@@ -8,4 +8,4 @@
 
 set -e # Exit on failure
 
-exec java -jar /tmp/codecrafters-build-git-java/java_git.jar "$@"
+exec java -jar C:/Users/Asus/Documents/codecrafters-build-git-java/java_git.jar "$@"
