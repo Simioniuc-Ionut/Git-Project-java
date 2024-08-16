@@ -14,11 +14,11 @@ set -e # Exit early if any commands fail
 # - Edit .codecrafters/compile.sh to change how your program compiles remotely
 (
   cd "$(dirname "$0")" # Ensure compile steps are run within the repository directory
-  mvn -B package -Ddir= C:/Users/Asus/Documents/codecrafters-build-git-java
+  mvn -B package -Ddir=/tmp/codecrafters-build-git-java
 )
 
 # Copied from .codecrafters/run.sh
 #
 # - Edit this to change how your program runs locally
 # - Edit .codecrafters/run.sh to change how your program runs remotely
-exec java -jar C:/Users/Asus/Documents/codecrafters-build-git-java/java_git.jar "$@"
+exec java -jar /tmp/codecrafters-build-git-java/java_git.jar "$@"

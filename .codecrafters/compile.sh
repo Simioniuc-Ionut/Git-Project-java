@@ -8,4 +8,4 @@
 
 set -e # Exit on failure
 
-mvn -B package -Ddir= C:/Users/Asus/Documents/codecrafters-build-git-java
+mvn -B package -Ddir=/tmp/codecrafters-build-git-java
