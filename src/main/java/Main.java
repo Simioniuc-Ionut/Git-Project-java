@@ -85,7 +85,7 @@ public class Main {
 
 
           //options
-          while(index<argumentsLength - 2){
+          while(index<argumentsLength - 1){
             System.out.println("In while " + args[index] + " " + index);
             if(args[index].contains("-t")){
               String typeRead = args[index].substring(2);
