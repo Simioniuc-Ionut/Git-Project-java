@@ -51,13 +51,13 @@ public class Main {
          //print section
          if(args[1] != null) {
            if (args[1].equals("-t"))
-             System.out.println(type);
+             System.out.print(type);
            else if (args[1].equals("-s"))
-             System.out.println(size);
+             System.out.print(size);
            else if (args[1].equals("-p"))
-             System.out.println(content);
+             System.out.print(content);
          }else {
-             System.out.println(content);
+             System.out.print(content);
          }
 
          }catch(IOException e){
