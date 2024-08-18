@@ -99,6 +99,7 @@ public class Main {
           if(type.isEmpty()){
             type="blob";
           }
+
           //result obj
           resultObject=type + " " + contentSize +"\0" + content;
           //compute SHA-1
@@ -119,7 +120,7 @@ public class Main {
           }
           //compute path to file
            path.append("/").append(filename);
-
+          System.out.println("Path is : " + path);
           //compriming content of file using zlib
           try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
                   DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
