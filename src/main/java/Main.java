@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.zip.InflaterInputStream;
 
 public class Main {
   public static void main(String[] args){
@@ -33,23 +34,31 @@ public class Main {
          String path = ".git/objects/" + directory + "/"+ filename;
          File object = new File(path);
          String result ,type,size,content;
-         try{
+
+         //decompresam bytes din object in format citibil ,folosind inflater.
+
+         try(InflaterInputStream decompressor = new InflaterInputStream(Files.newInputStream(object.toPath()))){
            //an object is stored in the format <type>" "<size>\0<content>
-         //prepare the object section
-         byte[] data = Files.readAllBytes(object.toPath());
+
+           //prepare the object section
+         byte[] data = decompressor.readAllBytes();
          result = new String(data);
+
          type = result.substring(0,result.indexOf(" "));
-         size = result.substring(result.indexOf(" ")+1 ,result.indexOf("\0"));
+         size = result.substring(result.indexOf(" ") + 1 ,result.indexOf("\0"));
          content = result.substring(result.indexOf("\0")+1);
 
          //print section
-//         if(args[1].equals("-t"))
-//           System.out.println(type);
-//         else if(args[1].equals("-s"))
-//           System.out.println(size);
-//         else if(args[1].equals("-p"))
-//           System.out.println(content);
-           System.out.println(type + " " + size + " " + content);
+         if(args[1] != null) {
+           if (args[1].equals("-t"))
+             System.out.println(type);
+           else if (args[1].equals("-s"))
+             System.out.println(size);
+           else if (args[1].equals("-p"))
+             System.out.println(content);
+         }else {
+             System.out.println(content);
+         }
 
          }catch(IOException e){
            throw new RuntimeException(e);
