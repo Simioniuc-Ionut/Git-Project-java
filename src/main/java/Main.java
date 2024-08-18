@@ -75,6 +75,7 @@ public class Main {
         try {
           //declaration zone
           String content = Files.readString(fileReaded.toPath());
+          byte[] size = content.getBytes();
 
           String resultObject,type="";
           StringBuilder path= new StringBuilder();// path where to write file
@@ -102,7 +103,7 @@ public class Main {
           }
 
           //result obj
-          resultObject=type + " " + content.length()+ "\0" + content;
+          resultObject=type + " " +content.length()+ "\0" + content;
 
           //compute SHA-1
           hash = instance.digest(resultObject.getBytes());
