@@ -81,7 +81,7 @@ public class Main {
           MessageDigest  instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
           byte[] hash;
           int index=1;
-          FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
+
 
           //options
           while(index<argumentsLength - 2){
@@ -103,26 +103,34 @@ public class Main {
           //compute SHA-1
           hash = instance.digest(resultObject.getBytes());
           //find directory and filename
-          String directory = Arrays.toString(hash).substring(0,2);
-          String filename = Arrays.toString(hash).substring(2);
+          String hashHexa = bytesToHex(hash);
+          String directory = hashHexa.substring(0,2);
+          String filename = hashHexa.substring(2);
           //compute path
           path.append(directory).append("/").append(filename);
           //compriming content of file using zlib
 
-          DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream);
-          compreserFile.write(resultObject.getBytes());
-          compreserFile.finish();
+          try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
+                  DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
+                  compreserFile.write(resultObject.getBytes());
+                  compreserFile.finish();
+          }
 
-          System.out.print(Arrays.toString(hash));
-
-          compreserFile.close();
-          fileOutputStream.close();
+          System.out.print(hashHexa);
         }catch (IOException | NoSuchAlgorithmException e){
           throw new RuntimeException(e);
         }
 
        }
-       default -> System.out.println("Unknown command 123: " + command);
+       default -> System.out.println("Unknown command: " + command);
      }
+  }
+  // Helper method to convert byte array to hexadecimal string
+  private static String bytesToHex(byte[] bytes) {
+    StringBuilder sb = new StringBuilder();
+    for (byte b : bytes) {
+      sb.append(String.format("%02x", b));
+    }
+    return sb.toString();
   }
 }
