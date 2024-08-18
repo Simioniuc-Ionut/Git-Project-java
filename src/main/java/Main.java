@@ -75,7 +75,6 @@ public class Main {
         try {
           //declaration zone
           String content = Files.readString(fileReaded.toPath());
-          byte[] size = content.getBytes();
 
           String resultObject,type="";
           StringBuilder path= new StringBuilder();// path where to write file
