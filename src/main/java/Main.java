@@ -105,12 +105,22 @@ public class Main {
           hash = instance.digest(resultObject.getBytes());
           //find directory and filename
           String hashHexa = bytesToHex(hash);
-          String directory = hashHexa.substring(0,2);
-          String filename = hashHexa.substring(2);
-          //compute path
-          path.append(directory).append("/").append(filename);
-          //compriming content of file using zlib
+          String directoryName = hashHexa.substring(0,2);
 
+          String filename = hashHexa.substring(2);
+          //compute path to directory
+          path.append(directoryName);
+
+          //cream directorul
+          File directory = new File(path.toString());
+          boolean isCreated = directory.mkdir();
+          if(!isCreated){
+            return ;
+          }
+          //compute path to file
+           path.append("/").append(filename);
+
+          //compriming content of file using zlib
           try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
                   DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
                   compreserFile.write(resultObject.getBytes());
