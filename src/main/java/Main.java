@@ -103,7 +103,7 @@ public class Main {
           }
 
           //result obj
-          resultObject=type + " " + contentSize +"\0" + content;
+          resultObject=type + " " + Arrays.toString(content.getBytes()) +"\0" + content;
           //compute SHA-1
           hash = instance.digest(resultObject.getBytes());
           //find directory and filename
@@ -122,7 +122,7 @@ public class Main {
           }
           //compute path to file
            path.append("/").append(filename);
-        
+
           //compriming content of file using zlib
           try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
                   DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
