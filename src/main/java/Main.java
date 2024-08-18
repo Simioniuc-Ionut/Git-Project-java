@@ -1,6 +1,10 @@
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 public class Main {
@@ -63,6 +67,60 @@ public class Main {
          }catch(IOException e){
            throw new RuntimeException(e);
          }
+       }
+       case "hash-object" ->{
+         int argumentsLength = args.length;
+         File fileReaded = new File(args[argumentsLength-1]);
+
+        try {
+          //declaration zone
+          String content = Files.readString(fileReaded.toPath());
+          byte[] size = content.getBytes();
+          String resultObject,type="";
+          StringBuilder path= new StringBuilder();// path where to write file
+          MessageDigest  instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
+          byte[] hash;
+          int index=1;
+          FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
+
+          //options
+          while(index<argumentsLength - 2){
+            if(args[index].contains("-t")){
+              String typeRead = args[index].substring(2);
+              if(typeRead.equals("tag") ||typeRead.equals("blob") || typeRead.equals("commit") || typeRead.equals("tree")){
+                type = typeRead.strip();
+              }
+            }else if(args[index].contains("-w")){
+              path.append(".git/objects/");
+            }
+            index++;
+          }
+          if(type.isEmpty()){
+            type="blob";
+          }
+          //result obj
+          resultObject=type + " " + Arrays.toString(size) +"\0" + content;
+          //compute SHA-1
+          hash = instance.digest(resultObject.getBytes());
+          //find directory and filename
+          String directory = Arrays.toString(hash).substring(0,2);
+          String filename = Arrays.toString(hash).substring(2);
+          //compute path
+          path.append(directory).append("/").append(filename);
+          //compriming content of file using zlib
+
+          DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream);
+          compreserFile.write(resultObject.getBytes());
+          compreserFile.finish();
+
+          System.out.print(Arrays.toString(hash));
+
+          compreserFile.close();
+          fileOutputStream.close();
+        }catch (IOException | NoSuchAlgorithmException e){
+          throw new RuntimeException(e);
+        }
+
        }
        default -> System.out.println("Unknown command: " + command);
      }
