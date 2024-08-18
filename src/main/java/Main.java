@@ -103,7 +103,8 @@ public class Main {
           }
 
           //result obj
-          resultObject=type + bytesToHex(" ".getBytes()) + contentSize +"\0" + content;
+          resultObject=bytesToHex(type.getBytes()) + bytesToHex(" ".getBytes()) + contentSize +bytesToHex("\0".getBytes()) + bytesToHex(content.getBytes());
+
           //compute SHA-1
           hash = instance.digest(resultObject.getBytes());
           //find directory and filename
