@@ -26,6 +26,34 @@ public class Main {
            throw new RuntimeException(e);
          }
        }
+       case "cat-file" ->{
+         String hash = args[2];
+         String directory = hash.substring(0,2);
+         String filename = hash.substring(2);
+         String path = ".git/objects/" + directory + "/"+ filename;
+         File object = new File(path);
+         String result ,type,size,content;
+         try{
+           //an object is stored in the format <type>" "<size>\0<content>
+         //prepare the object section
+         byte[] data = Files.readAllBytes(object.toPath());
+         result = new String(data);
+         type = result.substring(0,result.indexOf(" "));
+         size = result.substring(result.indexOf(" ")+1 ,result.indexOf("\0"));
+         content = result.substring(result.indexOf("\0")+1);
+
+         //print section
+         if(args[1].equals("-t"))
+           System.out.println(type);
+         else if(args[1].equals("-s"))
+           System.out.println(size);
+         else if(args[1].equals("-p"))
+           System.out.println(content);
+
+         }catch(IOException e){
+           throw new RuntimeException(e);
+         }
+       }
        default -> System.out.println("Unknown command: " + command);
      }
   }
