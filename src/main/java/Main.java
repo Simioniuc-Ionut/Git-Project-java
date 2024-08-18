@@ -76,6 +76,7 @@ public class Main {
           //declaration zone
           String content = Files.readString(fileReaded.toPath());
           byte[] size = content.getBytes();
+          String contentSize = bytesToHex(size);
           String resultObject,type="";
           StringBuilder path= new StringBuilder();// path where to write file
           MessageDigest  instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
@@ -99,7 +100,7 @@ public class Main {
             type="blob";
           }
           //result obj
-          resultObject=type + " " + Arrays.toString(size) +"\0" + content;
+          resultObject=type + " " + contentSize +"\0" + content;
           //compute SHA-1
           hash = instance.digest(resultObject.getBytes());
           //find directory and filename
@@ -125,6 +126,7 @@ public class Main {
        default -> System.out.println("Unknown command: " + command);
      }
   }
+
   // Helper method to convert byte array to hexadecimal string
   private static String bytesToHex(byte[] bytes) {
     StringBuilder sb = new StringBuilder();
