@@ -86,14 +86,14 @@ public class Main {
 
           //options
           while(index<argumentsLength - 1){
-            System.out.println("In while " + args[index] + " " + index);
+
             if(args[index].contains("-t")){
               String typeRead = args[index].substring(2);
               if(typeRead.equals("tag") ||typeRead.equals("blob") || typeRead.equals("commit") || typeRead.equals("tree")){
                 type = typeRead.strip();
               }
             }else if(args[index].contains("-w")){
-              System.out.println("Am intrat in if");
+
               path.append(".git/objects/");
             }
             index++;
@@ -122,7 +122,7 @@ public class Main {
           }
           //compute path to file
            path.append("/").append(filename);
-          System.out.println("Path is : " + path);
+        
           //compriming content of file using zlib
           try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
                   DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
