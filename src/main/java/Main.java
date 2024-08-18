@@ -22,7 +22,7 @@ public class Main {
          try {
            head.createNewFile();
            Files.write(head.toPath(), "ref: refs/heads/main\n".getBytes());
-           System.out.println("Initialized git directory");
+           System.out.print("Initialized git directory");
          } catch (IOException e) {
            throw new RuntimeException(e);
          }
