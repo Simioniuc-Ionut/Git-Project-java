@@ -43,12 +43,13 @@ public class Main {
          content = result.substring(result.indexOf("\0")+1);
 
          //print section
-         if(args[1].equals("-t"))
-           System.out.println(type);
-         else if(args[1].equals("-s"))
-           System.out.println(size);
-         else if(args[1].equals("-p"))
-           System.out.println(content);
+//         if(args[1].equals("-t"))
+//           System.out.println(type);
+//         else if(args[1].equals("-s"))
+//           System.out.println(size);
+//         else if(args[1].equals("-p"))
+//           System.out.println(content);
+           System.out.println(type + " " + size + " " + content);
 
          }catch(IOException e){
            throw new RuntimeException(e);
