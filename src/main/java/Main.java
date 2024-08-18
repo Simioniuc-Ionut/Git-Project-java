@@ -122,7 +122,7 @@ public class Main {
         }
 
        }
-       default -> System.out.println("Unknown command: " + command);
+       default -> System.out.println("Unknown command 123: " + command);
      }
   }
 }
