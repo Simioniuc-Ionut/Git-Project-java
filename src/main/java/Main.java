@@ -76,7 +76,7 @@ public class Main {
           //declaration zone
           String content = Files.readString(fileReaded.toPath());
           byte[] size = content.getBytes();
-          String contentSize = bytesToHex(size);
+          
           String resultObject,type="";
           StringBuilder path= new StringBuilder();// path where to write file
           MessageDigest  instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
@@ -103,7 +103,7 @@ public class Main {
           }
 
           //result obj
-          resultObject=bytesToHex(type.getBytes()) + bytesToHex(" ".getBytes()) + contentSize +bytesToHex("\0".getBytes()) + bytesToHex(content.getBytes());
+          resultObject=type + " " + Arrays.toString(size) +"\0"  + content;
 
           //compute SHA-1
           hash = instance.digest(resultObject.getBytes());
