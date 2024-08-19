@@ -3,7 +3,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class GitFunctions {
-    public static void processTreeContent(String content) {
+
+    public static void processTreeContent(String content){
         int charactersRead = 0;
         List<String> allResult = new LinkedList<>();
         List<String> nameResult = new LinkedList<>();
@@ -61,5 +62,26 @@ public class GitFunctions {
             }
         }
     }
+    public static void processTreeNames(String content){
+        // Print name only
+        int charactersReaded = 0;
+        List<String> nameResult = new LinkedList<>();
+        while (charactersReaded < content.length()) {
+            int spaceIndex = content.indexOf(' ', charactersReaded);
+            if (spaceIndex == -1) break;
 
+            int nullCharIndex = content.indexOf('\0', spaceIndex);
+            if (nullCharIndex == -1) break;
+
+            String name = content.substring(spaceIndex + 1, nullCharIndex);
+            nameResult.add(name);
+
+            charactersReaded = nullCharIndex + 21; // Move past the name and 20-byte SHA-1
+        }
+        String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
+
+        for (String sortedName : sortedNames) {
+            System.out.println(sortedName);
+        }
+    }
 }

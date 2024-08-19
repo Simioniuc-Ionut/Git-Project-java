@@ -7,6 +7,15 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class MainTest {
+
+    private static String bytesToHex(byte[] bytes) {
+    StringBuilder sb = new StringBuilder();
+    for (byte b : bytes) {
+        sb.append(String.format("%02x", b));
+    }
+    return sb.toString();
+    }
+
     public static void test1(){
         try {
             MessageDigest dig = MessageDigest.getInstance("SHA-1");
@@ -58,11 +67,5 @@ public class MainTest {
         MainTest.test2();
 
     }
-    private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    }
+
 }
