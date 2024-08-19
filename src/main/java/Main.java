@@ -153,8 +153,9 @@ public class Main {
             Inflater decompilation = new Inflater();
             byte[] nameTreeFile = args[argumetNumber].getBytes();
             decompilation.setInput(nameTreeFile);
+         long res = decompilation.getBytesRead();
             decompilation.finished();
-            long res = decompilation.getBytesRead();
+              
             System.out.println("Decompresed: " + res);
 
           //}else{
