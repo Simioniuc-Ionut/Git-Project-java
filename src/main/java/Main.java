@@ -139,7 +139,7 @@ public class Main {
        }
        case "ls-tree" -> {
          boolean nameOnly = false;
-         ]
+         
          StringBuilder path = new StringBuilder();
          int argumetNumber=1;
          if(args[1].equals("--name-only")){
