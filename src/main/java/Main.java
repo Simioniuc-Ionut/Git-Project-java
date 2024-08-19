@@ -139,7 +139,6 @@ public class Main {
        }
        case "ls-tree" -> {
          boolean nameOnly = false;
-         
          StringBuilder path = new StringBuilder();
          int argumetNumber=1;
          if(args[1].equals("--name-only")){
@@ -149,13 +148,15 @@ public class Main {
          String hashName = args[argumetNumber];
          path.append(".git/objects/").append(args[argumetNumber],0,2).append(args[argumetNumber].substring(2));
          File treeFile = new File(path.toString());
+
          //decompresing content
          try(InflaterInputStream decompresed = new InflaterInputStream(Files.newInputStream(treeFile.toPath()))) {
            //an tree obj is stored in format:
            byte[] data = decompresed.readAllBytes();
            String dataInString = new String(data);
 
-           System.out.println(dataInString);
+           System.out.println("Decompresed: " + dataInString);
+
 
          }catch (IOException e) {
 
