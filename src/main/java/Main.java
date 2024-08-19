@@ -145,9 +145,9 @@ public class Main {
            nameOnly=true;
            argumetNumber=3;
          }
-         if(nameOnly){
+         //if(nameOnly){
 
-         }else{
+         //}else{
           if(args[argumetNumber].equals(DigestMethod.SHA1)) {
 
             Inflater decompilation = new Inflater();
@@ -161,7 +161,7 @@ public class Main {
           }
 
 
-         }
+         //}
 
 
 
