@@ -24,10 +24,16 @@ public class Git {
             result = new String(data);
 
 
+            int typeEndIndex = result.indexOf(" ");
+            int sizeEndIndex = result.indexOf("\0");
 
-                type = result.substring(0,result.indexOf(" "));
-                size = result.substring(result.indexOf(" ") + 1 ,result.indexOf("\0"));
-                content = result.substring(result.indexOf("\0")+1);
+            if (typeEndIndex == -1 || sizeEndIndex == -1 || sizeEndIndex <= typeEndIndex) {
+                throw new IllegalArgumentException("Invalid object format");
+            }
+
+            type = result.substring(0, typeEndIndex);
+            size = result.substring(typeEndIndex + 1, sizeEndIndex);
+            content = result.substring(sizeEndIndex + 1);
 
             if(type.equals("blob")){
                 //an blob object is stored in the format <type>" "<size>\0<content>
@@ -71,7 +77,7 @@ public class Git {
                     allResult.add(eachLine.toString());
                     nameResult.add(name);
                     // Update index for next iteration
-                    charactersReaded = nullCharIndex + 20 ;
+                    charactersReaded = nullCharIndex + 21 ;
                 }
 
                 String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
