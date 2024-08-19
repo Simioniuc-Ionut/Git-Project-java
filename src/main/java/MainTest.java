@@ -7,12 +7,9 @@ import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
 public class MainTest {
-    public static void main(String[] args) {
+    public static void test1(){
         try {
             MessageDigest dig = MessageDigest.getInstance("SHA-1");
-
-
-
             String nume = "ceva mai lung";
             byte[] hash = dig.digest(nume.getBytes());
             String hashHexa =bytesToHex(hash);
@@ -43,8 +40,24 @@ public class MainTest {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-    }
 
+    }
+    public  static  void test2(){
+        // Example content of a Git tree object
+        String content =
+        "040000 tree c43da8ed93e41af84dc08cffbce3a907e09159b8\0.codecrafters";
+
+        // Example usage
+        GitFunctions.processTreeContent(content);
+    }
+    public static void main(String[] args) {
+        //compriming and decompriming an string. and create an sha-1 hash
+        MainTest.test1();
+
+        // ls-tree command:
+        MainTest.test2();
+
+    }
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
