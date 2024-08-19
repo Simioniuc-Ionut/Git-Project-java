@@ -148,7 +148,7 @@ public class Main {
          if(nameOnly){
 
          }else{
-          if(args[2].equals(DigestMethod.SHA1)) {
+          if(args[argumetNumber].equals(DigestMethod.SHA1)) {
 
             Inflater decompilation = new Inflater();
             byte[] nameTreeFile = args[argumetNumber].getBytes();
