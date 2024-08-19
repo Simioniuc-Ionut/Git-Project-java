@@ -1,5 +1,6 @@
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -135,6 +136,18 @@ public class Main {
         }catch (IOException | NoSuchAlgorithmException e){
           throw new RuntimeException(e);
         }
+
+       }
+       case "ls-tree" -> {
+         boolean nameOnly = false;
+         String path = Paths.get("").toAbsolutePath().toString(); //iau calea curenta.
+         if(args[2].equals("--name-only")){
+           nameOnly=true;
+         }
+         System.out.println("Absolute path : " + path+"/"+args[2]);
+
+
+
 
        }
        default -> System.out.println("Unknown command: " + command);
