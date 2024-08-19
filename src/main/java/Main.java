@@ -31,43 +31,7 @@ public class Main {
            throw new RuntimeException(e);
          }
        }
-       case "cat-file" ->{
-         String hash = args[2];
-         String directory = hash.substring(0,2);
-         String filename = hash.substring(2);
-         String path = ".git/objects/" + directory + "/"+ filename;
-         File object = new File(path);
-         String result ,type,size,content;
-
-         //decompresam bytes din object in format citibil ,folosind inflater.
-
-         try(InflaterInputStream decompressor = new InflaterInputStream(Files.newInputStream(object.toPath()))){
-           //an object is stored in the format <type>" "<size>\0<content>
-
-           //prepare the object section
-         byte[] data = decompressor.readAllBytes();
-         result = new String(data);
-
-         type = result.substring(0,result.indexOf(" "));
-         size = result.substring(result.indexOf(" ") + 1 ,result.indexOf("\0"));
-         content = result.substring(result.indexOf("\0")+1);
-
-         //print section
-         if(args[1] != null) {
-           if (args[1].equals("-t"))
-             System.out.print(type);
-           else if (args[1].equals("-s"))
-             System.out.print(size);
-           else if (args[1].equals("-p"))
-             System.out.print(content);
-         }else {
-             System.out.print(content);
-         }
-
-         }catch(IOException e){
-           throw new RuntimeException(e);
-         }
-       }
+       case "cat-file" -> Git.catFile(args[2],args[1],"blob");
        case "hash-object" ->{
          int argumentsLength = args.length;
          File fileReaded = new File(args[argumentsLength-1]);
@@ -137,31 +101,13 @@ public class Main {
         }
 
        }
-       case "ls-tree" -> {
-         boolean nameOnly = false;
-         StringBuilder path = new StringBuilder();
-         int argumetNumber=1;
+       case "ls-tree" ->  {
          if(args[1].equals("--name-only")){
-           nameOnly=true;
-           argumetNumber=2;
+           Git.catFile(args[2],args[1],"tree");
+         }else{
+           Git.catFile(args[1],"","tree");
          }
-         String hashName = args[argumetNumber];
-         path.append(".git/objects/").append(args[argumetNumber],0,2).append(args[argumetNumber].substring(2));
-         File treeFile = new File(path.toString());
-
-         //decompresing content
-         try(InflaterInputStream decompresed = new InflaterInputStream(Files.newInputStream(treeFile.toPath()))) {
-           //an tree obj is stored in format:
-           byte[] data = decompresed.readAllBytes();
-           String dataInString = new String(data);
-
-           System.out.println("Decompresed: " + dataInString);
-
-
-         }catch (IOException e) {
-
-         }
-       }
+        }
        default -> System.out.println("Unknown command: " + command);
      }
   }
