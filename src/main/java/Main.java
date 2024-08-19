@@ -154,7 +154,8 @@ public class Main {
             byte[] nameTreeFile = args[argumetNumber].getBytes();
             decompilation.setInput(nameTreeFile);
             decompilation.finished();
-            System.out.println("Decompresed: " + decompilation.toString());
+            long res = decompilation.getBytesRead();
+            System.out.println("Decompresed: " + res);
 
           //}else{
             //is a name not an sha 1
