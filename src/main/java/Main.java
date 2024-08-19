@@ -139,36 +139,27 @@ public class Main {
        }
        case "ls-tree" -> {
          boolean nameOnly = false;
+         ]
          StringBuilder path = new StringBuilder();
          int argumetNumber=1;
          if(args[1].equals("--name-only")){
            nameOnly=true;
            argumetNumber=2;
          }
-         //if(nameOnly){
+         String hashName = args[argumetNumber];
+         path.append(".git/objects/").append(args[argumetNumber],0,2).append(args[argumetNumber].substring(2));
+         File treeFile = new File(path.toString());
+         //decompresing content
+         try(InflaterInputStream decompresed = new InflaterInputStream(Files.newInputStream(treeFile.toPath()))) {
+           //an tree obj is stored in format:
+           byte[] data = decompresed.readAllBytes();
+           String dataInString = new String(data);
 
-         //}else{
-        //  if(args[argumetNumber].equals(DigestMethod.SHA1)) {
+           System.out.println(dataInString);
 
-            Inflater decompilation = new Inflater();
-            byte[] nameTreeFile = args[argumetNumber].getBytes();
-            decompilation.setInput(nameTreeFile);
-         long res = decompilation.getBytesRead();
-            decompilation.finished();
-              
-            System.out.println("Decompresed: " + res);
+         }catch (IOException e) {
 
-          //}else{
-            //is a name not an sha 1
-          //}
-
-
-         //}
-
-
-
-
-
+         }
        }
        default -> System.out.println("Unknown command: " + command);
      }
