@@ -58,7 +58,7 @@ public class Git {
                             .append(content, charactersReaded+ content.indexOf("\0") + 1, charactersReaded+ content.indexOf("\0") + 21);
                     //add each line
                     allResult.add(eachLine.toString());
-                    nameResult.add(content.substring(charactersReaded+ content.indexOf("\0") + 1, charactersReaded+ content.indexOf("\0") + 21));
+                    nameResult.add(content.substring(charactersReaded + content.indexOf(" ") + 1, charactersReaded + content.indexOf("\0")));
 
                     charactersReaded+=eachLine.length();//without \n
                 }
