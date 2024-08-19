@@ -140,15 +140,15 @@ public class Main {
        case "ls-tree" -> {
          boolean nameOnly = false;
          StringBuilder path = new StringBuilder();
-         int argumetNumber=2;
-         if(args[2].equals("--name-only")){
+         int argumetNumber=1;
+         if(args[1].equals("--name-only")){
            nameOnly=true;
-           argumetNumber=3;
+           argumetNumber=2;
          }
          //if(nameOnly){
 
          //}else{
-          if(args[argumetNumber].equals(DigestMethod.SHA1)) {
+        //  if(args[argumetNumber].equals(DigestMethod.SHA1)) {
 
             Inflater decompilation = new Inflater();
             byte[] nameTreeFile = args[argumetNumber].getBytes();
@@ -156,9 +156,9 @@ public class Main {
             decompilation.finished();
             System.out.println("Decompresed: " + decompilation.toString());
 
-          }else{
+          //}else{
             //is a name not an sha 1
-          }
+          //}
 
 
          //}
