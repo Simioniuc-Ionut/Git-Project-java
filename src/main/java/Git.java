@@ -52,29 +52,44 @@ public class Git {
                 List<String> nameResult = new LinkedList<>();
 
                 while(charactersReaded<content.length()) {
-                    StringBuilder eachLine = new StringBuilder();
-                    eachLine.append(content, charactersReaded, content.indexOf(" "))
-                            .append(content, charactersReaded + content.indexOf(" ") + 1, charactersReaded + content.indexOf("\0"))
-                            .append(content, charactersReaded+ content.indexOf("\0") + 1, charactersReaded+ content.indexOf("\0") + 21);
-                    //add each line
-                    allResult.add(eachLine.toString());
-                    nameResult.add(content.substring(charactersReaded + content.indexOf(" ") + 1, charactersReaded + content.indexOf("\0")));
+                    // Search for firest appearance \0
+                    int nullCharIndex = content.indexOf('\0', charactersReaded);
+                    if (nullCharIndex == -1) break; // If we dont found \0 ,we break,
 
-                    charactersReaded+=eachLine.length();//without \n
+                    // Split line
+                    String modeNamePart = content.substring(charactersReaded, nullCharIndex);
+                    int spaceIndex = modeNamePart.indexOf(' ');
+                    if (spaceIndex == -1) break; // If not exist,break
+
+                    String name = modeNamePart.substring(spaceIndex + 1); //gain name
+                    String sha = content.substring(nullCharIndex + 1, nullCharIndex + 21); // SHA
+
+                    StringBuilder eachLine = new StringBuilder();
+                    eachLine.append(modeNamePart).append('\0').append(sha);
+
+                    // Add each row
+                    allResult.add(eachLine.toString());
+                    nameResult.add(name);
+                    // Update index for next iteration
+                    charactersReaded = nullCharIndex + 21 + 1;
                 }
 
                 String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
                 //print section
 
                 if(option.equals("--name-only")){
-                        System.out.print(sortedNames);
+
+                    //print name only
+                    for (String sortedName : sortedNames) {
+                        System.out.println(sortedName);
+                    }
                 }else{
 
-                    //print all
+                    //print all info
                     for(String sortedName : Arrays.stream(sortedNames).toList()){
                         for(String unsortedLine : allResult){
                             if(unsortedLine.contains(sortedName)){
-                                System.out.print(unsortedLine);
+                                System.out.println(unsortedLine);
                                 break;
                             }
                         }
