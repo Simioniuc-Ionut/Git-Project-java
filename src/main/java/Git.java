@@ -69,7 +69,7 @@ public class Git {
 
                     String name = modeNamePart.substring(spaceIndex + 1); //gain name
                     String sha = content.substring(nullCharIndex + 1, nullCharIndex + 41); // SHA
-
+                    System.out.println("SHA : " + sha);
                     StringBuilder eachLine = new StringBuilder();
                     eachLine.append(modeNamePart).append('\0').append(sha);
 
@@ -77,7 +77,7 @@ public class Git {
                     allResult.add(eachLine.toString());
                     nameResult.add(name);
                     // Update index for next iteration
-                    charactersReaded = nullCharIndex + 41 ;
+                    charactersReaded = nullCharIndex + 21 ;
                 }
 
                 String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
