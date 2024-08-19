@@ -61,14 +61,14 @@ public class Git {
                     // Search for firest appearance \0
                     int nullCharIndex = content.indexOf('\0', charactersReaded);
                     if (nullCharIndex == -1) break; // If we dont found \0 ,we break,
-
+                    int hashSize= 0;
                     // Split line
                     String modeNamePart = content.substring(charactersReaded, nullCharIndex);
                     int spaceIndex = modeNamePart.indexOf(' ');
                     if (spaceIndex == -1) break; // If not exist,break
 
                     String name = modeNamePart.substring(spaceIndex + 1); //gain name
-                    String sha = content.substring(nullCharIndex + 1, nullCharIndex + 21); // SHA
+                    String sha = content.substring(nullCharIndex + 1, nullCharIndex + 41); // SHA
 
                     StringBuilder eachLine = new StringBuilder();
                     eachLine.append(modeNamePart).append('\0').append(sha);
@@ -77,7 +77,7 @@ public class Git {
                     allResult.add(eachLine.toString());
                     nameResult.add(name);
                     // Update index for next iteration
-                    charactersReaded = nullCharIndex + 21 ;
+                    charactersReaded = nullCharIndex + 41 ;
                 }
 
                 String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
