@@ -49,52 +49,61 @@ public class Git {
                 }else {
                     System.out.print(content);
                 }
-            }else if(type.equals("tree")){
+            }else if(type.equals("tree")) {
+
                 // tree <size>\0
                 //  <mode> <name>\0<20_byte_sha>
                 //  <mode> <name>\0<20_byte_sha>
-                int charactersReaded=0;
-                List<String> allResult = new LinkedList<>();
-                List<String> nameResult = new LinkedList<>();
-                System.out.println("Content : " + content);
-                while(charactersReaded<content.length()) {
-                    // Search for firest appearance \0
-                    int nullCharIndex = content.indexOf('\0', charactersReaded);
-                    if (nullCharIndex == -1) break; // If we dont found \0 ,we break,
-                    int hashSize= 0;
-                    // Split line
-                    String modeNamePart = content.substring(charactersReaded, nullCharIndex);
-                    int spaceIndex = modeNamePart.indexOf(' ');
-                    if (spaceIndex == -1) break; // If not exist,break
-
-                    String name = modeNamePart.substring(spaceIndex + 1); //gain name
-                    String sha = content.substring(nullCharIndex + 1, nullCharIndex + 21); // SHA
-                    System.out.println("SHA : " + sha);
-                    StringBuilder eachLine = new StringBuilder();
-                    eachLine.append(modeNamePart).append('\0').append(sha);
-
-                    // Add each row
-                    allResult.add(eachLine.toString());
-                    nameResult.add(name);
-                    // Update index for next iteration
-                    charactersReaded = nullCharIndex + 21 ;
-                }
-
-                String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
-                //print section
-
-                if(option.equals("--name-only")){
-
+                if (option.equals("--name-only")) {
                     //print name only
+                    int charactersReaded = 0;
+                    List<String> nameResult = new LinkedList<>();
+                    while(charactersReaded<content.length()){
+                        StringBuilder name = new StringBuilder();
+                        name.append(content , charactersReaded , content.indexOf(" ",charactersReaded) );
+                        nameResult.add(name.toString());
+                        charactersReaded += name.length() + 1;
+                    }
+                    String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
+
                     for (String sortedName : sortedNames) {
                         System.out.println(sortedName);
                     }
-                }else{
+                } else {
+                    int charactersReaded = 0;
+                    List<String> allResult = new LinkedList<>();
+                    List<String> nameResult = new LinkedList<>();
+                    System.out.println("Content : " + content);
+
+                    while (charactersReaded < content.length()) {
+                        // Search for firest appearance \0
+                        int nullCharIndex = content.indexOf('\0', charactersReaded);
+                        if (nullCharIndex == -1) break; // If we dont found \0 ,we break,
+                        int hashSize = 0;
+                        // Split line
+                        String modeNamePart = content.substring(charactersReaded, nullCharIndex);
+                        int spaceIndex = modeNamePart.indexOf(' ');
+                        if (spaceIndex == -1) break; // If not exist,break
+
+                        String name = modeNamePart.substring(spaceIndex + 1); //gain name
+                        String sha = content.substring(nullCharIndex + 1, nullCharIndex + 21); // SHA
+                        System.out.println("SHA : " + sha);
+                        StringBuilder eachLine = new StringBuilder();
+                        eachLine.append(modeNamePart).append('\0').append(sha);
+
+                        // Add each row
+                        allResult.add(eachLine.toString());
+                        nameResult.add(name);
+                        // Update index for next iteration
+                        charactersReaded = nullCharIndex + 21;
+                    }
+
+                    String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
 
                     //print all info
-                    for(String sortedName : Arrays.stream(sortedNames).toList()){
-                        for(String unsortedLine : allResult){
-                            if(unsortedLine.contains(sortedName)){
+                    for (String sortedName : Arrays.stream(sortedNames).toList()) {
+                        for (String unsortedLine : allResult) {
+                            if (unsortedLine.contains(sortedName)) {
                                 System.out.println(unsortedLine);
                                 break;
                             }
@@ -102,10 +111,10 @@ public class Git {
                     }
                 }
             }
-
-        }catch(IOException e){
-            throw new RuntimeException(e);
+        }catch (IOException e){
+            throw  new RuntimeException(e);
         }
+
     }
 
 }
