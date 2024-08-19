@@ -56,7 +56,7 @@ public class Git {
                 int charactersReaded=0;
                 List<String> allResult = new LinkedList<>();
                 List<String> nameResult = new LinkedList<>();
-
+                System.out.println("Content : " + content);
                 while(charactersReaded<content.length()) {
                     // Search for firest appearance \0
                     int nullCharIndex = content.indexOf('\0', charactersReaded);
@@ -68,7 +68,7 @@ public class Git {
                     if (spaceIndex == -1) break; // If not exist,break
 
                     String name = modeNamePart.substring(spaceIndex + 1); //gain name
-                    String sha = content.substring(nullCharIndex + 1, nullCharIndex + 41); // SHA
+                    String sha = content.substring(nullCharIndex + 1, nullCharIndex + 21); // SHA
                     System.out.println("SHA : " + sha);
                     StringBuilder eachLine = new StringBuilder();
                     eachLine.append(modeNamePart).append('\0').append(sha);
