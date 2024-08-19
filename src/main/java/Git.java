@@ -71,7 +71,7 @@ public class Git {
                     allResult.add(eachLine.toString());
                     nameResult.add(name);
                     // Update index for next iteration
-                    charactersReaded = nullCharIndex + 21 + 1;
+                    charactersReaded = nullCharIndex + 21 ;
                 }
 
                 String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
