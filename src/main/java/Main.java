@@ -1,12 +1,11 @@
+import javax.xml.crypto.dsig.DigestMethod;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.InflaterInputStream;
+import java.util.zip.*;
 
 public class Main {
   public static void main(String[] args){
@@ -140,11 +139,29 @@ public class Main {
        }
        case "ls-tree" -> {
          boolean nameOnly = false;
-         String path = Paths.get("").toAbsolutePath().toString(); //iau calea curenta.
+         StringBuilder path = new StringBuilder();
+         int argumetNumber=2;
          if(args[2].equals("--name-only")){
            nameOnly=true;
+           argumetNumber=3;
          }
-         System.out.println("Absolute path : " + path+"/"+args[2]);
+         if(nameOnly){
+
+         }else{
+          if(args[2].equals(DigestMethod.SHA1)) {
+
+            Inflater decompilation = new Inflater();
+            byte[] nameTreeFile = args[argumetNumber].getBytes();
+            decompilation.setInput(nameTreeFile);
+            System.out.println("Decompresed: " + decompilation.toString());
+
+          }else{
+            //is a name not an sha 1
+          }
+
+
+         }
+
 
 
 
