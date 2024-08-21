@@ -140,7 +140,7 @@ public class Git {
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(shaTree);
+                           .append(Arrays.toString(shaTree.getBytes()));
                  //  System.out.println(contentLine);
                } else {
                    //is file
@@ -155,7 +155,7 @@ public class Git {
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(blobShaFileInHexa);
+                           .append(Arrays.toString(blobShaFileInHexa.getBytes()));
 
                   // System.out.println(contentLine);
                }
