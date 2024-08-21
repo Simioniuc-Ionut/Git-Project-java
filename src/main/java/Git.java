@@ -149,7 +149,7 @@ public class Git {
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append('\0')
-                           .append(shaTree);
+                           .append(hexToBytes(shaTree));
                    System.out.println(contentLine);
                } else {
                    //is file
@@ -164,7 +164,7 @@ public class Git {
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append('\0')
-                           .append(blobShaFileInHexa);
+                           .append(shaIn20Bytes);
 
                    System.out.println(contentLine);
                }
@@ -250,6 +250,7 @@ public class Git {
             // Restaurăm System.out la starea inițială
             System.setOut(originalOut);
         }
+        System.out.println("Sha ul capturat de la stdout " + outputShaData);
         return outputShaData;
     }
 }
