@@ -159,7 +159,7 @@ public class Git {
                    args[1] = "-w";
                    args[2] = file.toString();
                    String blobShaFileInHexa = takeShaFromStdout(args);
-                  // byte[] shaIn20Bytes = hexToBytes(blobShaFileInHexa);
+                   byte[] shaIn20Bytes = hexToBytes(blobShaFileInHexa);
                    //returnez un blob obj
                    contentLine.append("100644 ")
                            .append(file.getName())
