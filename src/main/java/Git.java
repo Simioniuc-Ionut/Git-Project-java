@@ -266,10 +266,9 @@ public class Git {
 
             if (returnFullContent) {
                 StringBuilder eachLine = new StringBuilder();
-                eachLine.append(mode).append(' ')
-                        .append(type).append(' ')
-                        .append(sha).append(' ')
-                        .append(name);
+                eachLine.append(mode).append(" ")
+                        .append(name).append("\0")
+                        .append(sha);
 
                 allResult.add(eachLine.toString());
             }
