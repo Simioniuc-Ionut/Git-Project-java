@@ -58,8 +58,8 @@ public class Git {
                 //  <mode> <name>\0<20_byte_sha>
                 //  <mode> <name>\0<20_byte_sha>
 
-                String treeContent= Git.processTree(content, !option.equals("--name-only"));
-                System.out.println(treeContent);
+              //  String treeContent= Git.processTree(content, !option.equals("--name-only"));
+                //System.out.println(treeContent);
 
             }
         }catch (IOException e){
@@ -128,48 +128,128 @@ public class Git {
     }
         return new byte[0];
     }
-
-    public static  byte[] itereateDirectory(File dir) throws Exception{
-
+    public static byte[] itereateDirectory(File dir) throws Exception {
         File[] files = dir.listFiles();
+        if (files == null) {
+            System.out.println("Error: files is null " + dir);
+            return new byte[0];
+        }
 
-        StringBuilder contentLine =  new StringBuilder();
-       if(files!=null) {
-           for (File file : files) {
-               if (file.isDirectory()) {
-                   byte[] shaTree = itereateDirectory(file);
-                  // String shaTreeHex = bytesToHex(shaTree); // Convertim sha-ul în hexazecimal
-                   contentLine.append("040000 ")
-                           .append(file.getName())
-                           .append("\0")
-                           .append(new String(shaTree, StandardCharsets.ISO_8859_1)); // Append binary
+        ByteArrayOutputStream contentLine = new ByteArrayOutputStream();
 
-                   //  System.out.println(contentLine);
-               } else {
-                   //is file
-                   //aplicam hash object si returnam sha ul
-                   String[] args = new String[3];
-                   args[0] = "hash-object";
-                   args[1] = "-w";
-                   args[2] = file.toString();
-                   byte[] blobShaFileBinary = hashObjectCreate(args);
-                   //String blobShaFileHex = bytesToHex(blobShaFileBinary); // Convertim sha-ul în hexazecimal
-                   //returnez un blob obj
-                   contentLine.append("100644 ")
-                           .append(file.getName())
-                           .append("\0")
-                           .append(new String(blobShaFileBinary, StandardCharsets.ISO_8859_1)); // Append binary
+        for (File file : files) {
+            if (file.isDirectory()) {
+                // Recursive call for directories
+                byte[] shaTree = itereateDirectory(file);
 
-                  // System.out.println(contentLine);
-               }
-           }
-           //am parcurs toate fisierele din direct. creez tree sha ul directorului si l returnez;
-           //return sha-1 tree in hex
-           return calculateTreeStructure(contentLine.toString());
-       }else{
-           System.out.println("error files is null " + dir);
-           return new byte[0];
-       }
+                contentLine.write("040000 ".getBytes(StandardCharsets.UTF_8));
+                contentLine.write(file.getName().getBytes(StandardCharsets.UTF_8));
+                contentLine.write(0); // Null terminator
+                contentLine.write(shaTree); // SHA binary
+            } else {
+                // Process files
+                String[] args = new String[]{"hash-object", "-w", file.toString()};
+                byte[] blobShaFileBinary = hashObjectCreate(args);
+
+                contentLine.write("100644 ".getBytes(StandardCharsets.UTF_8));
+                contentLine.write(file.getName().getBytes(StandardCharsets.UTF_8));
+                contentLine.write(0); // Null terminator
+                contentLine.write(blobShaFileBinary); // SHA binary
+            }
+        }
+
+        return calculateTreeStructure(contentLine.toByteArray());
+    }
+
+
+    private static byte[] calculateTreeStructure(byte[] contentBytes) throws NoSuchAlgorithmException, IOException {
+        // Build the full tree content
+        String fullTreeContent = "tree " + contentBytes.length + "\0";
+        fullTreeContent += new String(contentBytes, StandardCharsets.UTF_8);
+
+        // Compute SHA-1
+        MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
+        byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
+
+        // Write to .git/objects/ directory
+        String path = addDirAndFileToObjects(bytesToHex(treeSha1));
+        comprimeToZlib(path, fullTreeContent);
+
+        return treeSha1;
+    }
+
+    private static String addDirAndFileToObjects(String hashHexa) throws IOException {
+        StringBuilder path = new StringBuilder(".git/objects/");
+        String directoryName = hashHexa.substring(0, 2);
+        String filename = hashHexa.substring(2);
+
+        path.append(directoryName);
+        File directory = new File(path.toString());
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw new IOException("Failed to create directory: " + directory);
+        }
+
+        path.append("/").append(filename);
+        return path.toString();
+    }
+
+    private static void comprimeToZlib(String path, String resultObject) throws IOException {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(path);
+             DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
+            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
+            compreserFile.finish();
+        }
+    }
+
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
+//    public static  byte[] itereateDirectory(File dir) throws Exception{
+//
+//        File[] files = dir.listFiles();
+//
+//        StringBuilder contentLine =  new StringBuilder();
+//       if(files!=null) {
+//           for (File file : files) {
+//               if (file.isDirectory()) {
+//                   byte[] shaTree = itereateDirectory(file);
+//                  // String shaTreeHex = bytesToHex(shaTree); // Convertim sha-ul în hexazecimal
+//                   contentLine.append("040000 ")
+//                           .append(file.getName())
+//                           .append("\0")
+//                           .append(new String(shaTree, StandardCharsets.ISO_8859_1)); // Append binary
+//
+//                   //  System.out.println(contentLine);
+//               } else {
+//                   //is file
+//                   //aplicam hash object si returnam sha ul
+//                   String[] args = new String[3];
+//                   args[0] = "hash-object";
+//                   args[1] = "-w";
+//                   args[2] = file.toString();
+//                   byte[] blobShaFileBinary = hashObjectCreate(args);
+//                   //String blobShaFileHex = bytesToHex(blobShaFileBinary); // Convertim sha-ul în hexazecimal
+//                   //returnez un blob obj
+//                   contentLine.append("100644 ")
+//                           .append(file.getName())
+//                           .append("\0")
+//                           .append(new String(blobShaFileBinary, StandardCharsets.ISO_8859_1)); // Append binary
+//
+//                  // System.out.println(contentLine);
+//               }
+//           }
+//           //am parcurs toate fisierele din direct. creez tree sha ul directorului si l returnez;
+//           //return sha-1 tree in hex
+//           return calculateTreeStructure(contentLine.toString());
+//       }else{
+//           System.out.println("error files is null " + dir);
+//           return new byte[0];
+//       }
 //        File[] files = dir.listFiles();
 //        ByteArrayOutputStream contentLine = new ByteArrayOutputStream();
 //
@@ -198,155 +278,155 @@ public class Git {
 //        }
     }
 
-    private static byte[] calculateTreeStructure(String content) throws NoSuchAlgorithmException, IOException {
-    /**
-     * tree <size>\0
-     * 100644 file.txt\0<binary_sha1_abcd1234...>
-     */
-    String sortedContent = Git.processTree(content,true);
-   // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
-    System.out.println("sorted content " + sortedContent);
-    String fullTreeContent = "tree" + " " +
-            sortedContent.length() +
-            "\0" + sortedContent;
-
-    // Calcularea SHA-1
-    MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.ISO_8859_1));
-    String hashHexa = bytesToHex(treeSha1);
-    try {
-        //add in .git/objects/
-        String path = addDirAndFileToObjects(hashHexa);
-        //compriming data
-        comprimeToZlib(path, fullTreeContent);
-    }catch (Exception e){
-        e.printStackTrace();
-        System.out.println("in calculate Tree Structure");
-    }
-    return treeSha1;
-
-    }
-    // Helper method to convert byte array to hexadecimal string
-
-    private static String addDirAndFileToObjects(String hashHexa) throws IOException {
-        StringBuilder path= new StringBuilder();// path where to write file
-
-        path.append(".git/objects/");
-        //find directory and filename
-
-        String directoryName = hashHexa.substring(0,2);
-        String filename = hashHexa.substring(2);
-        //compute path to directory
-        path.append(directoryName);
-
-        //cream directorul
-        File directory = new File(path.toString());
-
-        if (!directory.exists() && !directory.mkdir()) {
-            throw new IOException("Failed to create directory: " + directory);
-        }
-        //compute path to file
-        path.append("/").append(filename);
-
-        return path.toString();
-
-    }
-    private static void comprimeToZlib(String path,String resultObject) throws IOException {
-        try(FileOutputStream fileOutputStream = new FileOutputStream(path);
-            DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
-            compreserFile.finish();
-        }
-    }
-    private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
-    }
-    public static void printShaInHexaMode(byte[] sha){
-        System.out.println(bytesToHex(sha));
-    }
-
-
-        public static String processTree(String content, boolean returnFullContent) {
-            List<String> allResult = new ArrayList<>();
-            List<String> nameResult = new ArrayList<>();
-
-            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.ISO_8859_1))) {
-                byte[] buffer = new byte[256]; // Buffer for reading
-                int bytesRead;
-
-                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                    int charactersRead = 0;
-                    while (charactersRead < bytesRead) {
-                        // Find the mode end
-                        int modeEndIndex = indexOf(buffer, ' ', charactersRead, bytesRead);
-                        if (modeEndIndex == -1) break;
-
-                        // Find the name end
-                        int nameEndIndex = indexOf(buffer, '\0', modeEndIndex + 1, bytesRead);
-                        if (nameEndIndex == -1) break;
-
-                        // Extract mode and name
-                        String mode = new String(buffer, charactersRead, modeEndIndex - charactersRead, StandardCharsets.ISO_8859_1);
-                        String name = new String(buffer, modeEndIndex + 1, nameEndIndex - (modeEndIndex + 1), StandardCharsets.ISO_8859_1);
-
-                        // Extract the 20-byte binary SHA
-                        byte[] shaBinary = new byte[20];
-                        inputStream.read(shaBinary, 0, 20);
-
-                        if (returnFullContent) {
-                            StringBuilder eachLine = new StringBuilder();
-                            eachLine.append(mode).append(" ")
-                                    .append(name).append("\0")
-                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
-
-                            allResult.add(eachLine.toString());
-                        }
-
-                        nameResult.add(name);
-                        charactersRead = nameEndIndex + 21; // Move past \0 and 20-byte SHA
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
-            StringBuilder result = new StringBuilder();
-            // Print all content
-            //System.out.println("All content \n" + allResult);
-
-            if (returnFullContent) {
-                for (String sortedName : sortedNames) {
-                    for (String unsortedLine : allResult) {
-                        if (unsortedLine.contains(sortedName)) {
-                            result.append(unsortedLine);
-                            break;
-                        }
-                    }
-                }
-            } else {
-                for (String sortedName : sortedNames) {
-                    result.append(sortedName);
-                }
-            }
-            //System.out.println("All sorted content \n" + result + " names " + nameResult);
-
-
-            return result.toString();
-        }
-
-        private static int indexOf(byte[] buffer, char delimiter, int start, int end) {
-            for (int i = start; i < end; i++) {
-                if (buffer[i] == delimiter) {
-                    return i;
-                }
-            }
-            return -1;
-        }
+//    private static byte[] calculateTreeStructure(String content) throws NoSuchAlgorithmException, IOException {
+//    /**
+//     * tree <size>\0
+//     * 100644 file.txt\0<binary_sha1_abcd1234...>
+//     */
+//    String sortedContent = Git.processTree(content,true);
+//   // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
+//    System.out.println("sorted content " + sortedContent);
+//    String fullTreeContent = "tree" + " " +
+//            sortedContent.length() +
+//            "\0" + sortedContent;
+//
+//    // Calcularea SHA-1
+//    MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
+//    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.ISO_8859_1));
+//    String hashHexa = bytesToHex(treeSha1);
+//    try {
+//        //add in .git/objects/
+//        String path = addDirAndFileToObjects(hashHexa);
+//        //compriming data
+//        comprimeToZlib(path, fullTreeContent);
+//    }catch (Exception e){
+//        e.printStackTrace();
+//        System.out.println("in calculate Tree Structure");
+//    }
+//    return treeSha1;
+//
+//    }
+//    // Helper method to convert byte array to hexadecimal string
+//
+//    private static String addDirAndFileToObjects(String hashHexa) throws IOException {
+//        StringBuilder path= new StringBuilder();// path where to write file
+//
+//        path.append(".git/objects/");
+//        //find directory and filename
+//
+//        String directoryName = hashHexa.substring(0,2);
+//        String filename = hashHexa.substring(2);
+//        //compute path to directory
+//        path.append(directoryName);
+//
+//        //cream directorul
+//        File directory = new File(path.toString());
+//
+//        if (!directory.exists() && !directory.mkdir()) {
+//            throw new IOException("Failed to create directory: " + directory);
+//        }
+//        //compute path to file
+//        path.append("/").append(filename);
+//
+//        return path.toString();
+//
+//    }
+//    private static void comprimeToZlib(String path,String resultObject) throws IOException {
+//        try(FileOutputStream fileOutputStream = new FileOutputStream(path);
+//            DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
+//            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
+//            compreserFile.finish();
+//        }
+//    }
+//    private static String bytesToHex(byte[] bytes) {
+//        StringBuilder sb = new StringBuilder();
+//        for (byte b : bytes) {
+//            sb.append(String.format("%02x", b));
+//        }
+//        return sb.toString();
+//    }
+//    public static void printShaInHexaMode(byte[] sha){
+//        System.out.println(bytesToHex(sha));
+//    }
+//
+//
+//        public static String processTree(String content, boolean returnFullContent) {
+//            List<String> allResult = new ArrayList<>();
+//            List<String> nameResult = new ArrayList<>();
+//
+//            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.ISO_8859_1))) {
+//                byte[] buffer = new byte[256]; // Buffer for reading
+//                int bytesRead;
+//
+//                while ((bytesRead = inputStream.read(buffer)) != -1) {
+//                    int charactersRead = 0;
+//                    while (charactersRead < bytesRead) {
+//                        // Find the mode end
+//                        int modeEndIndex = indexOf(buffer, ' ', charactersRead, bytesRead);
+//                        if (modeEndIndex == -1) break;
+//
+//                        // Find the name end
+//                        int nameEndIndex = indexOf(buffer, '\0', modeEndIndex + 1, bytesRead);
+//                        if (nameEndIndex == -1) break;
+//
+//                        // Extract mode and name
+//                        String mode = new String(buffer, charactersRead, modeEndIndex - charactersRead, StandardCharsets.ISO_8859_1);
+//                        String name = new String(buffer, modeEndIndex + 1, nameEndIndex - (modeEndIndex + 1), StandardCharsets.ISO_8859_1);
+//
+//                        // Extract the 20-byte binary SHA
+//                        byte[] shaBinary = new byte[20];
+//                        inputStream.read(shaBinary, 0, 20);
+//
+//                        if (returnFullContent) {
+//                            StringBuilder eachLine = new StringBuilder();
+//                            eachLine.append(mode).append(" ")
+//                                    .append(name).append("\0")
+//                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
+//
+//                            allResult.add(eachLine.toString());
+//                        }
+//
+//                        nameResult.add(name);
+//                        charactersRead = nameEndIndex + 21; // Move past \0 and 20-byte SHA
+//                    }
+//                }
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//            String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
+//            StringBuilder result = new StringBuilder();
+//            // Print all content
+//            //System.out.println("All content \n" + allResult);
+//
+//            if (returnFullContent) {
+//                for (String sortedName : sortedNames) {
+//                    for (String unsortedLine : allResult) {
+//                        if (unsortedLine.contains(sortedName)) {
+//                            result.append(unsortedLine);
+//                            break;
+//                        }
+//                    }
+//                }
+//            } else {
+//                for (String sortedName : sortedNames) {
+//                    result.append(sortedName);
+//                }
+//            }
+//            //System.out.println("All sorted content \n" + result + " names " + nameResult);
+//
+//
+//            return result.toString();
+//        }
+//
+//        private static int indexOf(byte[] buffer, char delimiter, int start, int end) {
+//            for (int i = start; i < end; i++) {
+//                if (buffer[i] == delimiter) {
+//                    return i;
+//                }
+//            }
+//            return -1;
+//        }
 
 //    public static String processTree(String content, boolean returnFullContent) {
 //        int charactersRead = 0;
@@ -406,4 +486,4 @@ public class Git {
 //        return result.toString();
 //    }
 
-}
+//}

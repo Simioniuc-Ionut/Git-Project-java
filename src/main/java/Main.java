@@ -35,7 +35,7 @@ public class Main {
        case "cat-file" -> Git.catFile(args[2],args[1],"blob");
        case "hash-object" -> {
          byte[] sha = Git.hashObjectCreate(args);
-         Git.printShaInHexaMode(sha);
+       //  Git.printShaInHexaMode(sha);
        }
        case "ls-tree" ->  {
          if(args[1].equals("--name-only")){
@@ -55,7 +55,7 @@ public class Main {
 
          try {
            byte[] shaTree = Git.itereateDirectory(new File(path.toString()));
-           Git.printShaInHexaMode(shaTree);
+          // Git.printShaInHexaMode(shaTree);
          } catch (Exception e) {
            throw new RuntimeException(e);
          }
