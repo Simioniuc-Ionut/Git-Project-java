@@ -45,7 +45,8 @@ public class Main {
          //calea absoluta
          Path path = Paths.get("").toAbsolutePath();
          try {
-           Git.itereateDirectory(new File(path.toString()));
+           String hexShaTree = Git.itereateDirectory(new File(path.toString()));
+           System.out.print(hexShaTree);
          }catch (Exception e){
            throw new RuntimeException(e);
          }
