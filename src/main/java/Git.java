@@ -250,7 +250,7 @@ public class Git {
             // Restaurăm System.out la starea inițială
             System.setOut(originalOut);
         }
-        System.out.println("Sha ul capturat de la stdout " + outputShaData);
+
         return outputShaData;
     }
 }
