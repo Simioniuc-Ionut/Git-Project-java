@@ -81,7 +81,7 @@ public class Git {
             MessageDigest instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
             byte[] hash;
             int index=1;
-
+            boolean writeToObjects= false;
 
             //options
             while(index<argumentsLength - 1){
@@ -92,8 +92,8 @@ public class Git {
                         type = typeRead.strip();
                     }
                 }else if(args[index].contains("-w")){
-
-                    path.append(".git/objects/");
+                    //we write in .git/objects/dirname/filename
+                    writeToObjects=true;
                 }
                 index++;
             }
@@ -106,35 +106,23 @@ public class Git {
 
             //compute SHA-1
             hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_8));
-            //find directory and filename
             String hashHexa = bytesToHex(hash);
-            String directoryName = hashHexa.substring(0,2);
-            String filename = hashHexa.substring(2);
-            //compute path to directory
-            path.append(directoryName);
 
-            //cream directorul
-            File directory = new File(path.toString());
-            if (!directory.exists() && !directory.mkdir()) {
-                throw new IOException("Failed to create directory: " + directory);
+            if(writeToObjects) {
+                //add file and directory to .git/objects
+                addDirAndFileToObjects(hashHexa);
             }
-            //compute path to file
-            path.append("/").append(filename);
 
             //compriming content of file using zlib
-            try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
-                DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-                compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
-                compreserFile.finish();
-            }
+            comprimeToZlib(path.toString(),resultObject);
 
             System.out.print(hashHexa);
         }catch (MalformedInputException e) {
            System.out.println("Failed to read file as UTF-8: " + fileReaded.getPath()+ " " + e);
         }catch (IOException | NoSuchAlgorithmException e){
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        e.printStackTrace();
+        throw new RuntimeException(e);
+    }
 
     }
 
@@ -194,8 +182,14 @@ public class Git {
     // Calcularea SHA-1
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
     byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
-
-    return bytesToHex(treeSha1);
+    String hashHexa = bytesToHex(treeSha1);
+    //add in .git/objects/
+    try{
+        addDirAndFileToObjects(hashHexa);
+    }catch (IOException e){
+        e.printStackTrace();
+    }
+    return hashHexa;
 
     }
     // Helper method to convert byte array to hexadecimal string
@@ -231,5 +225,33 @@ public class Git {
         }
 
         return outputShaData;
+    }
+    private static void addDirAndFileToObjects(String hashHexa) throws IOException {
+        StringBuilder path= new StringBuilder();// path where to write file
+        path.append(".git/objects/");
+        //find directory and filename
+
+        String directoryName = hashHexa.substring(0,2);
+        String filename = hashHexa.substring(2);
+        //compute path to directory
+        path.append(directoryName);
+
+        //cream directorul
+        File directory = new File(path.toString());
+
+        if (!directory.exists() && !directory.mkdir()) {
+            throw new IOException("Failed to create directory: " + directory);
+        }
+        //compute path to file
+        path.append("/").append(filename);
+
+
+    }
+    private static void comprimeToZlib(String path,String resultObject) throws IOException {
+        try(FileOutputStream fileOutputStream = new FileOutputStream(path);
+            DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
+            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
+            compreserFile.finish();
+        }
     }
 }
