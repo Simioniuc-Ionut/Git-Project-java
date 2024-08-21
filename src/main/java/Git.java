@@ -117,7 +117,7 @@ public class Git {
             //compriming content of file using zlib
             comprimeToZlib(path.toString(),resultObject);
 
-            System.out.print(hashHexa);
+            //System.out.print(hashHexa);
             return hash;
         }catch (MalformedInputException e) {
            System.out.println("Failed to read file as UTF-8: " + fileReaded.getPath()+ " " + e);
@@ -198,7 +198,7 @@ public class Git {
 
     }
     // Helper method to convert byte array to hexadecimal string
-    public static String bytesToHex(byte[] bytes) {
+    private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));
@@ -282,5 +282,8 @@ public class Git {
             data[i / 2] = (byte) ((high << 4) + low);
         }
         return data;
+    }
+    public static void printShaInHexaMode(byte[] sha){
+        System.out.println(bytesToHex(sha));
     }
 }
