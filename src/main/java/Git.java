@@ -300,7 +300,7 @@ public class Git {
                             StringBuilder eachLine = new StringBuilder();
                             eachLine.append(mode).append(" ")
                                     .append(name).append("\0")
-                                    .append(bytesToHex(shaBinary)); // Append binary SHA as hex
+                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
 
                             allResult.add(eachLine.toString());
                         }
