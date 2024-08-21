@@ -268,6 +268,7 @@ public class Git {
         System.out.println(bytesToHex(sha));
     }
 
+
         public static String processTree(String content, boolean returnFullContent) {
             List<String> allResult = new ArrayList<>();
             List<String> nameResult = new ArrayList<>();
@@ -299,7 +300,7 @@ public class Git {
                             StringBuilder eachLine = new StringBuilder();
                             eachLine.append(mode).append(" ")
                                     .append(name).append("\0")
-                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA
+                                    .append(bytesToHex(shaBinary)); // Append binary SHA as hex
 
                             allResult.add(eachLine.toString());
                         }
@@ -345,6 +346,7 @@ public class Git {
             }
             return -1;
         }
+
 //    public static String processTree(String content, boolean returnFullContent) {
 //        int charactersRead = 0;
 //        List<String> allResult = new LinkedList<>();
