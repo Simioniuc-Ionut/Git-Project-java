@@ -139,36 +139,40 @@ public class Git {
         File[] files = dir.listFiles();
 
         StringBuilder contentLine =  new StringBuilder();
-        for(File file : files){
-            if(file.isDirectory()){
-                String shaTree = itereateDirectory(file);
-                //returnez un tree object
-                contentLine.append("040000 ")
-                        .append(file.getName())
-                        .append('\0')
-                        .append(hexToBytes(shaTree));
-                System.out.println(contentLine);
-            }else{
-                //is file
-                //aplicam hash object si returnam sha ul
-                String[] args = new String[3];
-                args[0] = "hash-object";
-                args[1]= "-w";
-                args[2] = file.toString();
-                String blobShaFileInHexa = takeShaFromStdout(args);
-                byte[] shaIn20Bytes = hexToBytes(blobShaFileInHexa);
-                //returnez un blob obj
-                contentLine.append("100644 ")
-                        .append(file.getName())
-                        .append('\0')
-                        .append(shaIn20Bytes);
+       if(files!=null) {
+           for (File file : files) {
+               if (file.isDirectory()) {
+                   String shaTree = itereateDirectory(file);
+                   //returnez un tree object
+                   contentLine.append("040000 ")
+                           .append(file.getName())
+                           .append('\0')
+                           .append(hexToBytes(shaTree));
+                   System.out.println(contentLine);
+               } else {
+                   //is file
+                   //aplicam hash object si returnam sha ul
+                   String[] args = new String[3];
+                   args[0] = "hash-object";
+                   args[1] = "-w";
+                   args[2] = file.toString();
+                   String blobShaFileInHexa = takeShaFromStdout(args);
+                   byte[] shaIn20Bytes = hexToBytes(blobShaFileInHexa);
+                   //returnez un blob obj
+                   contentLine.append("100644 ")
+                           .append(file.getName())
+                           .append('\0')
+                           .append(shaIn20Bytes);
 
-                System.out.println(contentLine);
-            }
-        }
-        //am parcurs toate fisierele din direct. creez tree sha ul directorului si l returnez;
-        //return sha-1 tree in hex
-        return  calculateTreeStructure(contentLine.toString());
+                   System.out.println(contentLine);
+               }
+           }
+           //am parcurs toate fisierele din direct. creez tree sha ul directorului si l returnez;
+           //return sha-1 tree in hex
+           return calculateTreeStructure(contentLine.toString());
+       }else{
+           System.out.println("error files is null " + dir);
+       }
     }
 
     private static String calculateTreeStructure(String content) throws NoSuchAlgorithmException {
