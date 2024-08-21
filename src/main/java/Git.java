@@ -75,6 +75,7 @@ public class Git {
 
         try {
             //declaration zone
+            System.out.println("Fileread  pah  is " + fileReaded.toPath());
             String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_8);// Ensure UTF-8 encoding
             String resultObject,type="";
             StringBuilder path= new StringBuilder();// path where to write file
@@ -113,14 +114,14 @@ public class Git {
                 path.append(addDirAndFileToObjects(hashHexa));
 
             }
-
+            System.out.println("Path is : " + path);
             //compriming content of file using zlib
             comprimeToZlib(path.toString(),resultObject);
 
             //System.out.print(hashHexa);
             return hash;
         }catch (MalformedInputException e) {
-           System.out.println("Failed to read file as UTF-8: " + fileReaded.getPath()+ " " + e);
+           System.out.println("Failed to read file as UTF-8: " + fileReaded.getPath()+ " " + e + " in hashObjectCreate");
         }catch (IOException | NoSuchAlgorithmException e){
         e.printStackTrace();
         throw new RuntimeException(e);
@@ -218,7 +219,7 @@ public class Git {
         }
         //compute path to file
         path.append("/").append(filename);
-        System.out.println(path);
+
         return path.toString();
 
     }
