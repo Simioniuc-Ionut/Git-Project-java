@@ -169,7 +169,7 @@ public class Git {
        }
     }
 
-    private static String calculateTreeStructure(String content) throws NoSuchAlgorithmException {
+    private static String calculateTreeStructure(String content) throws NoSuchAlgorithmException, IOException {
     /**
      * tree <size>\0
      * 100644 file.txt\0<binary_sha1_abcd1234...>
@@ -185,8 +185,11 @@ public class Git {
     byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
     String hashHexa = bytesToHex(treeSha1);
     //add in .git/objects/
-    try{
         String path = addDirAndFileToObjects(hashHexa);
+        //compriming data
+        comprimeToZlib(path,fullTreeContent);
+    try{
+        addDirAndFileToObjects(hashHexa);
     }catch (IOException e){
         e.printStackTrace();
     }
