@@ -29,12 +29,11 @@ public class GitTest {
 
         // Call the itereateDirectory method
         byte[] treeSha = Git.itereateDirectory(tempDir.toFile());
-        String treeHex = Git.bytesToHex(treeSha);
-        System.out.println(treeHex);
+        Git.printShaInHexaMode(treeSha);
 
         // Verify the output
-        Assertions.assertNotNull(treeHex);
-        Assertions.assertFalse(treeHex.isEmpty());
+        Assertions.assertNotNull(treeSha);
+        Assertions.assertFalse(treeSha.toString().isEmpty());
 
         // Clean up
         deleteDirectory(tempDir.toFile());
