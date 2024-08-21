@@ -206,7 +206,7 @@ public class Git {
     String sortedContent = Git.processTree(content,true);
    // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
     String fullTreeContent = "tree" + " " +
-            content.length() +
+            sortedContent.length() +
             "\0" + sortedContent;
 
     // Calcularea SHA-1
