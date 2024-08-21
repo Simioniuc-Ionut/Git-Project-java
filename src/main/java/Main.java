@@ -1,6 +1,7 @@
 import javax.xml.crypto.dsig.DigestMethod;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -32,92 +33,29 @@ public class Main {
          }
        }
        case "cat-file" -> Git.catFile(args[2],args[1],"blob");
-       case "hash-object" ->{
-         int argumentsLength = args.length;
-         File fileReaded = new File(args[argumentsLength-1]);
-
-        try {
-          //declaration zone
-          String content = Files.readString(fileReaded.toPath());
-          byte[] size = content.getBytes();
-
-          String resultObject,type="";
-          StringBuilder path= new StringBuilder();// path where to write file
-          MessageDigest  instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
-          byte[] hash;
-          int index=1;
-
-
-          //options
-          while(index<argumentsLength - 1){
-
-            if(args[index].contains("-t")){
-              String typeRead = args[index].substring(2);
-              if(typeRead.equals("tag") ||typeRead.equals("blob") || typeRead.equals("commit") || typeRead.equals("tree")){
-                type = typeRead.strip();
-              }
-            }else if(args[index].contains("-w")){
-
-              path.append(".git/objects/");
-            }
-            index++;
-          }
-          if(type.isEmpty()){
-            type="blob";
-          }
-
-          //result obj
-          resultObject=type + " " +content.length()+ "\0" + content;
-
-          //compute SHA-1
-          hash = instance.digest(resultObject.getBytes());
-          //find directory and filename
-          String hashHexa = bytesToHex(hash);
-          String directoryName = hashHexa.substring(0,2);
-
-          String filename = hashHexa.substring(2);
-          //compute path to directory
-          path.append(directoryName);
-
-          //cream directorul
-          File directory = new File(path.toString());
-          boolean isCreated = directory.mkdir();
-          if(!isCreated){
-            return ;
-          }
-          //compute path to file
-           path.append("/").append(filename);
-
-          //compriming content of file using zlib
-          try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
-                  DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-                  compreserFile.write(resultObject.getBytes());
-                  compreserFile.finish();
-          }
-
-          System.out.print(hashHexa);
-        }catch (IOException | NoSuchAlgorithmException e){
-          throw new RuntimeException(e);
-        }
-
-       }
+       case "hash-object" ->  Git.hashObjectCreate(args);
        case "ls-tree" ->  {
          if(args[1].equals("--name-only")){
            Git.catFile(args[2],args[1],"tree");
          }else{
            Git.catFile(args[1],"","tree");
          }
-        }
+       }
+       case "work-tree" ->{
+         //calea absoluta
+         Path path = Paths.get("").toAbsolutePath();
+         try {
+           Git.itereateDirectory(new File(path.toString()));
+         }catch (Exception e){
+           throw new RuntimeException(e);
+         }
+
+       }
        default -> System.out.println("Unknown command: " + command);
      }
   }
 
-  // Helper method to convert byte array to hexadecimal string
-  private static String bytesToHex(byte[] bytes) {
-    StringBuilder sb = new StringBuilder();
-    for (byte b : bytes) {
-      sb.append(String.format("%02x", b));
-    }
-    return sb.toString();
-  }
+
+
+
 }

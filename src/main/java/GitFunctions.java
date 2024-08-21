@@ -1,6 +1,13 @@
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.zip.DeflaterOutputStream;
 
 public class GitFunctions {
 
@@ -84,4 +91,5 @@ public class GitFunctions {
             System.out.println(sortedName);
         }
     }
+
 }
