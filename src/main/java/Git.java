@@ -142,7 +142,7 @@ public class Git {
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(new String(shaTree, StandardCharsets.UTF_8)); // Append binary
+                           .append(new String(shaTree, StandardCharsets.ISO_8859_1)); // Append binary
 
                    //  System.out.println(contentLine);
                } else {
@@ -158,7 +158,7 @@ public class Git {
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(new String(blobShaFileBinary, StandardCharsets.UTF_8)); // Append binary
+                           .append(new String(blobShaFileBinary, StandardCharsets.ISO_8859_1)); // Append binary
 
                   // System.out.println(contentLine);
                }
