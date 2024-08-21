@@ -142,7 +142,7 @@ public class Git {
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(new String(shaTree, StandardCharsets.ISO_8859_1)); // Append binary
+                           .append(new String(shaTree, StandardCharsets.UTF_8)); // Append binary
 
                    //  System.out.println(contentLine);
                } else {
@@ -158,7 +158,7 @@ public class Git {
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(new String(blobShaFileBinary, StandardCharsets.ISO_8859_1)); // Append binary
+                           .append(new String(blobShaFileBinary, StandardCharsets.UTF_8)); // Append binary
 
                   // System.out.println(contentLine);
                }
@@ -285,13 +285,13 @@ public class Git {
 
             // Extract the 20-byte binary SHA
             byte[] shaBinary = new byte[20];
-            System.arraycopy(content.getBytes(StandardCharsets.ISO_8859_1), nameEndIndex + 1, shaBinary, 0, 20);
+            System.arraycopy(content.getBytes(StandardCharsets.UTF_8), nameEndIndex + 1, shaBinary, 0, 20);
 
             if (returnFullContent) {
                 StringBuilder eachLine = new StringBuilder();
                 eachLine.append(mode).append(" ")
                         .append(name).append("\0")
-                        .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA
+                        .append(new String(shaBinary, StandardCharsets.UTF_8)); // Append binary SHA
 
                 allResult.add(eachLine.toString());
             }
