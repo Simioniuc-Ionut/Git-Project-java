@@ -129,75 +129,136 @@ public class Git {
         return new byte[0];
     }
 
-    public static byte[] itereateDirectory(File dir) throws Exception{
+    public static  byte[] itereateDirectory(File dir) throws Exception{
 
+//        File[] files = dir.listFiles();
+//
+//        StringBuilder contentLine =  new StringBuilder();
+//       if(files!=null) {
+//           for (File file : files) {
+//               if (file.isDirectory()) {
+//                   byte[] shaTree = itereateDirectory(file);
+//                  // String shaTreeHex = bytesToHex(shaTree); // Convertim sha-ul în hexazecimal
+//                   contentLine.append("040000 ")
+//                           .append(file.getName())
+//                           .append("\0")
+//                           .append(new String(shaTree, StandardCharsets.ISO_8859_1)); // Append binary
+//
+//                   //  System.out.println(contentLine);
+//               } else {
+//                   //is file
+//                   //aplicam hash object si returnam sha ul
+//                   String[] args = new String[3];
+//                   args[0] = "hash-object";
+//                   args[1] = "-w";
+//                   args[2] = file.toString();
+//                   byte[] blobShaFileBinary = hashObjectCreate(args);
+//                   //String blobShaFileHex = bytesToHex(blobShaFileBinary); // Convertim sha-ul în hexazecimal
+//                   //returnez un blob obj
+//                   contentLine.append("100644 ")
+//                           .append(file.getName())
+//                           .append("\0")
+//                           .append(new String(blobShaFileBinary, StandardCharsets.ISO_8859_1)); // Append binary
+//
+//                  // System.out.println(contentLine);
+//               }
+//           }
+//           //am parcurs toate fisierele din direct. creez tree sha ul directorului si l returnez;
+//           //return sha-1 tree in hex
+//           return calculateTreeStructure(contentLine.toString());
+//       }else{
+//           System.out.println("error files is null " + dir);
+//           return new byte[0];
+//       }
         File[] files = dir.listFiles();
+        ByteArrayOutputStream contentLine = new ByteArrayOutputStream();
 
-        StringBuilder contentLine =  new StringBuilder();
-       if(files!=null) {
-           for (File file : files) {
-               if (file.isDirectory()) {
-                   byte[] shaTree = itereateDirectory(file);
-                  // String shaTreeHex = bytesToHex(shaTree); // Convertim sha-ul în hexazecimal
-                   contentLine.append("040000 ")
-                           .append(file.getName())
-                           .append("\0")
-                           .append(new String(shaTree, StandardCharsets.ISO_8859_1)); // Append binary
-
-                   //  System.out.println(contentLine);
-               } else {
-                   //is file
-                   //aplicam hash object si returnam sha ul
-                   String[] args = new String[3];
-                   args[0] = "hash-object";
-                   args[1] = "-w";
-                   args[2] = file.toString();
-                   byte[] blobShaFileBinary = hashObjectCreate(args);
-                   //String blobShaFileHex = bytesToHex(blobShaFileBinary); // Convertim sha-ul în hexazecimal
-                   //returnez un blob obj
-                   contentLine.append("100644 ")
-                           .append(file.getName())
-                           .append("\0")
-                           .append(new String(blobShaFileBinary, StandardCharsets.ISO_8859_1)); // Append binary
-
-                  // System.out.println(contentLine);
-               }
-           }
-           //am parcurs toate fisierele din direct. creez tree sha ul directorului si l returnez;
-           //return sha-1 tree in hex
-           return calculateTreeStructure(contentLine.toString());
-       }else{
-           System.out.println("error files is null " + dir);
-           return new byte[0];
-       }
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    byte[] shaTree = itereateDirectory(file);
+                    contentLine.write("040000 ".getBytes(StandardCharsets.UTF_8));
+                    contentLine.write(file.getName().getBytes(StandardCharsets.UTF_8));
+                    contentLine.write(0); // null terminator
+                    contentLine.write(shaTree); // SHA binar
+                } else {
+                    // Cod pentru fișiere
+                    String[] args = new String[]{"hash-object", "-w", file.toString()};
+                    byte[] blobShaFileBinary = hashObjectCreate(args);
+                    contentLine.write("100644 ".getBytes(StandardCharsets.UTF_8));
+                    contentLine.write(file.getName().getBytes(StandardCharsets.UTF_8));
+                    contentLine.write(0); // null terminator
+                    contentLine.write(blobShaFileBinary); // SHA binar
+                }
+            }
+            return calculateTreeStructure(contentLine.toByteArray());
+        } else {
+            System.out.println("error files is null " + dir);
+            return new byte[0];
+        }
     }
 
-    private static byte[] calculateTreeStructure(String content) throws NoSuchAlgorithmException, IOException {
-    /**
-     * tree <size>\0
-     * 100644 file.txt\0<binary_sha1_abcd1234...>
-     */
-    String sortedContent = Git.processTree(content,true);
-   // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
-    String fullTreeContent = "tree" + " " +
-            content.length() +
-            "\0" + sortedContent;
+    private static byte[] calculateTreeStructure(byte[] content) throws NoSuchAlgorithmException, IOException {
+//    /**
+//     * tree <size>\0
+//     * 100644 file.txt\0<binary_sha1_abcd1234...>
+//     */
+//    String sortedContent = Git.processTree(content,true);
+//   // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
+//    String fullTreeContent = "tree" + " " +
+//            content.length() +
+//            "\0" + sortedContent;
+//
+//    // Calcularea SHA-1
+//    MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
+//    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
+//    String hashHexa = bytesToHex(treeSha1);
+//    try {
+//        //add in .git/objects/
+//        String path = addDirAndFileToObjects(hashHexa);
+//        //compriming data
+//        comprimeToZlib(path, fullTreeContent);
+//    }catch (Exception e){
+//        e.printStackTrace();
+//        System.out.println("in calculate Tree Structure");
+//    }
+//    return treeSha1;
+        // `content` este deja în format binar, deci nu trebuie să-l convertiți în string
 
-    // Calcularea SHA-1
-    MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
-    String hashHexa = bytesToHex(treeSha1);
-    try {
-        //add in .git/objects/
-        String path = addDirAndFileToObjects(hashHexa);
-        //compriming data
-        comprimeToZlib(path, fullTreeContent);
-    }catch (Exception e){
-        e.printStackTrace();
-        System.out.println("in calculate Tree Structure");
-    }
-    return treeSha1;
+        // Calcularea dimensiunii conținutului tree-ului
+        int contentSize = content.length;
 
+        // Crearea conținutului complet pentru tree
+        ByteArrayOutputStream fullTreeContent = new ByteArrayOutputStream();
+
+        // Adăugarea antetului tree-ului
+        fullTreeContent.write("tree ".getBytes(StandardCharsets.UTF_8));
+        fullTreeContent.write(String.valueOf(contentSize).getBytes(StandardCharsets.UTF_8));
+        fullTreeContent.write(0); // null terminator
+
+        // Adăugarea conținutului binar
+        fullTreeContent.write(content);
+
+        // Calcularea SHA-1
+        MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
+        byte[] treeSha1 = sha1Digest.digest(fullTreeContent.toByteArray());
+
+        // Convertirea SHA-1 în hex (opțional, pentru debug)
+        String hashHexa = bytesToHex(treeSha1);
+
+        // Salvarea obiectului în Git
+        try {
+            // Crearea calea pentru obiectul Git
+            String path = addDirAndFileToObjects(hashHexa);
+
+            // Comprimarea datelor
+            comprimeToZlib(path, Arrays.toString(fullTreeContent.toByteArray()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error in calculateTreeStructure");
+        }
+
+        return treeSha1;
     }
     // Helper method to convert byte array to hexadecimal string
 
