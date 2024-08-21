@@ -172,6 +172,7 @@ public class Git {
            return calculateTreeStructure(contentLine.toString());
        }else{
            System.out.println("error files is null " + dir);
+           return " nothing ";
        }
     }
 
