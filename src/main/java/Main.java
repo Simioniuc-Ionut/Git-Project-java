@@ -42,15 +42,20 @@ public class Main {
          }
        }
        case "write-tree" ->{
-         //calea absoluta
+         // Ensure the current directory is the root of the repository
          Path path = Paths.get("").toAbsolutePath();
+         File gitDir = new File(path.toString(), ".git");
+         if (!gitDir.exists()) {
+           System.out.println("Error: .git directory not found. Please run 'init' command first.");
+           return;
+         }
+
          try {
            String hexShaTree = Git.itereateDirectory(new File(path.toString()));
            System.out.print(hexShaTree);
-         }catch (Exception e){
+         } catch (Exception e) {
            throw new RuntimeException(e);
          }
-
        }
        default -> System.out.println("Unknown command: " + command);
      }

@@ -14,22 +14,27 @@ public class GitTest {
     public void testWriteTree() throws Exception {
         // Set up a temporary directory structure
         Path tempDir = Files.createTempDirectory("testRepo");
-        File dir1 = new File(tempDir.toFile(), "dir1");
-        File dir2 = new File(tempDir.toFile(), "dir2");
-        File file1 = new File(dir1, "file1.txt");
-        File file2 = new File(dir2, "file2.txt");
+        File testFile1 = new File(tempDir.toFile(), "test_file_1.txt");
+        File dir1 = new File(tempDir.toFile(), "test_dir_1");
+        File testFile2 = new File(dir1, "test_file_2.txt");
+        File dir2 = new File(tempDir.toFile(), "test_dir_2");
+        File testFile3 = new File(dir2, "test_file_3.txt");
 
+        // Create directories and files
+        Files.writeString(testFile1.toPath(), "hello world");
         dir1.mkdir();
+        Files.writeString(testFile2.toPath(), "hello world");
         dir2.mkdir();
-        Files.writeString(file1.toPath(), "content of file1");
-        Files.writeString(file2.toPath(), "content of file2");
+        Files.writeString(testFile3.toPath(), "hello world");
 
         // Call the itereateDirectory method
         String treeSha = Git.itereateDirectory(tempDir.toFile());
 
+        System.out.println(treeSha);
+
         // Verify the output
-        assertNotNull(treeSha);
-        assertFalse(treeSha.isEmpty());
+        Assertions.assertNotNull(treeSha);
+        Assertions.assertFalse(treeSha.isEmpty());
 
         // Clean up
         deleteDirectory(tempDir.toFile());

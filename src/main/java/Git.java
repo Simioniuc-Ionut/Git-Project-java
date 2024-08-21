@@ -150,7 +150,7 @@ public class Git {
                            .append(file.getName())
                            .append('\0')
                            .append(hexToBytes(shaTree));
-                   System.out.println(contentLine);
+                 //  System.out.println(contentLine);
                } else {
                    //is file
                    //aplicam hash object si returnam sha ul
@@ -166,7 +166,7 @@ public class Git {
                            .append('\0')
                            .append(shaIn20Bytes);
 
-                   System.out.println(contentLine);
+                  // System.out.println(contentLine);
                }
            }
            //am parcurs toate fisierele din direct. creez tree sha ul directorului si l returnez;
