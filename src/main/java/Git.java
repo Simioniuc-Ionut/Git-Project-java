@@ -242,7 +242,7 @@ public class Git {
         System.out.println(bytesToHex(sha));
     }
     public static String processTree(String content, boolean returnFullContent) {
-        System.out.println("content is :" + content);
+        //System.out.println("content is :" + content);
         int charactersRead = 0;
         List<String> allResult = new LinkedList<>();
         List<String> nameResult = new LinkedList<>();
@@ -295,7 +295,7 @@ public class Git {
                 result.append(sortedName);
             }
         }
-        System.out.println("Result is " + result);
+       //System.out.println("Result is " + result);
         return result.toString();
     }
 
