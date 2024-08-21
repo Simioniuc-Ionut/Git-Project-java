@@ -316,7 +316,7 @@ public class Git {
             String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
             StringBuilder result = new StringBuilder();
             // Print all content
-            System.out.println("All content \n" + allResult);
+            //System.out.println("All content \n" + allResult);
 
             if (returnFullContent) {
                 for (String sortedName : sortedNames) {
@@ -332,7 +332,7 @@ public class Git {
                     result.append(sortedName);
                 }
             }
-            System.out.println("All sorted content \n" + result + " names " + nameResult);
+            //System.out.println("All sorted content \n" + result + " names " + nameResult);
 
 
             return result.toString();
