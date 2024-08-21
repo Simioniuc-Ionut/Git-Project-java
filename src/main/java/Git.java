@@ -177,7 +177,7 @@ public class Git {
      * 100644 file.txt\0<binary_sha1_abcd1234...>
      */
     String sortedContent = Git.processTree(content,true);
-    System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
+   // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
     String fullTreeContent = "tree" + " " +
             content.length() +
             "\0" + sortedContent;
@@ -241,6 +241,7 @@ public class Git {
         System.out.println(bytesToHex(sha));
     }
     public static String processTree(String content, boolean returnFullContent) {
+        System.out.println("content is :" + content);
         int charactersRead = 0;
         List<String> allResult = new LinkedList<>();
         List<String> nameResult = new LinkedList<>();
@@ -264,7 +265,7 @@ public class Git {
 
             if (returnFullContent) {
                 StringBuilder eachLine = new StringBuilder();
-                eachLine.append(mode).append(' ')
+                eachLine.append(mode).append(" ")
                         .append(name).append("\0")
                         .append(shaHex);
 
@@ -293,7 +294,7 @@ public class Git {
                 result.append(sortedName);
             }
         }
-
+        System.out.println("Result is " + result);
         return result.toString();
     }
 
