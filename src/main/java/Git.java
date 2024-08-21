@@ -208,10 +208,13 @@ public class Git {
     }
     private static byte[] hexToBytes(String hexa) {
         int len = hexa.length();
-        byte[] data = new byte[len / 2];//hexa are 40 caractere. in bytes voi avea doar 20
+        if (len % 2 != 0) {
+            throw new IllegalArgumentException("Hex string must have an even length");
+        }
+        byte[] data = new byte[len / 2]; // hexa has 40 characters, in bytes I will have only 20
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(hexa.charAt(i), 16) << 4)
-                    + Character.digit(hexa.charAt(i+1), 16));
+                    + Character.digit(hexa.charAt(i + 1), 16));
         }
         return data;
     }
