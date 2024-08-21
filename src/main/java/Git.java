@@ -200,23 +200,26 @@ public class Git {
     // Helper method to convert byte array to hexadecimal string
 
     private static String addDirAndFileToObjects(String hashHexa) throws IOException {
-        // Calea relativă
-        File currentDir = new File(".");
-        System.out.println("curr dir" + currentDir);
-        File parentDir = currentDir.getParentFile().getParentFile();
-        File gitObjectsDir = new File(parentDir, ".git/objects/");
+        StringBuilder path= new StringBuilder();// path where to write file
 
-        // Creează directorul dacă nu există
-        if (!gitObjectsDir.exists() && !gitObjectsDir.mkdirs()) {
-            throw new IOException("Failed to create directory: " + gitObjectsDir.getAbsolutePath());
-        }
+        path.append(".git/objects/");
+        //find directory and filename
 
-        // Calea către fișierul final
-        String directoryName = hashHexa.substring(0, 2);
+        String directoryName = hashHexa.substring(0,2);
         String filename = hashHexa.substring(2);
-        File filePath = new File(gitObjectsDir, directoryName + File.separator + filename);
+        //compute path to directory
+        path.append(directoryName);
 
-        return filePath.getAbsolutePath();
+        //cream directorul
+        File directory = new File(path.toString());
+
+        if (!directory.exists() && !directory.mkdir()) {
+            throw new IOException("Failed to create directory: " + directory);
+        }
+        //compute path to file
+        path.append("/").append(filename);
+        System.out.println(path);
+        return path.toString();
 
     }
     private static void comprimeToZlib(String path,String resultObject) throws IOException {
