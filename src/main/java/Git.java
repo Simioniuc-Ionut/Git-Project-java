@@ -202,6 +202,7 @@ public class Git {
     private static String addDirAndFileToObjects(String hashHexa) throws IOException {
         // Calea relativă
         File currentDir = new File(".");
+        System.out.println("curr dir" + currentDir);
         File parentDir = currentDir.getParentFile().getParentFile();
         File gitObjectsDir = new File(parentDir, ".git/objects/");
 
