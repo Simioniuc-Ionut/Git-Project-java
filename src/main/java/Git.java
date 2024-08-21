@@ -267,7 +267,7 @@ public class Git {
     public static void printShaInHexaMode(byte[] sha){
         System.out.println(bytesToHex(sha));
     }
-    public static String processTree(String content, boolean returnFullContent) {
+    public static String processTree(String content, boolean returnFullContent) throws IOException {
         int charactersRead = 0;
         List<String> allResult = new LinkedList<>();
         List<String> nameResult = new LinkedList<>();
@@ -287,14 +287,22 @@ public class Git {
             byte[] shaBinary = new byte[20];
             System.arraycopy(content.getBytes(StandardCharsets.ISO_8859_1), nameEndIndex + 1, shaBinary, 0, 20);
 
+//            if (returnFullContent) {
+//                StringBuilder eachLine = new StringBuilder();
+//                eachLine.append(mode).append(" ")
+//                        .append(name).append("\0")
+//                        .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA
+//
+//                allResult.add(eachLine.toString());
+//            }
             if (returnFullContent) {
-                StringBuilder eachLine = new StringBuilder();
-                eachLine.append(mode).append(" ")
-                        .append(name).append("\0")
-                        .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                outputStream.write((mode + " " + name + "\0").getBytes(StandardCharsets.UTF_8));
+                outputStream.write(shaBinary); // Write the binary SHA
 
-                allResult.add(eachLine.toString());
+                allResult.add(outputStream.toString(StandardCharsets.ISO_8859_1)); // Convert to String using ISO_8859_1
             }
+
 
             nameResult.add(name);
             charactersRead = nameEndIndex + 21; // Move past \0 and 20-byte SHA
