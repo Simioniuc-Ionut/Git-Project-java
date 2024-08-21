@@ -198,12 +198,42 @@ public class Git {
 
     }
     // Helper method to convert byte array to hexadecimal string
+
+    private static String addDirAndFileToObjects(String hashHexa) throws IOException {
+        // Calea relativă
+        File currentDir = new File(".");
+        File parentDir = currentDir.getParentFile().getParentFile();
+        File gitObjectsDir = new File(parentDir, ".git/objects/");
+
+        // Creează directorul dacă nu există
+        if (!gitObjectsDir.exists() && !gitObjectsDir.mkdirs()) {
+            throw new IOException("Failed to create directory: " + gitObjectsDir.getAbsolutePath());
+        }
+
+        // Calea către fișierul final
+        String directoryName = hashHexa.substring(0, 2);
+        String filename = hashHexa.substring(2);
+        File filePath = new File(gitObjectsDir, directoryName + File.separator + filename);
+
+        return filePath.getAbsolutePath();
+
+    }
+    private static void comprimeToZlib(String path,String resultObject) throws IOException {
+        try(FileOutputStream fileOutputStream = new FileOutputStream(path);
+            DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
+            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
+            compreserFile.finish();
+        }
+    }
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
+    }
+    public static void printShaInHexaMode(byte[] sha){
+        System.out.println(bytesToHex(sha));
     }
 //    private static String takeShaFromStdout(String[] args){
 //        // Citim din stodutul  sha ul si l returnam ca string
@@ -231,35 +261,6 @@ public class Git {
 //
 //        return outputShaData;
 //    }
-    private static String addDirAndFileToObjects(String hashHexa) throws IOException {
-        StringBuilder path= new StringBuilder();// path where to write file
-        path.append(".git/objects/");
-        //find directory and filename
-
-        String directoryName = hashHexa.substring(0,2);
-        String filename = hashHexa.substring(2);
-        //compute path to directory
-        path.append(directoryName);
-
-        //cream directorul
-        File directory = new File(path.toString());
-
-        if (!directory.exists() && !directory.mkdir()) {
-            throw new IOException("Failed to create directory: " + directory);
-        }
-        //compute path to file
-        path.append("/").append(filename);
-
-        return path.toString();
-
-    }
-    private static void comprimeToZlib(String path,String resultObject) throws IOException {
-        try(FileOutputStream fileOutputStream = new FileOutputStream(path);
-            DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
-            compreserFile.finish();
-        }
-    }
 
 //    private static byte[] hexToBytes(String hexa) {
 //        int len = hexa.length();
@@ -283,7 +284,5 @@ public class Git {
 //        }
 //        return data;
 //    }
-    public static void printShaInHexaMode(byte[] sha){
-        System.out.println(bytesToHex(sha));
-    }
+
 }
