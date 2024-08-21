@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
@@ -24,7 +25,7 @@ public class Git {
 
             //prepare the object section
             byte[] data = decompressor.readAllBytes();
-            result = new String(data, StandardCharsets.UTF_8); // Sau specifică codificarea potrivită
+            result = new String(data, StandardCharsets.UTF_16); // Sau specifică codificarea potrivită
 
 
 
@@ -74,7 +75,7 @@ public class Git {
 
         try {
             //declaration zone
-            String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_8);// Ensure UTF-8 encoding
+            String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_16);// Ensure UTF-8 encoding
             String resultObject,type="";
             StringBuilder path= new StringBuilder();// path where to write file
             MessageDigest instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
@@ -104,7 +105,7 @@ public class Git {
             resultObject=type + " " +content.length()+ "\0" + content;
 
             //compute SHA-1
-            hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_8));
+            hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_16));
             //find directory and filename
             String hashHexa = bytesToHex(hash);
             String directoryName = hashHexa.substring(0,2);
@@ -123,11 +124,13 @@ public class Git {
             //compriming content of file using zlib
             try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
                 DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-                compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
+                compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_16));
                 compreserFile.finish();
             }
 
             System.out.print(hashHexa);
+        }catch (MalformedInputException e) {
+            throw new IOException("Failed to read file as UTF-8: " + fileReaded.getPath(), e);
         }catch (IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
             throw new RuntimeException(e);
@@ -190,7 +193,7 @@ public class Git {
 
     // Calcularea SHA-1
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
+    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_16));
 
     return bytesToHex(treeSha1);
 
