@@ -57,7 +57,7 @@ public class MainTest {
         "040000 tree c43da8ed93e41af84dc08cffbce3a907e09159b8\0.codecrafters";
 
         // Example usage
-        GitFunctions.processTreeContent(content);
+        Git.processTree(content,true);
     }
     public static void main(String[] args) {
         //compriming and decompriming an string. and create an sha-1 hash

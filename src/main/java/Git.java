@@ -57,11 +57,10 @@ public class Git {
                 // tree <size>\0
                 //  <mode> <name>\0<20_byte_sha>
                 //  <mode> <name>\0<20_byte_sha>
-                if (option.equals("--name-only")) {
-                    GitFunctions.processTreeNames(content);
-                }else{
-                    GitFunctions.processTreeContent(content);
-                }
+
+                String treeContent= Git.processTree(content, !option.equals("--name-only"));
+                System.out.println(treeContent);
+
             }
         }catch (IOException e){
             throw  new RuntimeException(e);
@@ -180,8 +179,7 @@ public class Git {
 
     String fullTreeContent = "tree" + " " +
             content.length() +
-            "\0" +
-            content;
+            "\0" + Git.processTree(content,true);
 
     // Calcularea SHA-1
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
@@ -241,54 +239,65 @@ public class Git {
     public static void printShaInHexaMode(byte[] sha){
         System.out.println(bytesToHex(sha));
     }
-//    private static String takeShaFromStdout(String[] args){
-//        // Citim din stodutul  sha ul si l returnam ca string
-//        // Cream un obiect ByteArrayOutputStream pentru a capta ieșirea
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//        PrintStream printStream = new PrintStream(outputStream);
-//
-//
-//        // Salvăm referința originală la System.out
-//        PrintStream originalOut = System.out;
-//        String outputShaData;
-//        try{
-//            // Redirecționăm System.out către noul flux (printStream)
-//            System.setOut(printStream);
-//
-//            hashObjectCreate(args);
-//
-//            // Convertim conținutul captat într-un String și eliminăm newline-urile
-//            outputShaData = outputStream.toString().replace("\n", "").replace("\r", "");
-//        }
-//        finally {
-//            // Restaurăm System.out la starea inițială
-//            System.setOut(originalOut);
-//        }
-//
-//        return outputShaData;
-//    }
+    public static String processTree(String content, boolean returnFullContent) {
+        int charactersRead = 0;
+        List<String> allResult = new LinkedList<>();
+        List<String> nameResult = new LinkedList<>();
 
-//    private static byte[] hexToBytes(String hexa) {
-//        int len = hexa.length();
-//
-//        // Hex string length must be even (2 characters per byte)
-//        if (len % 2 != 0) {
-//            throw new IllegalArgumentException("Invalid hex string length: " + len);
-//        }
-//
-//        byte[] data = new byte[len / 2]; // 40 hex characters -> 20 bytes
-//        for (int i = 0; i < len; i += 2) {
-//            // Convert each pair of hex characters to a byte
-//            int high = Character.digit(hexa.charAt(i), 16);
-//            int low = Character.digit(hexa.charAt(i + 1), 16);
-//
-//            if (high == -1 || low == -1) {
-//                throw new IllegalArgumentException("Invalid hex character in string: " + hexa);
-//            }
-//
-//            data[i / 2] = (byte) ((high << 4) + low);
-//        }
-//        return data;
-//    }
+        while (charactersRead < content.length()) {
+            int newlineIndex = content.indexOf('\n', charactersRead);
+            if (newlineIndex == -1) newlineIndex = content.length();
+
+            String line = content.substring(charactersRead, newlineIndex);
+            int firstSpaceIndex = line.indexOf(' ');
+            if (firstSpaceIndex == -1) break;
+
+            int secondSpaceIndex = line.indexOf(' ', firstSpaceIndex + 1);
+            if (secondSpaceIndex == -1) break;
+
+            int thirdSpaceIndex = line.indexOf(' ', secondSpaceIndex + 1);
+            if (thirdSpaceIndex == -1) break;
+
+            String mode = line.substring(0, firstSpaceIndex);
+            String type = line.substring(firstSpaceIndex + 1, secondSpaceIndex);
+            String sha = line.substring(secondSpaceIndex + 1, thirdSpaceIndex);
+            String name = line.substring(thirdSpaceIndex + 1);
+
+            if (returnFullContent) {
+                StringBuilder eachLine = new StringBuilder();
+                eachLine.append(mode).append(' ')
+                        .append(type).append(' ')
+                        .append(sha).append(' ')
+                        .append(name);
+
+                allResult.add(eachLine.toString());
+            }
+
+            nameResult.add(name);
+
+            charactersRead = newlineIndex + 1;
+        }
+
+        String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
+        StringBuilder result = new StringBuilder();
+
+        if (returnFullContent) {
+            for (String sortedName : sortedNames) {
+                for (String unsortedLine : allResult) {
+                    if (unsortedLine.contains(sortedName)) {
+                        result.append(unsortedLine);
+                        break;
+                    }
+                }
+            }
+        } else {
+            for (String sortedName : sortedNames) {
+                result.append(sortedName);
+            }
+        }
+
+        return result.toString();
+    }
+
 
 }
