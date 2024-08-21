@@ -176,10 +176,11 @@ public class Git {
      * tree <size>\0
      * 100644 file.txt\0<binary_sha1_abcd1234...>
      */
-
+    String sortedContent = Git.processTree(content,true);
+    System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
     String fullTreeContent = "tree" + " " +
             content.length() +
-            "\0" + Git.processTree(content,true);
+            "\0" + sortedContent;
 
     // Calcularea SHA-1
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
