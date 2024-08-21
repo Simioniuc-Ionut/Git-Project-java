@@ -41,7 +41,7 @@ public class Main {
            Git.catFile(args[1],"","tree");
          }
        }
-       case "work-tree" ->{
+       case "write-tree" ->{
          //calea absoluta
          Path path = Paths.get("").toAbsolutePath();
          try {
