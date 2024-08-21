@@ -246,10 +246,10 @@ public class Git {
         List<String> nameResult = new LinkedList<>();
 
         while (charactersRead < content.length()) {
-            int modeEndIndex = content.indexOf(' ', charactersRead);
+            int modeEndIndex = content.indexOf(" ", charactersRead);
             if (modeEndIndex == -1) break;
 
-            int nameEndIndex = content.indexOf('\0', modeEndIndex + 1);
+            int nameEndIndex = content.indexOf("\0", modeEndIndex + 1);
             if (nameEndIndex == -1) break;
 
             // Extrage mod, nume și SHA binar
@@ -265,7 +265,7 @@ public class Git {
             if (returnFullContent) {
                 StringBuilder eachLine = new StringBuilder();
                 eachLine.append(mode).append(' ')
-                        .append(name).append(' ')
+                        .append(name).append("\0")
                         .append(shaHex);
 
                 allResult.add(eachLine.toString());
