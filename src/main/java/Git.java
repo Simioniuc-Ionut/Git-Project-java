@@ -129,7 +129,7 @@ public class Git {
 
             System.out.print(hashHexa);
         }catch (IOException | NoSuchAlgorithmException e){
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 
