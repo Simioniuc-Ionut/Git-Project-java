@@ -246,36 +246,34 @@ public class Git {
         List<String> nameResult = new LinkedList<>();
 
         while (charactersRead < content.length()) {
-            int newlineIndex = content.indexOf('\n', charactersRead);
-            if (newlineIndex == -1) newlineIndex = content.length();
+            int modeEndIndex = content.indexOf(' ', charactersRead);
+            if (modeEndIndex == -1) break;
 
-            String line = content.substring(charactersRead, newlineIndex);
-            int firstSpaceIndex = line.indexOf(' ');
-            if (firstSpaceIndex == -1) break;
+            int nameEndIndex = content.indexOf('\0', modeEndIndex + 1);
+            if (nameEndIndex == -1) break;
 
-            int secondSpaceIndex = line.indexOf(' ', firstSpaceIndex + 1);
-            if (secondSpaceIndex == -1) break;
+            // Extrage mod, nume și SHA binar
+            String mode = content.substring(charactersRead, modeEndIndex);
+            String name = content.substring(modeEndIndex + 1, nameEndIndex);
 
-            int thirdSpaceIndex = line.indexOf(' ', secondSpaceIndex + 1);
-            if (thirdSpaceIndex == -1) break;
+            // Extrage SHA-ul binar (20 bytes)
+            byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes();
 
-            String mode = line.substring(0, firstSpaceIndex);
-            String type = line.substring(firstSpaceIndex + 1, secondSpaceIndex);
-            String sha = line.substring(secondSpaceIndex + 1, thirdSpaceIndex);
-            String name = line.substring(thirdSpaceIndex + 1);
+            // Convertește SHA-ul din binar în hexazecimal
+            String shaHex = bytesToHex(shaBinary);
 
             if (returnFullContent) {
                 StringBuilder eachLine = new StringBuilder();
-                eachLine.append(mode).append(" ")
-                        .append(name).append("\0")
-                        .append(sha);
+                eachLine.append(mode).append(' ')
+                        .append(name).append(' ')
+                        .append(shaHex);
 
                 allResult.add(eachLine.toString());
             }
 
             nameResult.add(name);
 
-            charactersRead = newlineIndex + 1;
+            charactersRead = nameEndIndex + 21; // Trecem peste \0 și SHA (20 bytes)
         }
 
         String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
