@@ -25,7 +25,7 @@ public class Git {
 
             //prepare the object section
             byte[] data = decompressor.readAllBytes();
-            result = new String(data, StandardCharsets.UTF_16); // Sau specifică codificarea potrivită
+            result = new String(data, StandardCharsets.UTF_8); // Sau specifică codificarea potrivită
 
 
 
@@ -75,7 +75,7 @@ public class Git {
 
         try {
             //declaration zone
-            String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_16);// Ensure UTF-8 encoding
+            String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_8);// Ensure UTF-8 encoding
             String resultObject,type="";
             StringBuilder path= new StringBuilder();// path where to write file
             MessageDigest instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
@@ -105,7 +105,7 @@ public class Git {
             resultObject=type + " " +content.length()+ "\0" + content;
 
             //compute SHA-1
-            hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_16));
+            hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_8));
             //find directory and filename
             String hashHexa = bytesToHex(hash);
             String directoryName = hashHexa.substring(0,2);
@@ -124,7 +124,7 @@ public class Git {
             //compriming content of file using zlib
             try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
                 DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-                compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_16));
+                compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
                 compreserFile.finish();
             }
 
@@ -161,7 +161,7 @@ public class Git {
                    args[1] = "-w";
                    args[2] = file.toString();
                    String blobShaFileInHexa = takeShaFromStdout(args);
-                   //byte[] shaIn20Bytes = hexToBytes(blobShaFileInHexa);
+                 
                    //returnez un blob obj
                    contentLine.append("100644 ")
                            .append(file.getName())
@@ -193,7 +193,7 @@ public class Git {
 
     // Calcularea SHA-1
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_16));
+    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
 
     return bytesToHex(treeSha1);
 
@@ -206,19 +206,6 @@ public class Git {
         }
         return sb.toString();
     }
-    private static byte[] hexToBytes(String hexa) {
-        int len = hexa.length();
-        if (len % 2 != 0) {
-            throw new IllegalArgumentException("Hex string must have an even length");
-        }
-        byte[] data = new byte[len / 2]; // hexa has 40 characters, in bytes I will have only 20
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(hexa.charAt(i), 16) << 4)
-                    + Character.digit(hexa.charAt(i + 1), 16));
-        }
-        return data;
-    }
-
     private static String takeShaFromStdout(String[] args){
         // Citim din stodutul  sha ul si l returnam ca string
         // Cream un obiect ByteArrayOutputStream pentru a capta ieșirea
