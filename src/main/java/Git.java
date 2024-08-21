@@ -1,4 +1,5 @@
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -23,7 +24,8 @@ public class Git {
 
             //prepare the object section
             byte[] data = decompressor.readAllBytes();
-            result = new String(data);
+            result = new String(data, StandardCharsets.UTF_8); // Sau specifică codificarea potrivită
+
 
 
             int typeEndIndex = result.indexOf(" ");
@@ -147,7 +149,7 @@ public class Git {
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append('\0')
-                           .append(hexToBytes(shaTree));
+                           .append(shaTree);
                    System.out.println(contentLine);
                } else {
                    //is file
@@ -157,12 +159,12 @@ public class Git {
                    args[1] = "-w";
                    args[2] = file.toString();
                    String blobShaFileInHexa = takeShaFromStdout(args);
-                   byte[] shaIn20Bytes = hexToBytes(blobShaFileInHexa);
+                  // byte[] shaIn20Bytes = hexToBytes(blobShaFileInHexa);
                    //returnez un blob obj
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append('\0')
-                           .append(shaIn20Bytes);
+                           .append(blobShaFileInHexa);
 
                    System.out.println(contentLine);
                }
@@ -204,13 +206,27 @@ public class Git {
     }
     private static byte[] hexToBytes(String hexa) {
         int len = hexa.length();
-        byte[] data = new byte[len / 2];//hexa are 40 caractere. in bytes voi avea doar 20
+
+        // Hex string length must be even (2 characters per byte)
+        if (len % 2 != 0) {
+            throw new IllegalArgumentException("Invalid hex string length: " + len);
+        }
+
+        byte[] data = new byte[len / 2]; // 40 hex characters -> 20 bytes
         for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(hexa.charAt(i), 16) << 4)
-                    + Character.digit(hexa.charAt(i+1), 16));
+            // Convert each pair of hex characters to a byte
+            int high = Character.digit(hexa.charAt(i), 16);
+            int low = Character.digit(hexa.charAt(i + 1), 16);
+
+            if (high == -1 || low == -1) {
+                throw new IllegalArgumentException("Invalid hex character in string: " + hexa);
+            }
+
+            data[i / 2] = (byte) ((high << 4) + low);
         }
         return data;
     }
+
     private static String takeShaFromStdout(String[] args){
         // Citim din stodutul  sha ul si l returnam ca string
         // Cream un obiect ByteArrayOutputStream pentru a capta ieșirea
