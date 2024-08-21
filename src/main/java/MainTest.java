@@ -54,10 +54,11 @@ public class MainTest {
     public  static  void test2(){
         // Example content of a Git tree object
         String content =
-        "040000 tree c43da8ed93e41af84dc08cffbce3a907e09159b8\0.codecrafters";
-
+        //"040000 tree c43da8ed93e41af84dc08cffbce3a907e09159b8\0.codecrafters";
+                "040000 .codecrafters\0c43da8ed93e41af84dc08cffbce3a907e09159b8";
         // Example usage
-        Git.processTree(content,true);
+       String res =  Git.processTree(content,true);
+        System.out.println(content + "||" + res);
     }
     public static void main(String[] args) {
         //compriming and decompriming an string. and create an sha-1 hash
