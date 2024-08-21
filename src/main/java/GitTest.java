@@ -28,13 +28,13 @@ public class GitTest {
         Files.writeString(testFile3.toPath(), "hello world");
 
         // Call the itereateDirectory method
-        String treeSha = Git.itereateDirectory(tempDir.toFile());
-
-        System.out.println(treeSha);
+        byte[] treeSha = Git.itereateDirectory(tempDir.toFile());
+        String treeHex = Git.bytesToHex(treeSha);
+        System.out.println(treeHex);
 
         // Verify the output
-        Assertions.assertNotNull(treeSha);
-        Assertions.assertFalse(treeSha.isEmpty());
+        Assertions.assertNotNull(treeHex);
+        Assertions.assertFalse(treeHex.isEmpty());
 
         // Clean up
         deleteDirectory(tempDir.toFile());

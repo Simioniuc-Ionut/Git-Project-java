@@ -33,7 +33,10 @@ public class Main {
          }
        }
        case "cat-file" -> Git.catFile(args[2],args[1],"blob");
-       case "hash-object" ->  Git.hashObjectCreate(args);
+       case "hash-object" -> {
+         byte[] hash = Git.hashObjectCreate(args);
+         System.out.println(Git.bytesToHex(hash));
+       }
        case "ls-tree" ->  {
          if(args[1].equals("--name-only")){
            Git.catFile(args[2],args[1],"tree");
@@ -51,8 +54,8 @@ public class Main {
          }
 
          try {
-           String hexShaTree = Git.itereateDirectory(new File(path.toString()));
-           System.out.print(hexShaTree);
+           byte[] shaTree = Git.itereateDirectory(new File(path.toString()));
+           System.out.print(Git.bytesToHex(shaTree));
          } catch (Exception e) {
            throw new RuntimeException(e);
          }

@@ -68,7 +68,7 @@ public class Git {
         }
 
     }
-    public static void hashObjectCreate(String[] args)  {
+    public static byte[] hashObjectCreate(String[] args)  {
         //create a blob
         int argumentsLength = args.length;
         File fileReaded = new File(args[argumentsLength-1]);
@@ -118,16 +118,17 @@ public class Git {
             comprimeToZlib(path.toString(),resultObject);
 
             System.out.print(hashHexa);
+            return hash;
         }catch (MalformedInputException e) {
            System.out.println("Failed to read file as UTF-8: " + fileReaded.getPath()+ " " + e);
         }catch (IOException | NoSuchAlgorithmException e){
         e.printStackTrace();
         throw new RuntimeException(e);
     }
-
+        return new byte[0];
     }
 
-    public static String itereateDirectory(File dir) throws Exception{
+    public static byte[] itereateDirectory(File dir) throws Exception{
 
         File[] files = dir.listFiles();
 
@@ -135,12 +136,12 @@ public class Git {
        if(files!=null) {
            for (File file : files) {
                if (file.isDirectory()) {
-                   String shaTree = itereateDirectory(file);
-                   byte[] shaTreeBinary = hexToBytes(shaTree);
+                   byte[] shaTree = itereateDirectory(file);
+                   //byte[] shaTreeBinary = hexToBytes(shaTree);
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(Arrays.toString(shaTreeBinary));
+                           .append(Arrays.toString(shaTree));
                  //  System.out.println(contentLine);
                } else {
                    //is file
@@ -149,13 +150,13 @@ public class Git {
                    args[0] = "hash-object";
                    args[1] = "-w";
                    args[2] = file.toString();
-                   String blobShaFileInHexa = takeShaFromStdout(args);
-                   byte[] blobShaBinary = hexToBytes(blobShaFileInHexa);
+                   byte[] blobShaFileBinary = hashObjectCreate(args);
+                   //byte[] blobShaBinary = hexToBytes(blobShaFileInHexa);
                    //returnez un blob obj
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(Arrays.toString(blobShaBinary));
+                           .append(Arrays.toString(blobShaFileBinary));
 
                   // System.out.println(contentLine);
                }
@@ -165,11 +166,11 @@ public class Git {
            return calculateTreeStructure(contentLine.toString());
        }else{
            System.out.println("error files is null " + dir);
-           return " nothing ";
+           return new byte[0];
        }
     }
 
-    private static String calculateTreeStructure(String content) throws NoSuchAlgorithmException, IOException {
+    private static byte[] calculateTreeStructure(String content) throws NoSuchAlgorithmException, IOException {
     /**
      * tree <size>\0
      * 100644 file.txt\0<binary_sha1_abcd1234...>
@@ -193,11 +194,11 @@ public class Git {
     }catch (IOException e){
         e.printStackTrace();
     }
-    return hashHexa;
+    return treeSha1;
 
     }
     // Helper method to convert byte array to hexadecimal string
-    private static String bytesToHex(byte[] bytes) {
+    public static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));
