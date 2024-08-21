@@ -191,74 +191,39 @@ public class Git {
                     contentLine.write(blobShaFileBinary); // SHA binar
                 }
             }
-            return calculateTreeStructure(contentLine.toByteArray());
+            return calculateTreeStructure(contentLine.toString());
         } else {
             System.out.println("error files is null " + dir);
             return new byte[0];
         }
     }
 
-    private static byte[] calculateTreeStructure(byte[] content) throws NoSuchAlgorithmException, IOException {
-//    /**
-//     * tree <size>\0
-//     * 100644 file.txt\0<binary_sha1_abcd1234...>
-//     */
-//    String sortedContent = Git.processTree(content,true);
-//   // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
-//    String fullTreeContent = "tree" + " " +
-//            content.length() +
-//            "\0" + sortedContent;
-//
-//    // Calcularea SHA-1
-//    MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-//    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
-//    String hashHexa = bytesToHex(treeSha1);
-//    try {
-//        //add in .git/objects/
-//        String path = addDirAndFileToObjects(hashHexa);
-//        //compriming data
-//        comprimeToZlib(path, fullTreeContent);
-//    }catch (Exception e){
-//        e.printStackTrace();
-//        System.out.println("in calculate Tree Structure");
-//    }
-//    return treeSha1;
-        // `content` este deja în format binar, deci nu trebuie să-l convertiți în string
+    private static byte[] calculateTreeStructure(String content) throws NoSuchAlgorithmException, IOException {
+    /**
+     * tree <size>\0
+     * 100644 file.txt\0<binary_sha1_abcd1234...>
+     */
+    String sortedContent = Git.processTree(content,true);
+   // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
+    String fullTreeContent = "tree" + " " +
+            content.length() +
+            "\0" + sortedContent;
 
-        // Calcularea dimensiunii conținutului tree-ului
-        int contentSize = content.length;
+    // Calcularea SHA-1
+    MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
+    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
+    String hashHexa = bytesToHex(treeSha1);
+    try {
+        //add in .git/objects/
+        String path = addDirAndFileToObjects(hashHexa);
+        //compriming data
+        comprimeToZlib(path, fullTreeContent);
+    }catch (Exception e){
+        e.printStackTrace();
+        System.out.println("in calculate Tree Structure");
+    }
+    return treeSha1;
 
-        // Crearea conținutului complet pentru tree
-        ByteArrayOutputStream fullTreeContent = new ByteArrayOutputStream();
-
-        // Adăugarea antetului tree-ului
-        fullTreeContent.write("tree ".getBytes(StandardCharsets.UTF_8));
-        fullTreeContent.write(String.valueOf(contentSize).getBytes(StandardCharsets.UTF_8));
-        fullTreeContent.write(0); // null terminator
-
-        // Adăugarea conținutului binar
-        fullTreeContent.write(content);
-
-        // Calcularea SHA-1
-        MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-        byte[] treeSha1 = sha1Digest.digest(fullTreeContent.toByteArray());
-
-        // Convertirea SHA-1 în hex (opțional, pentru debug)
-        String hashHexa = bytesToHex(treeSha1);
-
-        // Salvarea obiectului în Git
-        try {
-            // Crearea calea pentru obiectul Git
-            String path = addDirAndFileToObjects(hashHexa);
-
-            // Comprimarea datelor
-            comprimeToZlib(path, Arrays.toString(fullTreeContent.toByteArray()));
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("Error in calculateTreeStructure");
-        }
-
-        return treeSha1;
     }
     // Helper method to convert byte array to hexadecimal string
 
