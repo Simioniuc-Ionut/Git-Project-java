@@ -68,7 +68,7 @@ public class Git {
         }
 
     }
-    public static void hashObjectCreate(String[] args) throws IOException {
+    public static void hashObjectCreate(String[] args)  {
         //create a blob
         int argumentsLength = args.length;
         File fileReaded = new File(args[argumentsLength-1]);
