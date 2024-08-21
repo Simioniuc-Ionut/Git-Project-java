@@ -258,10 +258,12 @@ public class Git {
             String name = content.substring(modeEndIndex + 1, nameEndIndex);
 
             // Extrage SHA-ul binar (20 bytes)
-            byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes();
+            //byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes();
 
             // Convertește SHA-ul din binar în hexazecimal
-            String shaHex = bytesToHex(shaBinary);
+            //String shaHex = bytesToHex(shaBinary);
+            String shaHex =content.substring(nameEndIndex + 1, nameEndIndex + 21);
+
 
             if (returnFullContent) {
                 StringBuilder eachLine = new StringBuilder();
