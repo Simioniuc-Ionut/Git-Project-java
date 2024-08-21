@@ -192,7 +192,7 @@ public class Git {
         comprimeToZlib(path, fullTreeContent);
     }catch (Exception e){
         e.printStackTrace();
-        System.out.println("in calculate Tree Structure")
+        System.out.println("in calculate Tree Structure");
     }
     return treeSha1;
 
