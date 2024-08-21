@@ -302,7 +302,11 @@ public class Git {
 
         String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
         StringBuilder result = new StringBuilder();
-
+        //print all content
+        System.out.println("All content");
+        for(String s : allResult){
+            System.out.println(s);
+        }
         if (returnFullContent) {
             for (String sortedName : sortedNames) {
                 for (String unsortedLine : allResult) {
