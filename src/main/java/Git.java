@@ -267,62 +267,140 @@ public class Git {
     public static void printShaInHexaMode(byte[] sha){
         System.out.println(bytesToHex(sha));
     }
-    public static String processTree(String content, boolean returnFullContent) {
-        int charactersRead = 0;
-        List<String> allResult = new LinkedList<>();
-        List<String> nameResult = new LinkedList<>();
 
-        while (charactersRead < content.length()) {
-            int modeEndIndex = content.indexOf(" ", charactersRead);
-            if (modeEndIndex == -1) break;
+        public static String processTree(String content, boolean returnFullContent) {
+            List<String> allResult = new ArrayList<>();
+            List<String> nameResult = new ArrayList<>();
 
-            int nameEndIndex = content.indexOf("\0", modeEndIndex + 1);
-            if (nameEndIndex == -1) break;
+            try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.ISO_8859_1))) {
+                byte[] buffer = new byte[256]; // Buffer for reading
+                int bytesRead;
 
-            // Extract mode, name, and binary SHA
-            String mode = content.substring(charactersRead, modeEndIndex);
-            String name = content.substring(modeEndIndex + 1, nameEndIndex);
+                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                    int charactersRead = 0;
+                    while (charactersRead < bytesRead) {
+                        // Find the mode end
+                        int modeEndIndex = indexOf(buffer, ' ', charactersRead, bytesRead);
+                        if (modeEndIndex == -1) break;
 
-            // Extract the 20-byte binary SHA
-            byte[] shaBinary = new byte[20];
-            System.arraycopy(content.getBytes(StandardCharsets.ISO_8859_1), nameEndIndex + 1, shaBinary, 0, 20);
+                        // Find the name end
+                        int nameEndIndex = indexOf(buffer, '\0', modeEndIndex + 1, bytesRead);
+                        if (nameEndIndex == -1) break;
 
-            if (returnFullContent) {
-                StringBuilder eachLine = new StringBuilder();
-                eachLine.append(mode).append(" ")
-                        .append(name).append("\0")
-                        .append(bytesToHex(shaBinary)); // Append binary SHA
+                        // Extract mode and name
+                        String mode = new String(buffer, charactersRead, modeEndIndex - charactersRead, StandardCharsets.ISO_8859_1);
+                        String name = new String(buffer, modeEndIndex + 1, nameEndIndex - (modeEndIndex + 1), StandardCharsets.ISO_8859_1);
 
-                allResult.add(eachLine.toString());
-            }
+                        // Extract the 20-byte binary SHA
+                        byte[] shaBinary = new byte[20];
+                        inputStream.read(shaBinary, 0, 20);
 
-            nameResult.add(name);
-            charactersRead = nameEndIndex + 21; // Move past \0 and 20-byte SHA
-        }
+                        if (returnFullContent) {
+                            StringBuilder eachLine = new StringBuilder();
+                            eachLine.append(mode).append(" ")
+                                    .append(name).append("\0")
+                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA
 
-        String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
-        StringBuilder result = new StringBuilder();
-        //print all content
-        System.out.println("All content");
-        for(String s : allResult){
-            System.out.println(s);
-        }
-        if (returnFullContent) {
-            for (String sortedName : sortedNames) {
-                for (String unsortedLine : allResult) {
-                    if (unsortedLine.contains(sortedName)) {
-                        result.append(unsortedLine);
-                        break;
+                            allResult.add(eachLine.toString());
+                        }
+
+                        nameResult.add(name);
+                        charactersRead = nameEndIndex + 21; // Move past \0 and 20-byte SHA
                     }
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } else {
-            for (String sortedName : sortedNames) {
-                result.append(sortedName);
+
+            String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
+            StringBuilder result = new StringBuilder();
+            // Print all content
+            System.out.println("All content");
+            for (String s : allResult) {
+                System.out.println(s);
             }
+            if (returnFullContent) {
+                for (String sortedName : sortedNames) {
+                    for (String unsortedLine : allResult) {
+                        if (unsortedLine.contains(sortedName)) {
+                            result.append(unsortedLine);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                for (String sortedName : sortedNames) {
+                    result.append(sortedName);
+                }
+            }
+
+            return result.toString();
         }
 
-        return result.toString();
-    }
+        private static int indexOf(byte[] buffer, char delimiter, int start, int end) {
+            for (int i = start; i < end; i++) {
+                if (buffer[i] == delimiter) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+//    public static String processTree(String content, boolean returnFullContent) {
+//        int charactersRead = 0;
+//        List<String> allResult = new LinkedList<>();
+//        List<String> nameResult = new LinkedList<>();
+//
+//        while (charactersRead < content.length()) {
+//            int modeEndIndex = content.indexOf(" ", charactersRead);
+//            if (modeEndIndex == -1) break;
+//
+//            int nameEndIndex = content.indexOf("\0", modeEndIndex + 1);
+//            if (nameEndIndex == -1) break;
+//
+//            // Extract mode, name, and binary SHA
+//            String mode = content.substring(charactersRead, modeEndIndex);
+//            String name = content.substring(modeEndIndex + 1, nameEndIndex);
+//
+//            // Extract the 20-byte binary SHA
+//            byte[] shaBinary = new byte[20];
+//            System.arraycopy(content.getBytes(StandardCharsets.ISO_8859_1), nameEndIndex + 1, shaBinary, 0, 20);
+//
+//            if (returnFullContent) {
+//                StringBuilder eachLine = new StringBuilder();
+//                eachLine.append(mode).append(" ")
+//                        .append(name).append("\0")
+//                        .append(bytesToHex(shaBinary)); // Append binary SHA
+//
+//                allResult.add(eachLine.toString());
+//            }
+//
+//            nameResult.add(name);
+//            charactersRead = nameEndIndex + 21; // Move past \0 and 20-byte SHA
+//        }
+//
+//        String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
+//        StringBuilder result = new StringBuilder();
+//        //print all content
+//        System.out.println("All content");
+//        for(String s : allResult){
+//            System.out.println(s);
+//        }
+//        if (returnFullContent) {
+//            for (String sortedName : sortedNames) {
+//                for (String unsortedLine : allResult) {
+//                    if (unsortedLine.contains(sortedName)) {
+//                        result.append(unsortedLine);
+//                        break;
+//                    }
+//                }
+//            }
+//        } else {
+//            for (String sortedName : sortedNames) {
+//                result.append(sortedName);
+//            }
+//        }
+//
+//        return result.toString();
+//    }
 
 }
