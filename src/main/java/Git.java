@@ -185,11 +185,15 @@ public class Git {
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
     byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
     String hashHexa = bytesToHex(treeSha1);
-         //add in .git/objects/
+    try {
+        //add in .git/objects/
         String path = addDirAndFileToObjects(hashHexa);
         //compriming data
-        comprimeToZlib(path,fullTreeContent);
-        
+        comprimeToZlib(path, fullTreeContent);
+    }catch (Exception e){
+        e.printStackTrace();
+        System.out.println("in calculate Tree Structure")
+    }
     return treeSha1;
 
     }
