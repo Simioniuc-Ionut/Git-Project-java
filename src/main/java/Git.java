@@ -142,7 +142,7 @@ public class Git {
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(shaTree);
+                           .append(bytesToHex(shaTree));
                  //  System.out.println(contentLine);
                } else {
                    //is file
@@ -157,7 +157,7 @@ public class Git {
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(blobShaFileBinary);
+                           .append(bytesToHex(blobShaFileBinary));
 
                   // System.out.println(contentLine);
                }
