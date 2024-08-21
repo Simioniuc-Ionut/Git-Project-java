@@ -136,11 +136,11 @@ public class Git {
            for (File file : files) {
                if (file.isDirectory()) {
                    String shaTree = itereateDirectory(file);
-                   //returnez un tree object
+                   byte[] shaTreeBinary = hexToBytes(shaTree);
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(Arrays.toString(shaTree.getBytes()));
+                           .append(new String(shaTreeBinary,StandardCharsets.UTF_8));
                  //  System.out.println(contentLine);
                } else {
                    //is file
@@ -150,12 +150,12 @@ public class Git {
                    args[1] = "-w";
                    args[2] = file.toString();
                    String blobShaFileInHexa = takeShaFromStdout(args);
-                 
+                   byte[] blobShaBinary = hexToBytes(blobShaFileInHexa);
                    //returnez un blob obj
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(Arrays.toString(blobShaFileInHexa.getBytes()));
+                           .append(new String(blobShaBinary, StandardCharsets.UTF_8));
 
                   // System.out.println(contentLine);
                }
@@ -258,5 +258,28 @@ public class Git {
             compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
             compreserFile.finish();
         }
+    }
+
+    private static byte[] hexToBytes(String hexa) {
+        int len = hexa.length();
+
+        // Hex string length must be even (2 characters per byte)
+        if (len % 2 != 0) {
+            throw new IllegalArgumentException("Invalid hex string length: " + len);
+        }
+
+        byte[] data = new byte[len / 2]; // 40 hex characters -> 20 bytes
+        for (int i = 0; i < len; i += 2) {
+            // Convert each pair of hex characters to a byte
+            int high = Character.digit(hexa.charAt(i), 16);
+            int low = Character.digit(hexa.charAt(i + 1), 16);
+
+            if (high == -1 || low == -1) {
+                throw new IllegalArgumentException("Invalid hex character in string: " + hexa);
+            }
+
+            data[i / 2] = (byte) ((high << 4) + low);
+        }
+        return data;
     }
 }
