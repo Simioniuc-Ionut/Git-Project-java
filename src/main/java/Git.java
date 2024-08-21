@@ -25,7 +25,7 @@ public class Git {
 
             //prepare the object section
             byte[] data = decompressor.readAllBytes();
-            result = new String(data, StandardCharsets.UTF_8); // Sau specifică codificarea potrivită
+            result = new String(data, StandardCharsets.UTF_16); // Sau specifică codificarea potrivită
 
 
 
@@ -75,7 +75,7 @@ public class Git {
 
         try {
             //declaration zone
-            String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_8);// Ensure UTF-8 encoding
+            String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_16);// Ensure UTF-8 encoding
             String resultObject,type="";
             StringBuilder path= new StringBuilder();// path where to write file
             MessageDigest instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
@@ -105,7 +105,7 @@ public class Git {
             resultObject=type + " " +content.length()+ "\0" + content;
 
             //compute SHA-1
-            hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_8));
+            hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_16));
             String hashHexa = bytesToHex(hash);
 
             if(writeToObjects) {
@@ -183,7 +183,7 @@ public class Git {
 
     // Calcularea SHA-1
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_8));
+    byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.UTF_16));
     String hashHexa = bytesToHex(treeSha1);
     //add in .git/objects/
         String path = addDirAndFileToObjects(hashHexa);
@@ -205,32 +205,32 @@ public class Git {
         }
         return sb.toString();
     }
-    private static String takeShaFromStdout(String[] args){
-        // Citim din stodutul  sha ul si l returnam ca string
-        // Cream un obiect ByteArrayOutputStream pentru a capta ieșirea
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        PrintStream printStream = new PrintStream(outputStream);
-
-
-        // Salvăm referința originală la System.out
-        PrintStream originalOut = System.out;
-        String outputShaData;
-        try{
-            // Redirecționăm System.out către noul flux (printStream)
-            System.setOut(printStream);
-
-            hashObjectCreate(args);
-
-            // Convertim conținutul captat într-un String și eliminăm newline-urile
-            outputShaData = outputStream.toString().replace("\n", "").replace("\r", "");
-        }
-        finally {
-            // Restaurăm System.out la starea inițială
-            System.setOut(originalOut);
-        }
-
-        return outputShaData;
-    }
+//    private static String takeShaFromStdout(String[] args){
+//        // Citim din stodutul  sha ul si l returnam ca string
+//        // Cream un obiect ByteArrayOutputStream pentru a capta ieșirea
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        PrintStream printStream = new PrintStream(outputStream);
+//
+//
+//        // Salvăm referința originală la System.out
+//        PrintStream originalOut = System.out;
+//        String outputShaData;
+//        try{
+//            // Redirecționăm System.out către noul flux (printStream)
+//            System.setOut(printStream);
+//
+//            hashObjectCreate(args);
+//
+//            // Convertim conținutul captat într-un String și eliminăm newline-urile
+//            outputShaData = outputStream.toString().replace("\n", "").replace("\r", "");
+//        }
+//        finally {
+//            // Restaurăm System.out la starea inițială
+//            System.setOut(originalOut);
+//        }
+//
+//        return outputShaData;
+//    }
     private static String addDirAndFileToObjects(String hashHexa) throws IOException {
         StringBuilder path= new StringBuilder();// path where to write file
         path.append(".git/objects/");
@@ -256,33 +256,33 @@ public class Git {
     private static void comprimeToZlib(String path,String resultObject) throws IOException {
         try(FileOutputStream fileOutputStream = new FileOutputStream(path);
             DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
+            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_16));
             compreserFile.finish();
         }
     }
 
-    private static byte[] hexToBytes(String hexa) {
-        int len = hexa.length();
-
-        // Hex string length must be even (2 characters per byte)
-        if (len % 2 != 0) {
-            throw new IllegalArgumentException("Invalid hex string length: " + len);
-        }
-
-        byte[] data = new byte[len / 2]; // 40 hex characters -> 20 bytes
-        for (int i = 0; i < len; i += 2) {
-            // Convert each pair of hex characters to a byte
-            int high = Character.digit(hexa.charAt(i), 16);
-            int low = Character.digit(hexa.charAt(i + 1), 16);
-
-            if (high == -1 || low == -1) {
-                throw new IllegalArgumentException("Invalid hex character in string: " + hexa);
-            }
-
-            data[i / 2] = (byte) ((high << 4) + low);
-        }
-        return data;
-    }
+//    private static byte[] hexToBytes(String hexa) {
+//        int len = hexa.length();
+//
+//        // Hex string length must be even (2 characters per byte)
+//        if (len % 2 != 0) {
+//            throw new IllegalArgumentException("Invalid hex string length: " + len);
+//        }
+//
+//        byte[] data = new byte[len / 2]; // 40 hex characters -> 20 bytes
+//        for (int i = 0; i < len; i += 2) {
+//            // Convert each pair of hex characters to a byte
+//            int high = Character.digit(hexa.charAt(i), 16);
+//            int low = Character.digit(hexa.charAt(i + 1), 16);
+//
+//            if (high == -1 || low == -1) {
+//                throw new IllegalArgumentException("Invalid hex character in string: " + hexa);
+//            }
+//
+//            data[i / 2] = (byte) ((high << 4) + low);
+//        }
+//        return data;
+//    }
     public static void printShaInHexaMode(byte[] sha){
         System.out.println(bytesToHex(sha));
     }
