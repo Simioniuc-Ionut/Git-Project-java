@@ -205,11 +205,11 @@ public class Git {
      */
     String sortedContent = Git.processTree(content,true);
    // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
-
+    System.out.println("sorted content " + sortedContent);
     String fullTreeContent = "tree" + " " +
             sortedContent.length() +
             "\0" + sortedContent;
-    //System.out.println("full content" + fullTreeContent);
+
     // Calcularea SHA-1
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
     byte[] treeSha1 = sha1Digest.digest(fullTreeContent.getBytes(StandardCharsets.ISO_8859_1));
