@@ -138,11 +138,11 @@ public class Git {
            for (File file : files) {
                if (file.isDirectory()) {
                    byte[] shaTree = itereateDirectory(file);
-                   //byte[] shaTreeBinary = hexToBytes(shaTree);
+                   String shaTreeHex = bytesToHex(shaTree); // Convertim sha-ul în hexazecimal
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(bytesToHex(shaTree));
+                           .append(shaTreeHex);
                  //  System.out.println(contentLine);
                } else {
                    //is file
@@ -152,12 +152,12 @@ public class Git {
                    args[1] = "-w";
                    args[2] = file.toString();
                    byte[] blobShaFileBinary = hashObjectCreate(args);
-                   //byte[] blobShaBinary = hexToBytes(blobShaFileInHexa);
+                   String blobShaFileHex = bytesToHex(blobShaFileBinary); // Convertim sha-ul în hexazecimal
                    //returnez un blob obj
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append("\0")
-                           .append(bytesToHex(blobShaFileBinary));
+                           .append(blobShaFileHex);
 
                   // System.out.println(contentLine);
                }
@@ -241,63 +241,91 @@ public class Git {
         System.out.println(bytesToHex(sha));
     }
     public static String processTree(String content, boolean returnFullContent) {
-        System.out.println("content is :" + content);
         int charactersRead = 0;
-        List<String> allResult = new LinkedList<>();
+        List<byte[]> allResult = new LinkedList<>();
         List<String> nameResult = new LinkedList<>();
 
         while (charactersRead < content.length()) {
-            int modeEndIndex = content.indexOf(" ", charactersRead);
-            if (modeEndIndex == -1) break;
+            int newlineIndex = content.indexOf('\n', charactersRead);
+            if (newlineIndex == -1) newlineIndex = content.length();
 
-            int nameEndIndex = content.indexOf("\0", modeEndIndex + 1);
-            if (nameEndIndex == -1) break;
+            String line = content.substring(charactersRead, newlineIndex);
 
-            // Extrage mod, nume și SHA binar
-            String mode = content.substring(charactersRead, modeEndIndex);
-            String name = content.substring(modeEndIndex + 1, nameEndIndex);
+            int firstSpaceIndex = line.indexOf(' ');
+            if (firstSpaceIndex == -1) break;
 
-            // Extrage SHA-ul binar (20 bytes)
-            //byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes();
+            int secondSpaceIndex = line.indexOf(' ', firstSpaceIndex + 1);
+            if (secondSpaceIndex == -1) break;
 
-            // Convertește SHA-ul din binar în hexazecimal
-            //String shaHex = bytesToHex(shaBinary);
-            String shaHex =content.substring(nameEndIndex + 1, nameEndIndex + 21);
+            int thirdSpaceIndex = line.indexOf('\0', secondSpaceIndex + 1);  // Notă: aici căutăm delimitatorul \0
+            if (thirdSpaceIndex == -1) break;
 
+            String mode = line.substring(0, firstSpaceIndex);
+            String name = line.substring(secondSpaceIndex + 1, thirdSpaceIndex);
+
+            // SHA-ul binar este următorii 20 de bytes după \0
+            byte[] shaBinary = line.substring(thirdSpaceIndex + 1).getBytes();  // Aceasta va lua restul stringului
 
             if (returnFullContent) {
-                StringBuilder eachLine = new StringBuilder();
-                eachLine.append(mode).append(" ")
-                        .append(name).append("\0")
-                        .append(shaHex);
-
-                allResult.add(eachLine.toString());
+                // Combinați datele într-un singur array de bytes
+                byte[] entry = combineEntry(mode, name, shaBinary);
+                allResult.add(entry);
             }
 
             nameResult.add(name);
-
-            charactersRead = nameEndIndex + 21; // Trecem peste \0 și SHA (20 bytes)
+            charactersRead = newlineIndex + 1;
         }
 
-        String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
         StringBuilder result = new StringBuilder();
 
         if (returnFullContent) {
-            for (String sortedName : sortedNames) {
-                for (String unsortedLine : allResult) {
-                    if (unsortedLine.contains(sortedName)) {
-                        result.append(unsortedLine);
+            // Ordonăm rezultatele pe baza numelui și reconstruim rezultatul
+            Collections.sort(nameResult);
+            for (String sortedName : nameResult) {
+                for (byte[] unsortedLine : allResult) {
+                    String entryName = extractNameFromEntry(unsortedLine); // Funcție care extrage numele dintr-un entry
+                    if (entryName.equals(sortedName)) {
+                        result.append(new String(unsortedLine));
                         break;
                     }
                 }
             }
         } else {
-            for (String sortedName : sortedNames) {
+            // Doar numele ordonate
+            Collections.sort(nameResult);
+            for (String sortedName : nameResult) {
                 result.append(sortedName);
             }
         }
-        System.out.println("Result is " + result);
+
         return result.toString();
+    }
+
+    // Combinați datele într-un singur array de bytes
+    private static byte[] combineEntry(String mode, String name, byte[] shaBinary) {
+        StringBuilder entry = new StringBuilder();
+        entry.append(mode).append(' ')
+                .append(name).append('\0');
+        byte[] entryPrefix = entry.toString().getBytes();
+        byte[] combined = new byte[entryPrefix.length + shaBinary.length];
+
+        System.arraycopy(entryPrefix, 0, combined, 0, entryPrefix.length);
+        System.arraycopy(shaBinary, 0, combined, entryPrefix.length, shaBinary.length);
+
+        return combined;
+    }
+
+    // Funcție care extrage numele dintr-un entry binar
+    private static String extractNameFromEntry(byte[] entry) {
+        int zeroIndex = -1;
+        for (int i = 0; i < entry.length; i++) {
+            if (entry[i] == 0) {
+                zeroIndex = i;
+                break;
+            }
+        }
+        if (zeroIndex == -1) return null;
+        return new String(entry, 0, zeroIndex);
     }
 
 
