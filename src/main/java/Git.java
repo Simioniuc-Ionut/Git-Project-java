@@ -76,7 +76,8 @@ public class Git {
         try {
             //declaration zone
             System.out.println("Fileread  pah  is " + fileReaded.toPath());
-            String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_8);// Ensure UTF-8 encoding
+            byte[] contentBinary = Files.readAllBytes(fileReaded.toPath()); // Read as bytes
+            String content = new String(contentBinary,StandardCharsets.UTF_8);
             String resultObject,type="";
             StringBuilder path= new StringBuilder();// path where to write file
             MessageDigest instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
