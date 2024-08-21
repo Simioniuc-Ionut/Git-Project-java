@@ -74,7 +74,7 @@ public class Git {
 
         try {
             //declaration zone
-            String content = Files.readString(fileReaded.toPath());
+            String content = Files.readString(fileReaded.toPath(), StandardCharsets.UTF_8);// Ensure UTF-8 encoding
             String resultObject,type="";
             StringBuilder path= new StringBuilder();// path where to write file
             MessageDigest instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
@@ -104,20 +104,18 @@ public class Git {
             resultObject=type + " " +content.length()+ "\0" + content;
 
             //compute SHA-1
-            hash = instance.digest(resultObject.getBytes());
+            hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_8));
             //find directory and filename
             String hashHexa = bytesToHex(hash);
             String directoryName = hashHexa.substring(0,2);
-
             String filename = hashHexa.substring(2);
             //compute path to directory
             path.append(directoryName);
 
             //cream directorul
             File directory = new File(path.toString());
-            boolean isCreated = directory.mkdir();
-            if(!isCreated){
-                return ;
+            if (!directory.exists() && !directory.mkdir()) {
+                throw new IOException("Failed to create directory: " + directory);
             }
             //compute path to file
             path.append("/").append(filename);
@@ -125,7 +123,7 @@ public class Git {
             //compriming content of file using zlib
             try(FileOutputStream fileOutputStream = new FileOutputStream(path.toString());
                 DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-                compreserFile.write(resultObject.getBytes());
+                compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
                 compreserFile.finish();
             }
 
