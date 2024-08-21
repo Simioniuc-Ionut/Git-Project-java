@@ -110,7 +110,8 @@ public class Git {
 
             if(writeToObjects) {
                 //add file and directory to .git/objects
-                addDirAndFileToObjects(hashHexa);
+                path.append(addDirAndFileToObjects(hashHexa));
+
             }
 
             //compriming content of file using zlib
@@ -185,7 +186,7 @@ public class Git {
     String hashHexa = bytesToHex(treeSha1);
     //add in .git/objects/
     try{
-        addDirAndFileToObjects(hashHexa);
+        String path = addDirAndFileToObjects(hashHexa);
     }catch (IOException e){
         e.printStackTrace();
     }
@@ -226,7 +227,7 @@ public class Git {
 
         return outputShaData;
     }
-    private static void addDirAndFileToObjects(String hashHexa) throws IOException {
+    private static String addDirAndFileToObjects(String hashHexa) throws IOException {
         StringBuilder path= new StringBuilder();// path where to write file
         path.append(".git/objects/");
         //find directory and filename
@@ -245,6 +246,7 @@ public class Git {
         //compute path to file
         path.append("/").append(filename);
 
+        return path.toString();
 
     }
     private static void comprimeToZlib(String path,String resultObject) throws IOException {
