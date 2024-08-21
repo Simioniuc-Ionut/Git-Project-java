@@ -75,7 +75,7 @@ public class Git {
 
         try {
             //declaration zone
-            System.out.println("Fileread  pah  is " + fileReaded.toPath());
+            //System.out.println("Fileread  pah  is " + fileReaded.toPath());
             byte[] contentBinary = Files.readAllBytes(fileReaded.toPath()); // Read as bytes
             String content = new String(contentBinary,StandardCharsets.UTF_8);
             String resultObject,type="";
@@ -115,7 +115,7 @@ public class Git {
                 path.append(addDirAndFileToObjects(hashHexa));
 
             }
-            System.out.println("Path is : " + path);
+            //System.out.println("Path is : " + path);
             //compriming content of file using zlib
             comprimeToZlib(path.toString(),resultObject);
 
