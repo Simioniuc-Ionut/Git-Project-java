@@ -68,7 +68,7 @@ public class Git {
         }
 
     }
-    public static void hashObjectCreate(String[] args){
+    public static void hashObjectCreate(String[] args) throws IOException {
         //create a blob
         int argumentsLength = args.length;
         File fileReaded = new File(args[argumentsLength-1]);
@@ -130,7 +130,7 @@ public class Git {
 
             System.out.print(hashHexa);
         }catch (MalformedInputException e) {
-            throw new IOException("Failed to read file as UTF-8: " + fileReaded.getPath(), e);
+           System.out.println("Failed to read file as UTF-8: " + fileReaded.getPath()+ " " + e);
         }catch (IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
             throw new RuntimeException(e);
