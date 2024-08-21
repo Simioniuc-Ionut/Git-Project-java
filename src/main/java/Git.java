@@ -242,7 +242,6 @@ public class Git {
         System.out.println(bytesToHex(sha));
     }
     public static String processTree(String content, boolean returnFullContent) {
-        //System.out.println("content is :" + content);
         int charactersRead = 0;
         List<String> allResult = new LinkedList<>();
         List<String> nameResult = new LinkedList<>();
@@ -254,28 +253,25 @@ public class Git {
             int nameEndIndex = content.indexOf("\0", modeEndIndex + 1);
             if (nameEndIndex == -1) break;
 
-            // Extrage mod, nume și SHA binar
+            // Extract mode, name, and binary SHA
             String mode = content.substring(charactersRead, modeEndIndex);
             String name = content.substring(modeEndIndex + 1, nameEndIndex);
 
-            // Extrage SHA-ul binar (20 bytes)
-            byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes();
-
-            // Convertește SHA-ul din binar în hexazecimal
-            String shaHex = bytesToHex(shaBinary);
+            // Extract the 20-byte binary SHA
+            byte[] shaBinary = new byte[20];
+            System.arraycopy(content.getBytes(StandardCharsets.ISO_8859_1), nameEndIndex + 1, shaBinary, 0, 20);
 
             if (returnFullContent) {
                 StringBuilder eachLine = new StringBuilder();
                 eachLine.append(mode).append(" ")
                         .append(name).append("\0")
-                        .append(shaHex);
+                        .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA
 
                 allResult.add(eachLine.toString());
             }
 
             nameResult.add(name);
-
-            charactersRead = nameEndIndex + 21; // Trecem peste \0 și SHA (20 bytes)
+            charactersRead = nameEndIndex + 21; // Move past \0 and 20-byte SHA
         }
 
         String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
@@ -295,9 +291,8 @@ public class Git {
                 result.append(sortedName);
             }
         }
-       //System.out.println("Result is " + result);
+
         return result.toString();
     }
-
 
 }
