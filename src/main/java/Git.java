@@ -139,7 +139,7 @@ public class Git {
                    //returnez un tree object
                    contentLine.append("040000 ")
                            .append(file.getName())
-                           .append('\0')
+                           .append("\0")
                            .append(shaTree);
                  //  System.out.println(contentLine);
                } else {
@@ -154,7 +154,7 @@ public class Git {
                    //returnez un blob obj
                    contentLine.append("100644 ")
                            .append(file.getName())
-                           .append('\0')
+                           .append("\0")
                            .append(blobShaFileInHexa);
 
                   // System.out.println(contentLine);
@@ -175,7 +175,7 @@ public class Git {
      * 100644 file.txt\0<binary_sha1_abcd1234...>
      */
 
-    String fullTreeContent = "tree " +
+    String fullTreeContent = "tree" + " " +
             content.length() +
             "\0" +
             content;
