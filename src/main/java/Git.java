@@ -208,23 +208,10 @@ public class Git {
     }
     private static byte[] hexToBytes(String hexa) {
         int len = hexa.length();
-
-        // Hex string length must be even (2 characters per byte)
-        if (len % 2 != 0) {
-            throw new IllegalArgumentException("Invalid hex string length: " + len);
-        }
-
-        byte[] data = new byte[len / 2]; // 40 hex characters -> 20 bytes
+        byte[] data = new byte[len / 2];//hexa are 40 caractere. in bytes voi avea doar 20
         for (int i = 0; i < len; i += 2) {
-            // Convert each pair of hex characters to a byte
-            int high = Character.digit(hexa.charAt(i), 16);
-            int low = Character.digit(hexa.charAt(i + 1), 16);
-
-            if (high == -1 || low == -1) {
-                throw new IllegalArgumentException("Invalid hex character in string: " + hexa);
-            }
-
-            data[i / 2] = (byte) ((high << 4) + low);
+            data[i / 2] = (byte) ((Character.digit(hexa.charAt(i), 16) << 4)
+                    + Character.digit(hexa.charAt(i+1), 16));
         }
         return data;
     }
