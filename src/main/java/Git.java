@@ -257,11 +257,7 @@ public class Git {
 
             String mode = content.substring(pos, modeEndIndex);
             String name = content.substring(modeEndIndex + 1, nameEndIndex);
-// Ignorăm intrările cu mode "40000"
-            if ("40000".equals(mode)) {
-                pos = nameEndIndex + 21;
-                continue;
-            }
+
             byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes(StandardCharsets.ISO_8859_1);
 
             if (returnFullContent) {
@@ -275,8 +271,8 @@ public class Git {
         }
 
         // Comparator care sortează lexicografic (fără a ține cont de setările locale)
-        Collections.sort(nameResult, Collator.getInstance(Locale.ROOT));
-
+        nameResult.sort(Collator.getInstance(Locale.ROOT));
+        System.out.println("names : " + nameResult);
         ByteArrayOutputStream sortedResult = new ByteArrayOutputStream();
         for (String name : nameResult) {
             for (Map.Entry<String, byte[]> entry : nameToSha.entrySet()) {
