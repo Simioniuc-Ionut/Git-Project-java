@@ -204,8 +204,8 @@ public class Git {
      * 100644 file.txt\0<binary_sha1_abcd1234...>
      */
     String sortedContent = Git.processTree(content,true);
-   // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
-   // System.out.println("sorted content " + sortedContent);
+    // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
+    // System.out.println("sorted content " + sortedContent);
     String fullTreeContent = "tree" + ' ' +
             sortedContent.length() +
             '\0' + sortedContent;
@@ -296,15 +296,21 @@ public class Git {
                         // Extract the 20-byte binary SHA
                         byte[] shaBinary = new byte[20];
                         inputStream.read(shaBinary, 0, 20);
-                        ByteArrayInputStream shaStream = new ByteArrayInputStream(shaBinary);
+                        ByteArrayOutputStream shaStream = new ByteArrayOutputStream();
 
                         if (returnFullContent) {
-                            StringBuilder eachLine = new StringBuilder();
-                            eachLine.append(mode).append(' ')
-                                    .append(name).append('\0')
-                                    //.append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
-                                            .append(new String(shaStream.readAllBytes() , StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
-                            allResult.add(eachLine.toString());
+                             // StringBuilder eachLine = new StringBuilder();
+                             // eachLine.append(mode).append(' ')
+                                    // .append(name).append('\0')
+                                    // .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
+                                    // .append(shaStream.readAllBytes()); // Append binary SHA as hex
+                             shaStream.write(mode.getBytes());
+                             shaStream.write(' ');
+                             shaStream.write(name.getBytes());
+                             shaStream.write(0); // null terminator
+                             shaStream.write(shaBinary); // Append binary SHA as hex
+
+                             allResult.add(shaStream.toString());
                         }
 
                         nameResult.add(name);
