@@ -58,7 +58,7 @@ public class Git {
                 //  <mode> <name>\0<20_byte_sha>
                 //  <mode> <name>\0<20_byte_sha>
 
-                String treeContent= Git.processTree(content, !option.equals("--name-only"));
+                String treeContent= Arrays.toString(Git.processTree(content, !option.equals("--name-only")));
                 System.out.println(treeContent);
 
             }
