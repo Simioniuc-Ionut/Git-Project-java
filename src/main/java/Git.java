@@ -299,10 +299,9 @@ public class Git {
 
                         if (returnFullContent) {
                             StringBuilder eachLine = new StringBuilder();
-                            eachLine.append(Arrays.toString(mode.getBytes(StandardCharsets.UTF_8))).append(" ")
-                                    .append(Arrays.toString(name.getBytes(StandardCharsets.UTF_8))).append("\0")
-                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
-
+                            eachLine.append(mode).append(" ")
+                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)) // Append binary SHA as hex
+                                    .append(name).append('\0');
                             allResult.add(eachLine.toString());
                         }
 
