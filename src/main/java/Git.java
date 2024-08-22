@@ -58,7 +58,7 @@ public class Git {
                 // Tree object: <type> <size>\0<entries>
                 // Process tree entries
                 byte[] processedTree = processTree(content, !option.equals("--name-only"));
-                System.out.println( new String(processedTree, StandardCharsets.ISO_8859_1));
+                System.out.print( new String(processedTree, StandardCharsets.ISO_8859_1));
 
             } else {
                 throw new IllegalArgumentException("Unsupported object type: " + type);
