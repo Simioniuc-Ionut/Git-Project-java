@@ -29,7 +29,7 @@ public class GitTest {
 
         // Call the itereateDirectory method
         byte[] treeSha = Git.itereateDirectory(tempDir.toFile());
-    //    Git.printShaInHexaMode(treeSha);
+        Git.printShaInHexaMode(treeSha);
 
         // Verify the output
         Assertions.assertNotNull(treeSha);
