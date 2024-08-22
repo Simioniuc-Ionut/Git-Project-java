@@ -151,8 +151,8 @@ public class Git {
 
     private static void processDirectory(ByteArrayOutputStream contentLine, File dir) throws Exception {
         byte[] shaTree = itereateDirectory(dir);
-        contentLine.write("040000 ".getBytes(StandardCharsets.UTF_8));
-        contentLine.write(dir.getName().getBytes(StandardCharsets.UTF_8));
+        contentLine.write("40000 ".getBytes(StandardCharsets.ISO_8859_1));
+        contentLine.write(dir.getName().getBytes(StandardCharsets.ISO_8859_1));
         contentLine.write(0); // Null terminator
         contentLine.write(shaTree); // SHA binar
     }
@@ -160,19 +160,18 @@ public class Git {
     private static void processFile(ByteArrayOutputStream contentLine, File file) throws Exception {
         String[] args = new String[]{"hash-object", "-w", file.toString()};
         byte[] blobShaFileBinary = hashObjectCreate(args);
-        contentLine.write("100644 ".getBytes(StandardCharsets.UTF_8));
-        contentLine.write(file.getName().getBytes(StandardCharsets.UTF_8));
-        contentLine.write(0); // Null terminator
+        contentLine.write("100644 ".getBytes(StandardCharsets.ISO_8859_1));
+        contentLine.write(file.getName().getBytes(StandardCharsets.ISO_8859_1));
+        contentLine.write("\0".getBytes(StandardCharsets.ISO_8859_1)); // Null terminator
         contentLine.write(blobShaFileBinary); // SHA binar
     }
     private static byte[] calculateTreeStructure(byte[] content) throws NoSuchAlgorithmException, IOException {
         byte[] sortedContent = Git.processTree(new String(content, StandardCharsets.ISO_8859_1), true);
 
         try (ByteArrayOutputStream fullTreeContent = new ByteArrayOutputStream()) {
-            fullTreeContent.write("tree".getBytes(StandardCharsets.UTF_8));
-            fullTreeContent.write(' ');
+            fullTreeContent.write("tree ".getBytes(StandardCharsets.ISO_8859_1));
             fullTreeContent.write(String.valueOf(sortedContent.length).getBytes(StandardCharsets.UTF_8));
-            fullTreeContent.write('\0'); // Null terminator
+            fullTreeContent.write("\0".getBytes(StandardCharsets.ISO_8859_1)); // Null terminator
             fullTreeContent.write(sortedContent);
 
             return computeSHA1AndStore(fullTreeContent.toByteArray());
