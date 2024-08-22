@@ -296,12 +296,14 @@ public class Git {
                         // Extract the 20-byte binary SHA
                         byte[] shaBinary = new byte[20];
                         inputStream.read(shaBinary, 0, 20);
+                        ByteArrayInputStream shaStream = new ByteArrayInputStream(shaBinary);
 
                         if (returnFullContent) {
                             StringBuilder eachLine = new StringBuilder();
                             eachLine.append(mode).append(' ')
                                     .append(name).append('\0')
-                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
+                                    //.append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
+                                            .append(shaStream.readAllBytes()); // Append binary SHA as hex
                             allResult.add(eachLine.toString());
                         }
 
