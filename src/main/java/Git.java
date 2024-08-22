@@ -254,7 +254,7 @@ public class Git {
     private static void comprimeToZlib(String path,String resultObject) throws IOException {
         try(FileOutputStream fileOutputStream = new FileOutputStream(path);
             DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-            compreserFile.write(resultObject.getBytes(StandardCharsets.UTF_8));
+            compreserFile.write(resultObject.getBytes(StandardCharsets.ISO_8859_1));
             compreserFile.finish();
         }
     }
@@ -300,8 +300,8 @@ public class Git {
                         if (returnFullContent) {
                             StringBuilder eachLine = new StringBuilder();
                             eachLine.append(mode).append(" ")
-                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)) // Append binary SHA as hex
-                                    .append(name).append('\0');
+                                    .append(name).append('\0')
+                                    .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
                             allResult.add(eachLine.toString());
                         }
 
