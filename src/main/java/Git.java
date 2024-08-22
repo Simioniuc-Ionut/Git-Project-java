@@ -228,7 +228,7 @@ public class Git {
             fullTreeContent.write("tree".getBytes(StandardCharsets.UTF_8));
             fullTreeContent.write(' ');
             fullTreeContent.write(String.valueOf(sortedContent.length).getBytes(StandardCharsets.UTF_8));
-            fullTreeContent.write(0); // Null terminator
+            fullTreeContent.write('\0'); // Null terminator
             fullTreeContent.write(sortedContent);
 
             return computeSHA1AndStore(fullTreeContent.toByteArray());
