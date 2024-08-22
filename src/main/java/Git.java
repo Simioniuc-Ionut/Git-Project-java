@@ -232,7 +232,7 @@ public class Git {
             fullTreeContent.write(sortedContent);
 
             // Debugging: Afișează conținutul complet înainte de calculul SHA-1
-            System.out.println("Full Tree Content (hex): " + bytesToHex(fullTreeContent.toByteArray()));
+            //System.out.println("Full Tree Content (hex): " + bytesToHex(fullTreeContent.toByteArray()));
 
             return computeSHA1AndStore(fullTreeContent.toByteArray());
         }
