@@ -141,7 +141,7 @@ public class Git {
                   // String shaTreeHex = bytesToHex(shaTree); // Convertim sha-ul în hexazecimal
                    contentLine.append("040000 ")
                            .append(file.getName())
-                           .append("\0")
+                           .append('\0')
                            .append(new String(shaTree, StandardCharsets.ISO_8859_1)); // Append binary
 
                    //  System.out.println(contentLine);
@@ -157,7 +157,7 @@ public class Git {
                    //returnez un blob obj
                    contentLine.append("100644 ")
                            .append(file.getName())
-                           .append("\0")
+                           .append('\0')
                            .append(new String(blobShaFileBinary, StandardCharsets.ISO_8859_1)); // Append binary
 
                   // System.out.println(contentLine);
