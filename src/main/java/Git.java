@@ -207,7 +207,7 @@ public class Git {
 
     private static void processDirectory(ByteArrayOutputStream contentLine, File dir) throws Exception {
         byte[] shaTree = itereateDirectory(dir);
-        contentLine.write("040000 ".getBytes(StandardCharsets.UTF_8));
+        contentLine.write("40000 ".getBytes(StandardCharsets.UTF_8));
         contentLine.write(dir.getName().getBytes(StandardCharsets.UTF_8));
         contentLine.write(0); // Null terminator
         contentLine.write(shaTree); // SHA binar
