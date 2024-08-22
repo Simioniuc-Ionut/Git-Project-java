@@ -10,243 +10,230 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 public class Git {
-    public static void catFile(String hashInput, String option, String typeInput) {
-        String hash = hashInput;
-        String directory = hash.substring(0, 2);
-        String filename = hash.substring(2);
-        String path = ".git/objects/" + directory + "/" + filename;
-        File object = new File(path);
 
-        try (InflaterInputStream decompressor = new InflaterInputStream(Files.newInputStream(object.toPath()))) {
-            // Decompress the bytes into a readable format
+    // Main method to display the content of a Git object
+    public static void displayGitObject(String hashInput, String option, String typeInput) {
+        String objectPath = getObjectPath(hashInput);
+        File objectFile = new File(objectPath);
+
+        try (InflaterInputStream decompressor = new InflaterInputStream(Files.newInputStream(objectFile.toPath()))) {
             byte[] data = decompressor.readAllBytes();
-            String result = new String(data, StandardCharsets.ISO_8859_1);
+            String objectContent = new String(data, StandardCharsets.ISO_8859_1);
 
-            // Extract type and size from the result string
-            int typeEndIndex = result.indexOf(' ');
-            int sizeEndIndex = result.indexOf('\0');
+            // Extract type, size, and content from the object data
+            ObjectData objectData = extractObjectData(objectContent);
 
-            if (typeEndIndex == -1 || sizeEndIndex == -1 || sizeEndIndex <= typeEndIndex) {
-                throw new IllegalArgumentException("Invalid object format");
-            }
-
-            String type = result.substring(0, typeEndIndex);
-            String size = result.substring(typeEndIndex + 1, sizeEndIndex);
-            String content = result.substring(sizeEndIndex + 1);
-
-            // Handle the different types of objects
-            if (type.equals("blob")) {
-                // Blob object: <type> <size>\0<content>
-                if (!option.isEmpty()) {
-                    switch (option) {
-                        case "-t":
-                            System.out.print(type);
-                            break;
-                        case "-s":
-                            System.out.print(size);
-                            break;
-                        case "-p":
-                            System.out.print(content);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Unknown option: " + option);
-                    }
-                } else {
-                    System.out.print(content);
-                }
-            } else if (type.equals("tree")) {
-                // Tree object: <type> <size>\0<entries>
-                // Process tree entries
-                byte[] processedTree = processTree(content, !option.equals("--name-only"));
-                System.out.print( new String(processedTree, StandardCharsets.ISO_8859_1));
-
+            // Handle different types of Git objects
+            if ("blob".equals(objectData.type)) {
+                handleBlobObject(option, objectData);
+            } else if ("tree".equals(objectData.type)) {
+                handleTreeObject(option, objectData);
             } else {
-                throw new IllegalArgumentException("Unsupported object type: " + type);
+                throw new IllegalArgumentException("Unsupported object type: " + objectData.type);
             }
         } catch (IOException e) {
             throw new RuntimeException("Error reading or processing Git object", e);
         }
     }
 
-    public static byte[] hashObjectCreate(String[] args)  {
-        //create a blob
-        int argumentsLength = args.length;
-        File fileReaded = new File(args[argumentsLength-1]);
+    // Helper method to get the path of the Git object
+    private static String getObjectPath(String hash) {
+        String directory = hash.substring(0, 2);
+        String filename = hash.substring(2);
+        return ".git/objects/" + directory + "/" + filename;
+    }
 
+    // Helper method to extract type, size, and content from object data
+    private static ObjectData extractObjectData(String content) {
+        int typeEndIndex = content.indexOf(' ');
+        int sizeEndIndex = content.indexOf('\0');
+
+        if (typeEndIndex == -1 || sizeEndIndex == -1 || sizeEndIndex <= typeEndIndex) {
+            throw new IllegalArgumentException("Invalid object format");
+        }
+
+        String type = content.substring(0, typeEndIndex);
+        String size = content.substring(typeEndIndex + 1, sizeEndIndex);
+        String objectContent = content.substring(sizeEndIndex + 1);
+
+        return new ObjectData(type, size, objectContent);
+    }
+
+    // Handles and prints blob objects
+    private static void handleBlobObject(String option, ObjectData objectData) {
+        switch (option) {
+            case "-t":
+                System.out.print(objectData.type);
+                break;
+            case "-s":
+                System.out.print(objectData.size);
+                break;
+            case "-p":
+                System.out.print(objectData.content);
+                break;
+            default:
+                System.out.print(objectData.content);
+        }
+    }
+
+    // Handles and prints tree objects
+    private static void handleTreeObject(String option, ObjectData objectData) throws IOException {
+        byte[] processedTree = processTreeContent(objectData.content, !option.equals("--name-only"));
+        System.out.print(new String(processedTree, StandardCharsets.ISO_8859_1));
+    }
+
+    // Creates a Git object (blob) from a file
+    public static byte[] createGitBlob(String[] args) {
+        File file = new File(args[args.length - 1]);
         try {
-            //declaration zone
-            //System.out.println("Fileread  pah  is " + fileReaded.toPath());
-            byte[] contentBinary = Files.readAllBytes(fileReaded.toPath()); // Read as bytes
-            String content = new String(contentBinary,StandardCharsets.UTF_8);
-            String resultObject,type="";
-            StringBuilder path= new StringBuilder();// path where to write file
-            MessageDigest instance = MessageDigest.getInstance("SHA-1"); //make an instance to get SHA-1 hash for file name and directory
-            byte[] hash;
-            int index=1;
-            boolean writeToObjects= false;
+            byte[] fileContent = Files.readAllBytes(file.toPath());
+            String content = new String(fileContent, StandardCharsets.UTF_8);
+            String type = parseObjectType(args);
+            String objectContent = type + " " + content.length() + "\0" + content;
+            byte[] sha1Hash = computeSHA1Hash(objectContent);
 
-            //options
-            while(index<argumentsLength - 1){
-
-                if(args[index].contains("-t")){ //if type is specified
-                    String typeRead = args[index].substring(2);
-                    if(typeRead.equals("tag") ||typeRead.equals("blob") || typeRead.equals("commit") || typeRead.equals("tree")){
-                        type = typeRead.strip();
-                    }
-                }else if(args[index].contains("-w")){
-                    //we write in .git/objects/dirname/filename
-                    writeToObjects=true;
-                }
-                index++;
+            if (shouldWriteToGitObjects(args)) {
+                String objectPath = getObjectPathForHash(sha1Hash);
+                compressToZlib(objectPath, objectContent);
             }
-            if(type.isEmpty()){
-                type="blob";
-            }
-
-            //result obj
-            resultObject=type + " " +content.length()+ "\0" + content;
-
-            //compute SHA-1
-            hash = instance.digest(resultObject.getBytes(StandardCharsets.UTF_8));
-            String hashHexa = bytesToHex(hash);
-
-            if(writeToObjects) {
-                //add file and directory to .git/objects
-                path.append(addDirAndFileToObjects(hashHexa));
-
-            }
-            //System.out.println("Path is : " + path);
-            //compriming content of file using zlib
-            comprimeToZlib(path.toString(),resultObject);
-
-            //System.out.print(hashHexa);
-            return hash;
-        }catch (MalformedInputException e) {
-           System.out.println("Failed to read file as UTF-8: " + fileReaded.getPath()+ " " + e + " in hashObjectCreate");
-        }catch (IOException | NoSuchAlgorithmException e){
-        e.printStackTrace();
-        throw new RuntimeException(e);
-    }
-        return new byte[0];
-    }
-
-
-    public static byte[] itereateDirectory(File dir) throws Exception {
-        File[] files = dir.listFiles();
-        if (files == null) {
-            System.out.println("error files is null " + dir);
-            return new byte[0];
+            return sha1Hash;
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error creating Git blob", e);
         }
+    }
 
-        try (ByteArrayOutputStream contentLine = new ByteArrayOutputStream()) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    processDirectory(contentLine, file);
-                } else {
-                    processFile(contentLine, file);
+    // Parses the object type from command-line arguments
+    private static String parseObjectType(String[] args) {
+        for (String arg : args) {
+            if (arg.startsWith("-t")) {
+                String type = arg.substring(2).strip();
+                if (type.equals("tag") || type.equals("blob") || type.equals("commit") || type.equals("tree")) {
+                    return type;
                 }
             }
-            return calculateTreeStructure(contentLine.toByteArray());
         }
+        return "blob";
     }
 
-    private static void processDirectory(ByteArrayOutputStream contentLine, File dir) throws Exception {
-        byte[] shaTree = itereateDirectory(dir);
-        contentLine.write("40000 ".getBytes(StandardCharsets.ISO_8859_1));
-        contentLine.write(dir.getName().getBytes(StandardCharsets.ISO_8859_1));
-        contentLine.write(0); // Null terminator
-        contentLine.write(shaTree); // SHA binar
-    }
-
-    private static void processFile(ByteArrayOutputStream contentLine, File file) throws Exception {
-        String[] args = new String[]{"hash-object", "-w", file.toString()};
-        byte[] blobShaFileBinary = hashObjectCreate(args);
-        contentLine.write("100644 ".getBytes(StandardCharsets.ISO_8859_1));
-        contentLine.write(file.getName().getBytes(StandardCharsets.ISO_8859_1));
-        contentLine.write("\0".getBytes(StandardCharsets.ISO_8859_1)); // Null terminator
-        contentLine.write(blobShaFileBinary); // SHA binar
-    }
-    private static byte[] calculateTreeStructure(byte[] content) throws NoSuchAlgorithmException, IOException {
-        byte[] sortedContent = Git.processTree(new String(content, StandardCharsets.ISO_8859_1), true);
-
-        try (ByteArrayOutputStream fullTreeContent = new ByteArrayOutputStream()) {
-            fullTreeContent.write("tree ".getBytes(StandardCharsets.ISO_8859_1));
-            fullTreeContent.write(String.valueOf(sortedContent.length).getBytes(StandardCharsets.UTF_8));
-            fullTreeContent.write("\0".getBytes(StandardCharsets.ISO_8859_1)); // Null terminator
-            fullTreeContent.write(sortedContent);
-
-            return computeSHA1AndStore(fullTreeContent.toByteArray());
+    // Determines whether to write the object to .git/objects
+    private static boolean shouldWriteToGitObjects(String[] args) {
+        for (String arg : args) {
+            if (arg.equals("-w")) {
+                return true;
+            }
         }
+        return false;
     }
 
-    private static byte[] computeSHA1AndStore(byte[] fullTreeContent) throws NoSuchAlgorithmException, IOException {
+    // Computes the SHA-1 hash of the object content
+    private static byte[] computeSHA1Hash(String content) throws NoSuchAlgorithmException {
         MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-        byte[] treeSha1 = sha1Digest.digest(fullTreeContent);
-
-        String hashHexa = bytesToHex(treeSha1);
-        String path = addDirAndFileToObjects(hashHexa);
-
-        comprimeToZlibInBytes(path, fullTreeContent);
-
-        return treeSha1;
+        return sha1Digest.digest(content.getBytes(StandardCharsets.UTF_8));
     }
 
+    // Gets the object path for the SHA-1 hash
+    private static String getObjectPathForHash(byte[] sha1Hash) throws IOException {
+        String hashHex = bytesToHex(sha1Hash);
+        String directoryName = hashHex.substring(0, 2);
+        String filename = hashHex.substring(2);
+        String path = ".git/objects/" + directoryName;
+        File directory = new File(path);
 
-    private static void comprimeToZlibInBytes(String path, byte[] fullTreeContent) throws IOException {
-        try(FileOutputStream fileOutputStream = new FileOutputStream(path);
-            DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-            compreserFile.write(fullTreeContent);
-            compreserFile.finish();
-        }
-    }
-    // Helper method to convert byte array to hexadecimal string
-
-    private static String addDirAndFileToObjects(String hashHexa) throws IOException {
-        StringBuilder path= new StringBuilder();// path where to write file
-
-        path.append(".git/objects/");
-        //find directory and filename
-
-        String directoryName = hashHexa.substring(0,2);
-        String filename = hashHexa.substring(2);
-        //compute path to directory
-        path.append(directoryName);
-
-        //cream directorul
-        File directory = new File(path.toString());
-
-        if (!directory.exists() && !directory.mkdir()) {
+        if (!directory.exists() && !directory.mkdirs()) {
             throw new IOException("Failed to create directory: " + directory);
         }
-        //compute path to file
-        path.append("/").append(filename);
-
-        return path.toString();
-
+        return path + "/" + filename;
     }
-    private static void comprimeToZlib(String path,String resultObject) throws IOException {
-        try(FileOutputStream fileOutputStream = new FileOutputStream(path);
-            DeflaterOutputStream compreserFile = new DeflaterOutputStream(fileOutputStream)) {
-            compreserFile.write(resultObject.getBytes(StandardCharsets.ISO_8859_1));
-            compreserFile.finish();
+
+    // Compresses data to a zlib file
+    private static void compressToZlib(String path, String content) throws IOException {
+        try (FileOutputStream fileOutputStream = new FileOutputStream(path);
+             DeflaterOutputStream compressor = new DeflaterOutputStream(fileOutputStream)) {
+            compressor.write(content.getBytes(StandardCharsets.ISO_8859_1));
+            compressor.finish();
         }
     }
 
-    private static String bytesToHex(byte[] bytes) {
+    // Converts byte array to hexadecimal string
+    static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
     }
-    public static void printShaInHexaMode(byte[] sha){
+    public static void printShaInHexaMode(byte[] sha) {
         System.out.println(bytesToHex(sha));
     }
+    // Iterates through a directory and processes files and subdirectories
+    public static byte[] processDirectory(File dir) throws Exception {
+        File[] files = dir.listFiles();
+        if (files == null) {
+            throw new IOException("Directory is empty or cannot be read: " + dir);
+        }
 
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    processSubdirectory(outputStream, file);
+                } else {
+                    processFile(outputStream, file);
+                }
+            }
+            return generateTreeStructure(outputStream.toByteArray());
+        }
+    }
 
-    public static byte[] processTree(String content, boolean returnFullContent) throws IOException {
-        List<String> nameResult = new ArrayList<>();
-        Map<String, byte[]> nameToSha = new LinkedHashMap<>();
+    // Processes a subdirectory and adds its content to the output stream
+    private static void processSubdirectory(ByteArrayOutputStream outputStream, File dir) throws Exception {
+        byte[] treeSha = processDirectory(dir);
+        outputStream.write("40000 ".getBytes(StandardCharsets.ISO_8859_1));
+        outputStream.write(dir.getName().getBytes(StandardCharsets.ISO_8859_1));
+        outputStream.write('\0'); // Null terminator
+        outputStream.write(treeSha);
+    }
+
+    // Processes a file and adds its content to the output stream
+    private static void processFile(ByteArrayOutputStream outputStream, File file) throws Exception {
+        String[] args = {"hash-object", "-w", file.toString()};
+        byte[] blobSha = createGitBlob(args);
+        outputStream.write("100644 ".getBytes(StandardCharsets.ISO_8859_1));
+        outputStream.write(file.getName().getBytes(StandardCharsets.ISO_8859_1));
+        outputStream.write('\0'); // Null terminator
+        outputStream.write(blobSha);
+    }
+
+    // Generates the tree structure and returns the SHA-1 hash of the tree
+    private static byte[] generateTreeStructure(byte[] content) throws NoSuchAlgorithmException, IOException {
+        byte[] sortedContent = processTreeContent(new String(content, StandardCharsets.ISO_8859_1), true);
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            outputStream.write("tree ".getBytes(StandardCharsets.ISO_8859_1));
+            outputStream.write(String.valueOf(sortedContent.length).getBytes(StandardCharsets.UTF_8));
+            outputStream.write('\0'); // Null terminator
+            outputStream.write(sortedContent);
+
+            return computeSHA1AndStore(outputStream.toByteArray());
+        }
+    }
+
+    // Computes SHA-1 hash and stores the data
+    private static byte[] computeSHA1AndStore(byte[] data) throws NoSuchAlgorithmException, IOException {
+        MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
+        byte[] sha1Hash = sha1Digest.digest(data);
+
+        String hashHex = bytesToHex(sha1Hash);
+        String path = getObjectPathForHash(sha1Hash);
+
+        compressToZlib(path, new String(data, StandardCharsets.ISO_8859_1));
+
+        return sha1Hash;
+    }
+
+    // Processes and returns tree content
+    public static byte[] processTreeContent(String content, boolean returnFullContent) throws IOException {
+        List<String> names = new ArrayList<>();
+        Map<String, byte[]> nameToShaMap = new LinkedHashMap<>();
         int pos = 0;
 
         while (pos < content.length()) {
@@ -257,53 +244,60 @@ public class Git {
 
             String mode = content.substring(pos, modeEndIndex);
             String name = content.substring(modeEndIndex + 1, nameEndIndex);
-            // Ignorăm intrările cu mode "40000" sau numele ".git"
+
             if (".git".equals(name)) {
                 pos = nameEndIndex + 21;
                 continue;
             }
-            // Asigură-te că există suficiente caractere pentru SHA
+
             if (nameEndIndex + 21 > content.length()) {
                 throw new IOException("Insufficient data to extract SHA for " + name);
             }
+
             byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes(StandardCharsets.ISO_8859_1);
 
             if (returnFullContent) {
-                StringBuilder line = new StringBuilder();
-                line.append(mode).append(' ').append(name).append('\0');
-                nameToSha.put(line.toString(), shaBinary);
+                String entry = mode + ' ' + name + '\0';
+                nameToShaMap.put(entry, shaBinary);
             }
-            nameResult.add(name);
+            names.add(name);
 
-            pos = nameEndIndex + 21; // Move past the SHA
+            pos = nameEndIndex + 21;
         }
 
-        // Comparator care sortează lexicografic (fără a ține cont de setările locale)
-        nameResult.sort(Collator.getInstance(Locale.ROOT));
+        names.sort(Collator.getInstance(Locale.ROOT));
 
         if (returnFullContent) {
-            ByteArrayOutputStream sortedResult = new ByteArrayOutputStream();
-            for (String name : nameResult) {
-                for (Map.Entry<String, byte[]> entry : nameToSha.entrySet()) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            for (String name : names) {
+                for (Map.Entry<String, byte[]> entry : nameToShaMap.entrySet()) {
                     if (entry.getKey().contains(name)) {
-                        sortedResult.write(entry.getKey().getBytes(StandardCharsets.ISO_8859_1));
-                        sortedResult.write(entry.getValue());
+                        outputStream.write(entry.getKey().getBytes(StandardCharsets.ISO_8859_1));
+                        outputStream.write(entry.getValue());
                         break;
                     }
                 }
             }
-            return sortedResult.toByteArray();
+            return outputStream.toByteArray();
         } else {
-            // Construiește un șir cu numele sortate
             StringBuilder sortedNames = new StringBuilder();
-            for (String name : nameResult) {
+            for (String name : names) {
                 sortedNames.append(name).append('\n');
             }
             return sortedNames.toString().getBytes(StandardCharsets.ISO_8859_1);
         }
-
     }
 
+    // Helper class to hold object data
+    private static class ObjectData {
+        String type;
+        String size;
+        String content;
 
-
+        ObjectData(String type, String size, String content) {
+            this.type = type;
+            this.size = size;
+            this.content = content;
+        }
+    }
 }

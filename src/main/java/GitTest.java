@@ -3,6 +3,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -27,13 +28,14 @@ public class GitTest {
         dir2.mkdir();
         Files.writeString(testFile3.toPath(), "hello world");
 
-        // Call the itereateDirectory method
-        byte[] treeSha = Git.itereateDirectory(tempDir.toFile());
-        Git.printShaInHexaMode(treeSha);
+        // Call the processDirectory method
+        byte[] treeSha = Git.processDirectory(tempDir.toFile());
+        Assertions.assertNotNull("Tree SHA should not be null", Arrays.toString(treeSha));
+        assertTrue(treeSha.length > 0, "Tree SHA should not be empty");
 
-        // Verify the output
-        Assertions.assertNotNull(treeSha);
-        Assertions.assertFalse(treeSha.toString().isEmpty());
+        // Verify that the SHA is a valid hexadecimal string
+        String shaHex = Git.bytesToHex(treeSha);
+        assertEquals(40, shaHex.length(), "SHA should be 40 characters long");
 
         // Clean up
         deleteDirectory(tempDir.toFile());
