@@ -138,11 +138,13 @@ public class Git {
            for (File file : files) {
                if (file.isDirectory()) {
                    byte[] shaTree = itereateDirectory(file);
+                   ByteArrayOutputStream shaByte = new ByteArrayOutputStream();
+                   shaByte.write(shaTree);
                   // String shaTreeHex = bytesToHex(shaTree); // Convertim sha-ul în hexazecimal
                    contentLine.append("040000 ")
                            .append(file.getName())
                            .append('\0')
-                           .append(new String(shaTree, StandardCharsets.ISO_8859_1)); // Append binary
+                           .append(shaByte); // Append binary
 
                    //  System.out.println(contentLine);
                } else {
@@ -155,10 +157,12 @@ public class Git {
                    byte[] blobShaFileBinary = hashObjectCreate(args);
                    //String blobShaFileHex = bytesToHex(blobShaFileBinary); // Convertim sha-ul în hexazecimal
                    //returnez un blob obj
+                   ByteArrayOutputStream shaByte = new ByteArrayOutputStream();
+                     shaByte.write(blobShaFileBinary);
                    contentLine.append("100644 ")
                            .append(file.getName())
                            .append('\0')
-                           .append(new String(blobShaFileBinary, StandardCharsets.ISO_8859_1)); // Append binary
+                           .append(shaByte); // Append binary
 
                   // System.out.println(contentLine);
                }
