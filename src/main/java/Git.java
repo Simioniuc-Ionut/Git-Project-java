@@ -58,8 +58,8 @@ public class Git {
                 // Tree object: <type> <size>\0<entries>
                 // Process tree entries
                 byte[] processedTree = processTree(content, !option.equals("--name-only"));
-                System.out.println(type + " " + size+"\0" + new String(processedTree, StandardCharsets.ISO_8859_1));
-            
+                System.out.println( new String(processedTree, StandardCharsets.ISO_8859_1));
+
             } else {
                 throw new IllegalArgumentException("Unsupported object type: " + type);
             }
@@ -281,19 +281,27 @@ public class Git {
         // Comparator care sortează lexicografic (fără a ține cont de setările locale)
         nameResult.sort(Collator.getInstance(Locale.ROOT));
 
-
-        ByteArrayOutputStream sortedResult = new ByteArrayOutputStream();
-        for (String name : nameResult) {
-            for (Map.Entry<String, byte[]> entry : nameToSha.entrySet()) {
-                if (entry.getKey().contains(name)) {
-                    sortedResult.write(entry.getKey().getBytes(StandardCharsets.ISO_8859_1));
-                    sortedResult.write(entry.getValue());
-                    break;
+        if (returnFullContent) {
+            ByteArrayOutputStream sortedResult = new ByteArrayOutputStream();
+            for (String name : nameResult) {
+                for (Map.Entry<String, byte[]> entry : nameToSha.entrySet()) {
+                    if (entry.getKey().contains(name)) {
+                        sortedResult.write(entry.getKey().getBytes(StandardCharsets.ISO_8859_1));
+                        sortedResult.write(entry.getValue());
+                        break;
+                    }
                 }
             }
+            return sortedResult.toByteArray();
+        } else {
+            // Construiește un șir cu numele sortate
+            StringBuilder sortedNames = new StringBuilder();
+            for (String name : nameResult) {
+                sortedNames.append(name).append('\n');
+            }
+            return sortedNames.toString().getBytes(StandardCharsets.ISO_8859_1);
         }
 
-        return sortedResult.toByteArray();
     }
 
 
