@@ -262,6 +262,10 @@ public class Git {
                 pos = nameEndIndex + 21;
                 continue;
             }
+            // Asigură-te că există suficiente caractere pentru SHA
+            if (nameEndIndex + 21 > content.length()) {
+                throw new IOException("Insufficient data to extract SHA for " + name);
+            }
             byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes(StandardCharsets.ISO_8859_1);
 
             if (returnFullContent) {
