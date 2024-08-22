@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.Collator;
 import java.util.*;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
@@ -244,10 +245,10 @@ public class Git {
 
 
     public static byte[] processTree(String content, boolean returnFullContent) throws IOException {
-
         List<String> nameResult = new ArrayList<>();
-        Map<String,byte[]> nameToSha = new LinkedHashMap<>();
+        Map<String, byte[]> nameToSha = new LinkedHashMap<>();
         int pos = 0;
+
         while (pos < content.length()) {
             int modeEndIndex = content.indexOf(' ', pos);
             int nameEndIndex = content.indexOf('\0', modeEndIndex + 1);
@@ -261,29 +262,28 @@ public class Git {
 
             if (returnFullContent) {
                 StringBuilder line = new StringBuilder();
-                line.append(mode).append(' ').append(name).append('\0'); //.append(new String(shaBinary, StandardCharsets.ISO_8859_1));
-                nameToSha.put(line.toString() , shaBinary);
-                //allResult.add(line.toString());
+                line.append(mode).append(' ').append(name).append('\0');
+                nameToSha.put(line.toString(), shaBinary);
             }
             nameResult.add(name);
 
             pos = nameEndIndex + 21; // Move past the SHA
         }
 
-        Collections.sort(nameResult);
+        // Comparator care sortează lexicografic (fără a ține cont de setările locale)
+        Collections.sort(nameResult, Collator.getInstance(Locale.ROOT));
 
-        //StringBuilder sortedResult = new StringBuilder();
         ByteArrayOutputStream sortedResult = new ByteArrayOutputStream();
         for (String name : nameResult) {
-            for (Map.Entry<String,byte[]> entry : nameToSha.entrySet()) {
+            for (Map.Entry<String, byte[]> entry : nameToSha.entrySet()) {
                 if (entry.getKey().contains(name)) {
                     sortedResult.write(entry.getKey().getBytes(StandardCharsets.ISO_8859_1));
                     sortedResult.write(entry.getValue());
-
                     break;
                 }
             }
         }
+
         return sortedResult.toByteArray();
     }
 
