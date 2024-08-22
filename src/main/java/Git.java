@@ -206,9 +206,9 @@ public class Git {
     String sortedContent = Git.processTree(content,true);
    // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
    // System.out.println("sorted content " + sortedContent);
-    String fullTreeContent = "tree" + " " +
+    String fullTreeContent = "tree" + ' ' +
             sortedContent.length() +
-            "\0" + sortedContent;
+            '\0' + sortedContent;
 
     // Calcularea SHA-1
     MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
@@ -299,7 +299,7 @@ public class Git {
 
                         if (returnFullContent) {
                             StringBuilder eachLine = new StringBuilder();
-                            eachLine.append(mode).append(" ")
+                            eachLine.append(mode).append(' ')
                                     .append(name).append('\0')
                                     .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
                             allResult.add(eachLine.toString());
