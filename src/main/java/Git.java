@@ -257,7 +257,11 @@ public class Git {
 
             String mode = content.substring(pos, modeEndIndex);
             String name = content.substring(modeEndIndex + 1, nameEndIndex);
-
+// Ignorăm intrările cu mode "40000"
+            if ("40000".equals(mode)) {
+                pos = nameEndIndex + 21;
+                continue;
+            }
             byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes(StandardCharsets.ISO_8859_1);
 
             if (returnFullContent) {
