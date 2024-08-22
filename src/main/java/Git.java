@@ -58,8 +58,8 @@ public class Git {
                 //  <mode> <name>\0<20_byte_sha>
                 //  <mode> <name>\0<20_byte_sha>
 
-                byte[] treeContent= Git.processTree(content, !option.equals("--name-only"));
-                System.out.println(treeContent.toString());
+                String treeContent= Git.processTree(content, !option.equals("--name-only"));
+                System.out.println(treeContent);
 
             }
         }catch (IOException e){
@@ -203,11 +203,11 @@ public class Git {
      * tree <size>\0
      * 100644 file.txt\0<binary_sha1_abcd1234...>
      */
-    byte[] sortedContent = Git.processTree(content,true);
+    String sortedContent = Git.processTree(content,true);
     // System.out.println("unsorted content " + content + "\n" + "sorted content " + sortedContent);
     // System.out.println("sorted content " + sortedContent);
     String fullTreeContent = "tree" + ' ' +
-            sortedContent.length +
+            sortedContent.length() +
             '\0' + sortedContent;
 
     // Calcularea SHA-1
@@ -270,10 +270,10 @@ public class Git {
     }
 
 
-        public static byte[] processTree(String content, boolean returnFullContent) throws IOException {
+        public static String processTree(String content, boolean returnFullContent) {
             List<String> allResult = new ArrayList<>();
             List<String> nameResult = new ArrayList<>();
-            Map<String,ByteArrayOutputStream> shaStream = new LinkedHashMap<>();
+
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.ISO_8859_1))) {
                 byte[] buffer = new byte[256]; // Buffer for reading
                 int bytesRead;
@@ -295,23 +295,17 @@ public class Git {
 
                         // Extract the 20-byte binary SHA
                         byte[] shaBinary = new byte[20];
-                        inputStream.read(shaBinary, 0, 20);
+                        //inputStream.read(shaBinary, 0, 20);
 
 
                         if (returnFullContent) {
-                             // StringBuilder eachLine = new StringBuilder();
-                             // eachLine.append(mode).append(' ')
-                                    // .append(name).append('\0')
-                                    // .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
-                                    // .append(shaStream.readAllBytes()); // Append binary SHA as hex
-                             shaStream.put(name,new ByteArrayOutputStream());
-                             shaStream.get(name).write(mode.getBytes(StandardCharsets.ISO_8859_1));
-                                shaStream.get(name).write(' ');
-                                shaStream.get(name).write(name.getBytes(StandardCharsets.ISO_8859_1));
-                                shaStream.get(name).write('\0');
-                                shaStream.get(name).write(shaBinary);
+                              StringBuilder eachLine = new StringBuilder();
+                              eachLine.append(mode).append(' ')
+                                     .append(name).append('\0')
+                                     .append(new String(shaBinary, StandardCharsets.ISO_8859_1)); // Append binary SHA as hex
 
-                             //allResult.add(shaStream.toString());
+
+                             allResult.add(eachLine.toString());
                         }
 
                         nameResult.add(name);
@@ -324,20 +318,17 @@ public class Git {
 
             String[] sortedNames = nameResult.stream().sorted().toArray(String[]::new);
             StringBuilder result = new StringBuilder();
-
             // Print all content
             //SysteQm.out.println("All content \n" + allResult);
-            ByteArrayOutputStream sha = new ByteArrayOutputStream();
 
             if (returnFullContent) {
                 for (String sortedName : sortedNames) {
-//                    for (String unsortedLine : allResult) {
-//                        if (unsortedLine.contains(sortedName)) {
-//                            result.append(unsortedLine);
-//                            break;
-//                        }
-//                    }
-                    sha.write(shaStream.get(sortedName).toByteArray());
+                    for (String unsortedLine : allResult) {
+                        if (unsortedLine.contains(sortedName)) {
+                            result.append(unsortedLine);
+                            break;
+                        }
+                    }
                 }
             } else {
                 for (String sortedName : sortedNames) {
@@ -347,8 +338,7 @@ public class Git {
             //System.out.println("All sorted content \n" + result + " names " + nameResult);
 
 
-            //return result.toString();
-            return sha.toByteArray();
+            return result.toString();
         }
 
         private static int indexOf(byte[] buffer, char delimiter, int start, int end) {
