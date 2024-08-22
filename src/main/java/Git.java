@@ -297,7 +297,7 @@ public class Git {
             // Construiește un șir cu numele sortate
             StringBuilder sortedNames = new StringBuilder();
             for (String name : nameResult) {
-                sortedNames.append(name).append('\n');
+                sortedNames.append(name);
             }
             return sortedNames.toString().getBytes(StandardCharsets.ISO_8859_1);
         }
