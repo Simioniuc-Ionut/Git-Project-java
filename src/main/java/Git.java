@@ -20,7 +20,7 @@ public class Git {
         try (InflaterInputStream decompressor = new InflaterInputStream(Files.newInputStream(object.toPath()))) {
             // Decompress the bytes into a readable format
             byte[] data = decompressor.readAllBytes();
-            String result = new String(data, StandardCharsets.UTF_8);
+            String result = new String(data, StandardCharsets.ISO_8859_1);
 
             // Extract type and size from the result string
             int typeEndIndex = result.indexOf(' ');
@@ -58,8 +58,8 @@ public class Git {
                 // Tree object: <type> <size>\0<entries>
                 // Process tree entries
                 byte[] processedTree = processTree(content, !option.equals("--name-only"));
-                String treeContent = new String(processedTree, StandardCharsets.UTF_8);
-                System.out.println(treeContent);
+                System.out.println(type + " " + size+"\0" + new String(processedTree, StandardCharsets.ISO_8859_1));
+            
             } else {
                 throw new IllegalArgumentException("Unsupported object type: " + type);
             }
@@ -67,63 +67,7 @@ public class Git {
             throw new RuntimeException("Error reading or processing Git object", e);
         }
     }
-//    public static void catFile(String hashInput,String option,String typeInput){
-//        String hash =hashInput;
-//        String directory = hash.substring(0,2);
-//        String filename = hash.substring(2);
-//        String path = ".git/objects/" + directory + "/"+ filename;
-//        File object = new File(path);
-//        String result ,type,size,content;
-//
-//        //decompresam bytes din object in format citibil ,folosind inflater.
-//
-//        try(InflaterInputStream decompressor = new InflaterInputStream(Files.newInputStream(object.toPath()))){
-//
-//
-//            //prepare the object section
-//            byte[] data = decompressor.readAllBytes();
-//            result = new String(data, StandardCharsets.UTF_8); // Sau specifică codificarea potrivită
-//
-//
-//
-//            int typeEndIndex = result.indexOf(" ");
-//            int sizeEndIndex = result.indexOf("\0");
-//
-//            if (typeEndIndex == -1 || sizeEndIndex == -1 || sizeEndIndex <= typeEndIndex) {
-//                throw new IllegalArgumentException("Invalid object format");
-//            }
-//
-//            type = result.substring(0, typeEndIndex);
-//            size = result.substring(typeEndIndex + 1, sizeEndIndex);
-//            content = result.substring(sizeEndIndex + 1);
-//
-//            if(type.equals("blob")){
-//                //an blob object is stored in the format <type>" "<size>\0<content>
-//                //print section
-//                if(!option.isEmpty()) {
-//                    if (option.equals("-t"))
-//                        System.out.print(type);
-//                    else if (option.equals("-s"))
-//                        System.out.print(size);
-//                    else if (option.equals("-p"))
-//                        System.out.print(content);
-//                }else {
-//                    System.out.print(content);
-//                }
-//            }else if(type.equals("tree")) {
-//                // tree <size>\0
-//                //  <mode> <name>\0<20_byte_sha>
-//                //  <mode> <name>\0<20_byte_sha>
-//
-//                String treeContent= Arrays.toString(Git.processTree(content, !option.equals("--name-only")));
-//                System.out.println(treeContent);
-//
-//            }
-//        }catch (IOException e){
-//            throw  new RuntimeException(e);
-//        }
-//
-//    }
+
     public static byte[] hashObjectCreate(String[] args)  {
         //create a blob
         int argumentsLength = args.length;
