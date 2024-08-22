@@ -207,7 +207,7 @@ public class Git {
 
     private static void processDirectory(ByteArrayOutputStream contentLine, File dir) throws Exception {
         byte[] shaTree = itereateDirectory(dir);
-        contentLine.write("40000 ".getBytes(StandardCharsets.UTF_8));
+        contentLine.write("040000 ".getBytes(StandardCharsets.UTF_8));
         contentLine.write(dir.getName().getBytes(StandardCharsets.UTF_8));
         contentLine.write(0); // Null terminator
         contentLine.write(shaTree); // SHA binar
@@ -230,6 +230,9 @@ public class Git {
             fullTreeContent.write(String.valueOf(sortedContent.length).getBytes(StandardCharsets.UTF_8));
             fullTreeContent.write(0); // Null terminator
             fullTreeContent.write(sortedContent);
+
+            // Debugging: Afișează conținutul complet înainte de calculul SHA-1
+            System.out.println("Full Tree Content (hex): " + bytesToHex(fullTreeContent.toByteArray()));
 
             return computeSHA1AndStore(fullTreeContent.toByteArray());
         }
@@ -337,29 +340,8 @@ public class Git {
     public static byte[] processTree(String content, boolean returnFullContent) throws IOException {
         List<String> allResult = new ArrayList<>();
         List<String> nameResult = new ArrayList<>();
-        Map<String,byte[]> nameToSha = new LinkedHashMap<>();
-        int pos = 0;
-        while (pos < content.length()) {
-            int modeEndIndex = content.indexOf(' ', pos);
-            int nameEndIndex = content.indexOf('\0', modeEndIndex + 1);
 
-            if (modeEndIndex == -1 || nameEndIndex == -1) break;
-
-            String mode = content.substring(pos, modeEndIndex);
-            String name = content.substring(modeEndIndex + 1, nameEndIndex);
-
-            byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes(StandardCharsets.ISO_8859_1);
-
-            if (returnFullContent) {
-                StringBuilder line = new StringBuilder();
-                line.append(mode).append(' ').append(name).append('\0'); //.append(new String(shaBinary, StandardCharsets.ISO_8859_1));
-                nameToSha.put(line.toString() , shaBinary);
-                //allResult.add(line.toString());
-            }
-            nameResult.add(name);
-
-            pos = nameEndIndex + 21; // Move past the SHA
-        }
+        Map<String, byte[]> nameToSha = parseContent(content, returnFullContent);
 
         Collections.sort(nameResult);
 
@@ -392,8 +374,31 @@ public class Git {
 
         return sortedResult.toByteArray();
     }
+    private static Map<String, byte[]> parseContent(String content, boolean returnFullContent) {
+        Map<String, byte[]> nameToSha = new LinkedHashMap<>();
+        int pos = 0;
 
-        private static int indexOf(byte[] buffer, char delimiter, int start, int end) {
+        while (pos < content.length()) {
+            int modeEndIndex = content.indexOf(' ', pos);
+            int nameEndIndex = content.indexOf('\0', modeEndIndex + 1);
+
+            if (modeEndIndex == -1 || nameEndIndex == -1) break;
+
+            String mode = content.substring(pos, modeEndIndex);
+            String name = content.substring(modeEndIndex + 1, nameEndIndex);
+            byte[] shaBinary = content.substring(nameEndIndex + 1, nameEndIndex + 21).getBytes(StandardCharsets.ISO_8859_1);
+
+            String key = returnFullContent ? mode + ' ' + name + '\0' : name;
+            nameToSha.put(key, shaBinary);
+
+            pos = nameEndIndex + 21; // Move past the SHA
+        }
+
+        return nameToSha;
+    }
+
+
+    private static int indexOf(byte[] buffer, char delimiter, int start, int end) {
             for (int i = start; i < end; i++) {
                 if (buffer[i] == delimiter) {
                     return i;
@@ -401,6 +406,7 @@ public class Git {
             }
             return -1;
         }
+
 
 //    public static String processTree(String content, boolean returnFullContent) {
 //        int charactersRead = 0;
