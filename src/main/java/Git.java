@@ -43,8 +43,8 @@ public class Git {
             if(optionParent){
                 commitContent.append("parent ").append(shaParrentCommit).append("\n");
             }
-            //commitContent.append("author ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
-            //commitContent.append("committer ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
+            commitContent.append("author ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
+            commitContent.append("committer ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
             if(optionMessage){
                 commitContent.append(message).append("\n");
             }
@@ -60,7 +60,7 @@ public class Git {
             //System.out.println(commitObject);
 
             //create sha1Commit.
-            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
+            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.UTF_8));
 
             //print sha1Commit
             printShaInHexaMode(sha1Commit);
@@ -226,7 +226,7 @@ public class Git {
     private static void compressToZlib(String path, String content) throws IOException {
         try (FileOutputStream fileOutputStream = new FileOutputStream(path);
              DeflaterOutputStream compressor = new DeflaterOutputStream(fileOutputStream)) {
-            compressor.write(content.getBytes(StandardCharsets.ISO_8859_1));
+            compressor.write(content.getBytes(StandardCharsets.UTF_8));
             compressor.finish();
         }
     }
@@ -303,7 +303,7 @@ public class Git {
 
         String path = getObjectPathForHash(sha1Hash);
 
-        compressToZlib(path, new String(data, StandardCharsets.ISO_8859_1));
+        compressToZlib(path, new String(data, StandardCharsets.UTF_8));
 
         return sha1Hash;
     }
