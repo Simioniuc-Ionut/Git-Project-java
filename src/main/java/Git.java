@@ -12,7 +12,7 @@ import java.util.zip.InflaterInputStream;
 
 public class Git {
     //Crate a new commit-tree object
-    private static void commitTreeCommand(String tree_hash, String param_p, String parent_commit_hash, String param_m, String message) {
+    static void commitTreeCommand(String tree_hash, String param_p, String parent_commit_hash, String param_m, String message) {
         final String author = "test author";
         Commit commit = new Commit(author, author, tree_hash, parent_commit_hash, LocalDateTime.now(), message);
         byte[] content = commit.toString().getBytes();
