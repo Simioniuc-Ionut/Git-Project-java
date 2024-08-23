@@ -102,7 +102,8 @@ public class Main {
       System.out.println("Usage: commit-tree <tree-hash>");
       return;
     }
-    //git commit-tree <sha1-tree> -p <sha1-parent-tree> -m "message"
+    //git commit-tree <sha1-tree> | -p <sha1-parent-tree> | -m "message"
+    
     Git.createCommit(args);
   }
 }
