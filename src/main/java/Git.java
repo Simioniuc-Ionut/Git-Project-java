@@ -64,7 +64,7 @@ public class Git {
 
             //print sha1Commit
             printShaInHexaMode(sha1Commit);
-
+            System.out.println(message);
 
         } catch (NoSuchAlgorithmException | IOException e) {
             throw new RuntimeException(e);
