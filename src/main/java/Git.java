@@ -57,10 +57,10 @@ public class Git {
             String commitObject = commitHeader + commitContent;
 
             //debug
-            //System.out.println(commitContent);
+            //System.out.println(commitObject);
 
             //create sha1Commit.
-            byte[] sha1Commit = computeSHA1CompressAndStore(commitContent.toString().getBytes(StandardCharsets.ISO_8859_1));
+            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
 
             //print sha1Commit
             printShaInHexaMode(sha1Commit);
