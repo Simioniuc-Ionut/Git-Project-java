@@ -58,7 +58,7 @@ public class Main {
       return;
     }
     System.out.println("i am in cat file");
-    Git.displayGitObject(args[2], args[1]);
+    Git.displayGitObject(args);
   }
 
   private static void handleHashObjectCommand(String[] args) {

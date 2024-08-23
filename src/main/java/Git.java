@@ -57,8 +57,8 @@ public class Git {
             String commitObject = commitHeader + commitContent;
 
             //debug
-            System.out.println(commitObject);
-            
+            //System.out.println(commitObject);
+
             //create sha1Commit.
             byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
 
@@ -71,7 +71,9 @@ public class Git {
         }
     }
     // Main method to display the content of a Git object
-    public static void displayGitObject(String hashInput, String option) {
+    public static void displayGitObject(String[] args) {
+        String hashInput = args[args.length - 1];
+        String option = args[1];
         String objectPath = getObjectPath(hashInput);
         File objectFile = new File(objectPath);
 
@@ -82,7 +84,7 @@ public class Git {
             // Extract type, size, and content from the object data
             ObjectData objectData = extractObjectData(objectContent);
             //debug
-            System.out.println("i am in displayGitObject");
+            //System.out.println("i am in displayGitObject");
             // Handle different types of Git objects
             if ("blob".equals(objectData.type)) {
                 handleBlobObject(option, objectData);
@@ -90,7 +92,7 @@ public class Git {
                 handleTreeObject(option, objectData);
             } else if("commit".equals(objectData.type)) {
                 //debug
-                System.out.println("i am in commit");
+                //System.out.println("i am in commit");
                 handleCommitObject(objectData);
             }else {
                 throw new IllegalArgumentException("Unsupported object type: " + objectData.type);
