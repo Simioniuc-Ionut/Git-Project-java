@@ -84,7 +84,9 @@ public class Git {
                 handleBlobObject(option, objectData);
             } else if ("tree".equals(objectData.type)) {
                 handleTreeObject(option, objectData);
-            } else {
+            } else if("commit".equals(objectData.type)) {
+                handleCommitObject(objectData);
+            }else {
                 throw new IllegalArgumentException("Unsupported object type: " + objectData.type);
             }
         } catch (IOException e) {
@@ -138,6 +140,10 @@ public class Git {
         System.out.print(new String(processedTree, StandardCharsets.ISO_8859_1));
     }
 
+    // Handles and prints commit objects
+    private static void handleCommitObject(ObjectData data){
+        System.out.println(data.type + " " + data.size + "\0" + data.content);
+    }
     // Creates a Git object (blob) from a file
     public static byte[] createGitBlob(String[] args) {
         File file = new File(args[args.length - 1]);
@@ -213,6 +219,7 @@ public class Git {
         }
         return sb.toString();
     }
+    // Prints the SHA-1 hash in hexadecimal format
     public static void printShaInHexaMode(byte[] sha) {
         System.out.println(bytesToHex(sha));
     }

@@ -103,7 +103,6 @@ public class Main {
       return;
     }
     //git commit-tree <sha1-tree> | -p <sha1-parent-tree> | -m "message"
-    
     Git.createCommit(args);
   }
 }
