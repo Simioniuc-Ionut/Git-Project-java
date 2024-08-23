@@ -64,7 +64,7 @@ public class Git {
 
             //print sha1Commit
             printShaInHexaMode(sha1Commit);
-            System.out.println(message);
+
 
         } catch (NoSuchAlgorithmException | IOException e) {
             throw new RuntimeException(e);
@@ -72,7 +72,7 @@ public class Git {
     }
     // Main method to display the content of a Git object
     public static void displayGitObject(String hashInput, String option) {
-        System.out.println("i am in displayGitObject");
+
         String objectPath = getObjectPath(hashInput);
         File objectFile = new File(objectPath);
 
@@ -82,8 +82,7 @@ public class Git {
 
             // Extract type, size, and content from the object data
             ObjectData objectData = extractObjectData(objectContent);
-            //debug
-            //System.out.println("i am in displayGitObject");
+
             // Handle different types of Git objects
             if ("blob".equals(objectData.type)) {
                 handleBlobObject(option, objectData);

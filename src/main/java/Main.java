@@ -20,7 +20,7 @@ public class Main {
     try {
       switch (command) {
         case "init" -> initializeGitRepository();
-        case "cat-file" -> handleCatFileCommand(args);
+        case "cat-file" -> {System.out.println("cat -file test "); handleCatFileCommand(args);}
         case "hash-object" -> handleHashObjectCommand(args);
         case "ls-tree" -> handleLsTreeCommand(args);
         case "write-tree" -> handleWriteTreeCommand();
