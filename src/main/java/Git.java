@@ -10,9 +10,65 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 public class Git {
+    //Crate a new commit-tree object
+    public static void createCommit(String[] args){
+        /**
+         * tree <sha1-of-tree>
+         * parent <sha1-of-parent-commit> (opțional, poate fi mai multe linii pentru fiecare părinte)
+         * author <name> <email> <timestamp> <timezone>
+         * committer <name> <email> <timestamp> <timezone>
+         *
+         * <commit-message>
+         **/
 
+        try{
+            int length = args.length , contentSize=0;
+            //take sha-tree
+            String shaTree = args[1] , shaParrentCommit = "", message="";
+            StringBuilder commitContent = new StringBuilder();
+            boolean optionParent=false,optionMessage=false;
+
+            //verify if we have option -p
+            if(args[2].equals("-p") && length>2){
+                optionParent=true;
+                shaParrentCommit=args[3];
+            }
+            //verify -m option
+            if(length>4 && args[4].equals("-m")){
+                optionMessage=true;
+                message=args[5];
+            }
+            //create the commit content
+            commitContent.append("tree ").append(shaTree).append("\n");
+            if(optionParent){
+                commitContent.append("parent ").append(shaParrentCommit).append("\n");
+            }
+            commitContent.append("author ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
+            commitContent.append("committer ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
+            if(optionMessage){
+                commitContent.append(message).append("\n");
+            }
+
+            contentSize = commitContent.length();
+
+            //create header for commit object
+
+            String commitHeader = "commit " + contentSize + "\0";
+            String commitObject = commitHeader + commitContent;
+
+            //create sha1Commit.
+            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
+
+            //print sha1Commit
+            printShaInHexaMode(sha1Commit);
+
+
+        } catch (NoSuchAlgorithmException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     // Main method to display the content of a Git object
-    public static void displayGitObject(String hashInput, String option, String typeInput) {
+    public static void displayGitObject(String hashInput, String option) {
         String objectPath = getObjectPath(hashInput);
         File objectFile = new File(objectPath);
 
@@ -125,11 +181,6 @@ public class Git {
         return false;
     }
 
-    // Computes the SHA-1 hash of the object content
-    private static byte[] computeSHA1Hash(String content) throws NoSuchAlgorithmException {
-        MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
-        return sha1Digest.digest(content.getBytes(StandardCharsets.UTF_8));
-    }
 
     // Gets the object path for the SHA-1 hash
     private static String getObjectPathForHash(byte[] sha1Hash) throws IOException {
@@ -213,21 +264,27 @@ public class Git {
             outputStream.write('\0'); // Null terminator
             outputStream.write(sortedContent);
 
-            return computeSHA1AndStore(outputStream.toByteArray());
+            return computeSHA1CompressAndStore(outputStream.toByteArray());
         }
     }
 
     // Computes SHA-1 hash and stores the data
-    private static byte[] computeSHA1AndStore(byte[] data) throws NoSuchAlgorithmException, IOException {
+    private static byte[] computeSHA1CompressAndStore(byte[] data) throws NoSuchAlgorithmException, IOException {
         MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
         byte[] sha1Hash = sha1Digest.digest(data);
 
-        String hashHex = bytesToHex(sha1Hash);
+
         String path = getObjectPathForHash(sha1Hash);
 
         compressToZlib(path, new String(data, StandardCharsets.ISO_8859_1));
 
         return sha1Hash;
+    }
+
+    // Computes the SHA-1 hash of the object content
+    private static byte[] computeSHA1Hash(String content) throws NoSuchAlgorithmException {
+        MessageDigest sha1Digest = MessageDigest.getInstance("SHA-1");
+        return sha1Digest.digest(content.getBytes(StandardCharsets.UTF_8));
     }
 
     // Processes and returns tree content

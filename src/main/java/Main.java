@@ -24,6 +24,7 @@ public class Main {
         case "hash-object" -> handleHashObjectCommand(args);
         case "ls-tree" -> handleLsTreeCommand(args);
         case "write-tree" -> handleWriteTreeCommand();
+        case "commit-tree" -> handleCommitTreeCommand(args);
         default -> System.out.println("Unknown command: " + command);
       }
     } catch (Exception e) {
@@ -56,7 +57,7 @@ public class Main {
       System.out.println("Usage: cat-file <option> <hash>");
       return;
     }
-    Git.displayGitObject(args[2], args[1], "blob");
+    Git.displayGitObject(args[2], args[1]);
   }
 
   private static void handleHashObjectCommand(String[] args) {
@@ -74,9 +75,9 @@ public class Main {
       return;
     }
     if (args[1].equals("--name-only")) {
-      Git.displayGitObject(args[2], args[1], "tree");
+      Git.displayGitObject(args[2], args[1]);
     } else {
-      Git.displayGitObject(args[1], "", "tree");
+      Git.displayGitObject(args[1], "");
     }
   }
 
@@ -96,4 +97,12 @@ public class Main {
     }
   }
 
+  private static void handleCommitTreeCommand(String[] args) {
+    if (args.length < 2) {
+      System.out.println("Usage: commit-tree <tree-hash>");
+      return;
+    }
+    //git commit-tree <sha1-tree> -p <sha1-parent-tree> -m "message"
+    Git.createCommit(args);
+  }
 }
