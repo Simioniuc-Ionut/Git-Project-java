@@ -224,7 +224,7 @@ public class Git {
 
     // Compresses data to a zlib file
     private static void compressToZlib(String path, String content) throws IOException {
-        System.out.println("Compressing to: " + path + " content " + content);
+        //System.out.println("Compressing to: " + path + " content " + content);
         try (FileOutputStream fileOutputStream = new FileOutputStream(path);
              DeflaterOutputStream compressor = new DeflaterOutputStream(fileOutputStream)) {
             compressor.write(content.getBytes(StandardCharsets.ISO_8859_1));
