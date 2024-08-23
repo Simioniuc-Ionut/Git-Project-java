@@ -98,8 +98,8 @@ public class Main {
   }
 
   private static void handleCommitTreeCommand(String[] args) {
-    if (args.length < 2) {
-      System.out.println("Usage: commit-tree <tree-hash>");
+    if (args.length < 4) {
+      System.out.println("Usage: commit-tree <tree-hash> -m <message>");
       return;
     }
     //git commit-tree <sha1-tree> | -p <sha1-parent-tree> | -m "message"
