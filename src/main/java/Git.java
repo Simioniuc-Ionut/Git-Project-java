@@ -71,9 +71,7 @@ public class Git {
         }
     }
     // Main method to display the content of a Git object
-    public static void displayGitObject(String[] args) {
-        String hashInput = args[args.length - 1];
-        String option = args[1];
+    public static void displayGitObject(String hashInput, String option) {
         String objectPath = getObjectPath(hashInput);
         File objectFile = new File(objectPath);
 
@@ -92,7 +90,7 @@ public class Git {
                 handleTreeObject(option, objectData);
             } else if("commit".equals(objectData.type)) {
                 //debug
-                //System.out.println("i am in commit");
+                System.out.println("i am in commit");
                 handleCommitObject(objectData);
             }else {
                 throw new IllegalArgumentException("Unsupported object type: " + objectData.type);
