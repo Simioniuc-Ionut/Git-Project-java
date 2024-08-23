@@ -24,28 +24,39 @@ public class Git {
          **/
 
         try{
-            int length = args.length , contentSize=0;
+            int length = args.length;
             //take sha-tree
-            String shaTree = args[1] , shaParrentCommit = "", message="";
+            String shaTree = args[1] , shaParentCommit = "", message="";
             StringBuilder commitContent = new StringBuilder();
-            boolean optionParent=false,optionMessage=false;
+            boolean hasParent=false,hasMessage=false;
 
             //verify if we have option -p
             if(args[2].equals("-p") && length>2){
-                optionParent=true;
-                shaParrentCommit=args[3];
+                hasParent=true;
+                shaParentCommit=args[3];
             }
             //verify -m option
             if(length>4 && args[4].equals("-m")){
-                optionMessage=true;
+                hasMessage=true;
                 message=args[5];
             }
 
-            //create the commit content
-            final String author = "test author";
-            Commit commit = new Commit(author, author, shaTree, shaParrentCommit, LocalDateTime.now(), message);
-            byte[] content = commit.toString().getBytes();
-            int contentLength = content.length;
+            // Build commit content
+            commitContent.append("tree ").append(shaTree).append("\n");
+            if (hasParent) {
+                commitContent.append("parent ").append(shaParentCommit).append("\n");
+            }
+            commitContent.append("author test author <test@example.com> ").append(LocalDateTime.now().toString()).append(" +0000\n");
+            commitContent.append("committer test author <test@example.com> ").append(LocalDateTime.now().toString()).append(" +0000\n");
+            if (hasMessage) {
+                commitContent.append("\n").append(message).append("\n");
+            } else {
+                commitContent.append("\n");
+            }
+
+            // Convert commit content to byte array
+            byte[] contentBytes = commitContent.toString().getBytes(StandardCharsets.UTF_8);
+            int contentLength = contentBytes.length;
 
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -53,7 +64,7 @@ public class Git {
             baos.write("commit ".getBytes());
             baos.write(Integer.toString(contentLength).getBytes());
             baos.write(0); // append null byte
-            baos.write(content);
+            baos.write(contentBytes);
         } catch (IOException e) {
             throw new RuntimeException("Error creating blob bytes", e);
         }
