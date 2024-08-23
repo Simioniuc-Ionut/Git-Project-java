@@ -43,24 +43,24 @@ public class Git {
             if(optionParent){
                 commitContent.append("parent ").append(shaParrentCommit).append("\n");
             }
-            commitContent.append("author ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
-            commitContent.append("committer ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
+            //commitContent.append("author ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
+            //commitContent.append("committer ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
             if(optionMessage){
                 commitContent.append(message).append("\n");
             }
 
-            contentSize = commitContent.length();
+           // contentSize = commitContent.length();
 
             //create header for commit object
 
-            String commitHeader = "commit " + contentSize + "\0";
-            String commitObject = commitHeader + commitContent;
+          //  String commitHeader = "commit " + contentSize + "\0";
+           // String commitObject = commitHeader + commitContent;
 
             //debug
-            //System.out.println(commitObject);
+            System.out.println(commitContent);
 
             //create sha1Commit.
-            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
+            byte[] sha1Commit = computeSHA1CompressAndStore(commitContent.toString().getBytes(StandardCharsets.ISO_8859_1));
 
             //print sha1Commit
             printShaInHexaMode(sha1Commit);
@@ -89,8 +89,7 @@ public class Git {
             } else if ("tree".equals(objectData.type)) {
                 handleTreeObject(option, objectData);
             } else if("commit".equals(objectData.type) || option.equals("commit")) {
-                //debug
-                System.out.println("i am in commit");
+
                 handleCommitObject(objectData);
             }else {
                 throw new IllegalArgumentException("Unsupported object type: " + objectData.type);
@@ -148,7 +147,7 @@ public class Git {
 
     // Handles and prints commit objects
     private static void handleCommitObject(ObjectData data) {
-        System.out.println("i am in handleCommitObject " + data.content);
+
 
         boolean isMessage = false;
         StringBuilder message = new StringBuilder();
