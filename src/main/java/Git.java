@@ -60,7 +60,7 @@ public class Git {
             //System.out.println(commitObject);
 
             //create sha1Commit.
-            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.UTF_8));
+            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
 
             //print sha1Commit
             printShaInHexaMode(sha1Commit);
@@ -224,9 +224,10 @@ public class Git {
 
     // Compresses data to a zlib file
     private static void compressToZlib(String path, String content) throws IOException {
+        System.out.println("Compressing to: " + path + " content " + content);
         try (FileOutputStream fileOutputStream = new FileOutputStream(path);
              DeflaterOutputStream compressor = new DeflaterOutputStream(fileOutputStream)) {
-            compressor.write(content.getBytes(StandardCharsets.UTF_8));
+            compressor.write(content.getBytes(StandardCharsets.ISO_8859_1));
             compressor.finish();
         }
     }
@@ -303,7 +304,7 @@ public class Git {
 
         String path = getObjectPathForHash(sha1Hash);
 
-        compressToZlib(path, new String(data, StandardCharsets.UTF_8));
+        compressToZlib(path, new String(data, StandardCharsets.ISO_8859_1));
 
         return sha1Hash;
     }
