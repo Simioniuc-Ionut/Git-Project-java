@@ -56,6 +56,9 @@ public class Git {
             String commitHeader = "commit " + contentSize + "\0";
             String commitObject = commitHeader + commitContent;
 
+            //debug
+            System.out.println(commitObject);
+            
             //create sha1Commit.
             byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
 
