@@ -21,14 +21,11 @@ public class Main {
     try {
       switch (command) {
         case "init" -> initializeGitRepository();
-        case "cat-file" -> {System.out.println("cat -file test "); handleCatFileCommand(args);}
+        case "cat-file" ->  handleCatFileCommand(args);
         case "hash-object" -> handleHashObjectCommand(args);
         case "ls-tree" -> handleLsTreeCommand(args);
         case "write-tree" -> handleWriteTreeCommand();
         case "commit-tree" -> handleCommitTreeCommand(args);
-//        case "commit-tree" -> {
-//          Git.commitTreeCommand(args[1], args[2], args[3], args[4], args[5]);
-//        }
         default -> System.out.println("Unknown command: " + command);
       }
     } catch (Exception e) {
