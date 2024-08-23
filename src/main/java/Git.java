@@ -72,6 +72,7 @@ public class Git {
     }
     // Main method to display the content of a Git object
     public static void displayGitObject(String hashInput, String option) {
+        System.out.println("i am in displayGitObject");
         String objectPath = getObjectPath(hashInput);
         File objectFile = new File(objectPath);
 
@@ -88,7 +89,7 @@ public class Git {
                 handleBlobObject(option, objectData);
             } else if ("tree".equals(objectData.type)) {
                 handleTreeObject(option, objectData);
-            } else if("commit".equals(objectData.type)) {
+            } else if("commit".equals(objectData.type) || option.equals("commit")) {
                 //debug
                 System.out.println("i am in commit");
                 handleCommitObject(objectData);
@@ -150,7 +151,18 @@ public class Git {
     private static void handleCommitObject(ObjectData data){
         //debug
         System.out.println("i am in handleCommitObject");
-        System.out.println(data.type + " " + data.size + "\0" + data.content);
+       //we print just message.
+        boolean nextLineIsMessage = false;
+        for(String line : data.content.split("\n")){
+            if(line.startsWith("committer")){
+                nextLineIsMessage=true;
+                continue;
+            }
+            if(nextLineIsMessage){
+                System.out.println(line);
+                break;
+            }
+        }
     }
     // Creates a Git object (blob) from a file
     public static byte[] createGitBlob(String[] args) {
