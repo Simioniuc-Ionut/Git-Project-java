@@ -53,7 +53,6 @@ public class Main {
   }
 
   private static void handleCatFileCommand(String[] args) {
-    System.out.println("args: " + Arrays.toString(args));
     if (args.length < 3) {
       System.out.println("Usage: cat-file <option> <hash>");
       return;

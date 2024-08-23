@@ -148,21 +148,23 @@ public class Git {
     }
 
     // Handles and prints commit objects
-    private static void handleCommitObject(ObjectData data){
-        //debug
-        System.out.println("i am in handleCommitObject");
-       //we print just message.
-        boolean nextLineIsMessage = false;
-        for(String line : data.content.split("\n")){
-            if(line.startsWith("committer")){
-                nextLineIsMessage=true;
+    private static void handleCommitObject(ObjectData data) {
+        System.out.println("i am in handleCommitObject " + data.content);
+
+        boolean isMessage = false;
+        StringBuilder message = new StringBuilder();
+
+        for (String line : data.content.split("\n")) {
+            if (line.startsWith("tree") || line.startsWith("parent") || line.startsWith("author") || line.startsWith("committer")) {
+                // Start collecting the message after all metadata
+                isMessage = true;
                 continue;
             }
-            if(nextLineIsMessage){
-                System.out.println(line);
-                break;
+            if (isMessage) {
+                message.append(line).append("\n");
             }
         }
+        System.out.println(message.toString().trim());
     }
     // Creates a Git object (blob) from a file
     public static byte[] createGitBlob(String[] args) {
