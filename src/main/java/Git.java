@@ -49,12 +49,12 @@ public class Git {
                 commitContent.append(message).append("\n");
             }
 
-           // contentSize = commitContent.length();
+           contentSize = commitContent.length();
 
             //create header for commit object
 
-          //  String commitHeader = "commit " + contentSize + "\0";
-           // String commitObject = commitHeader + commitContent;
+            String commitHeader = "commit " + contentSize + "\0";
+            String commitObject = commitHeader + commitContent;
 
             //debug
             //System.out.println(commitContent);
