@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.zip.*;
 
@@ -24,7 +25,10 @@ public class Main {
         case "hash-object" -> handleHashObjectCommand(args);
         case "ls-tree" -> handleLsTreeCommand(args);
         case "write-tree" -> handleWriteTreeCommand();
-        case "commit-tree" -> handleCommitTreeCommand(args);
+       // case "commit-tree" -> handleCommitTreeCommand(args);
+        case "commit-tree" -> {
+          Git.commitTreeCommand(args[1], args[2], args[3], args[4], args[5]);
+        }
         default -> System.out.println("Unknown command: " + command);
       }
     } catch (Exception e) {
@@ -98,12 +102,16 @@ public class Main {
     }
   }
 
-  private static void handleCommitTreeCommand(String[] args) {
-    if (args.length < 4) {
-      System.out.println("Usage: commit-tree <tree-hash> -m <message>");
-      return;
-    }
-    //git commit-tree <sha1-tree> | -p <sha1-parent-tree> | -m "message"
-    Git.createCommit(args);
-  }
+//  private static void handleCommitTreeCommand(String[] args) {
+//    if (args.length < 4) {
+//      System.out.println("Usage: commit-tree <tree-hash> -m <message>");
+//      return;
+//    }
+//    //git commit-tree <sha1-tree> | -p <sha1-parent-tree> | -m "message"
+//    Git.createCommit(args);
+//  }
+
+
+
+
 }

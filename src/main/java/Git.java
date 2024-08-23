@@ -5,71 +5,107 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Collator;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 public class Git {
     //Crate a new commit-tree object
-    public static void createCommit(String[] args){
-        /**
-         * tree <sha1-of-tree>
-         * parent <sha1-of-parent-commit> (opțional, poate fi mai multe linii pentru fiecare părinte)
-         * author <name> <email> <timestamp> <timezone>
-         * committer <name> <email> <timestamp> <timezone>
-         *
-         * <commit-message>
-         **/
+    private static void commitTreeCommand(String tree_hash, String param_p, String parent_commit_hash, String param_m, String message) {
+        final String author = "test author";
+        Commit commit = new Commit(author, author, tree_hash, parent_commit_hash, LocalDateTime.now(), message);
+        byte[] content = commit.toString().getBytes();
+        int length = content.length;
+        // Creating header and blob bytes
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            baos.write("commit ".getBytes());
+            baos.write(Integer.toString(length).getBytes());
+            baos.write(0); // append null byte
+            baos.write(content);
+        } catch (IOException e) {
+            throw new RuntimeException("Error creating blob bytes", e);
+        }
+        byte[] blob_bytes = baos.toByteArray();
+        // Calculate SHA-1 and create file
+        String hash = bytesToHex(blob_bytes);
+        File blob_file = new File(".git/objects/" + hash.substring(0, 2) + "/" + hash.substring(2));
+        // Create parent directories if necessary
+        if (blob_file.getParentFile() != null) {
+            blob_file.getParentFile().mkdirs();
+        }
 
-        try{
-            int length = args.length , contentSize=0;
-            //take sha-tree
-            String shaTree = args[1] , shaParrentCommit = "", message="";
-            StringBuilder commitContent = new StringBuilder();
-            boolean optionParent=false,optionMessage=false;
-
-            //verify if we have option -p
-            if(args[2].equals("-p") && length>2){
-                optionParent=true;
-                shaParrentCommit=args[3];
-            }
-            //verify -m option
-            if(length>4 && args[4].equals("-m")){
-                optionMessage=true;
-                message=args[5];
-            }
-            //create the commit content
-            commitContent.append("tree ").append(shaTree).append("\n");
-            if(optionParent){
-                commitContent.append("parent ").append(shaParrentCommit).append("\n");
-            }
-            commitContent.append("author ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
-            commitContent.append("committer ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
-            if(optionMessage){
-                commitContent.append(message).append("\n");
-            }
-
-           contentSize = commitContent.length();
-
-            //create header for commit object
-
-            String commitHeader = "commit " + contentSize + "\0";
-            String commitObject = commitHeader + commitContent;
-
-            //debug
-            //System.out.println(commitObject);
-
-            //create sha1Commit.
-            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
-
-            //print sha1Commit
-            printShaInHexaMode(sha1Commit);
-
-
-        } catch (NoSuchAlgorithmException | IOException e) {
-            throw new RuntimeException(e);
+        // BE aware - not closing the output streams properly would cause incorrect content
+        // written to file (should close deflaterOutputStream first, then FileOutputStream)
+        try (OutputStream outputStream = new FileOutputStream(blob_file);
+             DeflaterOutputStream deflaterOutputStream = new DeflaterOutputStream(outputStream)) {
+            deflaterOutputStream.write(blob_bytes);
+            System.out.print(hash);
+        } catch (IOException e) {
+            throw new RuntimeException("Error writing blob file", e);
         }
     }
+//    public static void createCommit(String[] args){
+//        /**
+//         * tree <sha1-of-tree>
+//         * parent <sha1-of-parent-commit> (opțional, poate fi mai multe linii pentru fiecare părinte)
+//         * author <name> <email> <timestamp> <timezone>
+//         * committer <name> <email> <timestamp> <timezone>
+//         *
+//         * <commit-message>
+//         **/
+//
+//        try{
+//            int length = args.length , contentSize=0;
+//            //take sha-tree
+//            String shaTree = args[1] , shaParrentCommit = "", message="";
+//            StringBuilder commitContent = new StringBuilder();
+//            boolean optionParent=false,optionMessage=false;
+//
+//            //verify if we have option -p
+//            if(args[2].equals("-p") && length>2){
+//                optionParent=true;
+//                shaParrentCommit=args[3];
+//            }
+//            //verify -m option
+//            if(length>4 && args[4].equals("-m")){
+//                optionMessage=true;
+//                message=args[5];
+//            }
+//            //create the commit content
+//            commitContent.append("tree ").append(shaTree).append("\n");
+//            if(optionParent){
+//                commitContent.append("parent ").append(shaParrentCommit).append("\n");
+//            }
+//            commitContent.append("author ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
+//            commitContent.append("committer ").append("Simioniuc Ionut").append(" ").append("simioniucionut@gmail.com").append(" ").append("timestamp").append(" ").append("timezone").append("\n");
+//            if(optionMessage){
+//                commitContent.append(message).append("\n");
+//            }
+//
+//           contentSize = commitContent.length();
+//
+//            //create header for commit object
+//
+//            String commitHeader = "commit " + contentSize + "\0";
+//            String commitObject = commitHeader + commitContent;
+//
+//            //debug
+//            //System.out.println(commitObject);
+//
+//            //create sha1Commit.
+//            byte[] sha1Commit = computeSHA1CompressAndStore(commitObject.getBytes(StandardCharsets.ISO_8859_1));
+//
+//            //print sha1Commit
+//            printShaInHexaMode(sha1Commit);
+//
+//
+//        } catch (NoSuchAlgorithmException | IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
     // Main method to display the content of a Git object
     public static void displayGitObject(String hashInput, String option) {
 
