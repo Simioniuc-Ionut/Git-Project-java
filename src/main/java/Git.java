@@ -27,7 +27,9 @@ public class Git {
         // Parse the refsContent to find the SHA-1 hash of the master branch
         Map<String,String> refs = parseMasterBranch(refsContent);
         //debug
-        System.out.println(refs);
+        for(Map.Entry<String,String> entry : refs.entrySet()){
+            System.out.println(entry.getKey() + " : " + entry.getValue());
+        }
     }
     //GitRefsDirectory
     private static String GetRefsDirectory(String gitURL) throws Exception{
