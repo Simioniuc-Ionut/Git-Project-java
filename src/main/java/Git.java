@@ -42,7 +42,7 @@ public class Git {
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Type", "application/x-git-upload-pack-request");
 
-        // Add Authorization header if required
+        // Add Authorization header if required for private repositories
         String personalAccessToken = "your_personal_access_token"; // Replace with your token
         connection.setRequestProperty("Authorization", "token " + personalAccessToken);
 
@@ -57,8 +57,17 @@ public class Git {
             os.flush();
         }
 
+        //debug
         System.out.println("Response code: " + connection.getResponseCode() + " " + connection.getResponseMessage());
-
+        // Print error stream if available
+        if (connection.getErrorStream() != null) {
+            BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
+            String line;
+            while ((line = errorReader.readLine()) != null) {
+                System.out.println(line);
+            }
+            errorReader.close();
+        }
     }
     private static String buildRequestBody(Map<String,String> refs) {
         StringBuilder requestBody = new StringBuilder();
@@ -70,6 +79,7 @@ public class Git {
             requestBody.append("0032want ").append(sha1).append("\n");
         }
         requestBody.append("0000");
+        System.out.println(requestBody.length());
         String length = Integer.toHexString(requestBody.length());
         packet.append(length).append("\n").append(requestBody);
         return packet.toString();
