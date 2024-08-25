@@ -20,10 +20,12 @@ public class Git {
          * - **Process**:
          *     - The client sends an HTTP GET request to the server to obtain a list of available refs.
          */
-        String RefsContent = GetRefsDirectory(gitURL);
+        String refsContent = GetRefsDirectory(gitURL);
         //debug
-        System.out.println(RefsContent);
+        //System.out.println(refsContent);
 
+        // Parse the refsContent to find the SHA-1 hash of the master branch
+        String masterSHA1 = parseMasterBranch(refsContent);
     }
     //GitRefsDirectory
     private static String GetRefsDirectory(String gitURL) throws Exception{
@@ -42,6 +44,14 @@ public class Git {
 
         return RefsContent.toString();
 
+    }
+    //Git find sha1 from master/branch
+    private static String parseMasterBranch(String refsContent) {
+        String[] lines = refsContent.split("\n");
+        for (String line : lines) {
+            System.out.println(line);
+        }
+        throw new IllegalArgumentException("Master branch not found in refs");
     }
     //Crate a new commit-tree object
     public static void createCommit(String[] args){
