@@ -35,7 +35,7 @@ public class Git {
     }
     //Constructing the Request
     private static void ConstructingTheRequest(String gitURL,Map<String,String> refs) throws Exception {
-        URL url = new URL(gitURL + "/git-upload-pacK");
+        URL url = new URL(gitURL + "/git-upload-pack HTTP/1.0");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
