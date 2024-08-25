@@ -57,6 +57,7 @@ public class Git {
     }
     private static String buildRequestBody(Map<String,String> refs) {
         StringBuilder requestBody = new StringBuilder();
+        StringBuilder packet = new StringBuilder();
         //i will want hust unic sha1 from refs.
         Set<String> setUniqueSHA1 = new HashSet<>(refs.values());
 
@@ -64,8 +65,9 @@ public class Git {
             requestBody.append("0032want ").append(sha1).append("\n");
         }
         requestBody.append("0000");
-
-        return requestBody.toString();
+        String length = Integer.toHexString(requestBody.length());
+        packet.append(length).append("\0").append(requestBody);
+        return packet.toString();
     }
     //GitRefsDirectory
     private static Map<String,String> handleRefDirectory(String gitURL)throws Exception{
