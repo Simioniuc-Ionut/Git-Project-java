@@ -16,24 +16,71 @@ public class Git {
     //Create a clone of a repository from GitHub
     public static void cloneRepository(String gitURL) throws Exception{
         /**
+         * 1. Ref Discovery
          * - **Purpose**: The client discovers the references (branches, tags, etc.) available on the server.
          * - **Process**:
          *     - The client sends an HTTP GET request to the server to obtain a list of available refs.
          */
+        Map<String,String> refs = handleRefDirectory(gitURL);
+        /**
+         * ### 2. **Constructing the Request**
+         *
+         * - **Purpose**: The client specifies the objects it needs (`want`) and the objects it already has (`have`).
+         * - **Process**:
+         *     - The client sends a POST request to the server with the list of wanted objects.
+         */
+        ConstructingTheRequest(refs);
+
+
+    }
+    //Constructing the Request
+    private static void ConstructingTheRequest(Map<String,String> refs) throws Exception {
+        String gitUrl = "https://github.com/user/repo.git";
+        URL url = new URL(gitUrl + "/git-upload-pack");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setDoOutput(true);
+        connection.setRequestProperty("Content-Type", "application/x-git-upload-pack-request");
+
+        //generally if i clone,i want all objects , bcs i dont have any object at the moment
+        String requestBody = buildRequestBody(refs);
+        //debug
+        System.out.println(requestBody);
+        // Write the request body to the server
+        try (OutputStream os = connection.getOutputStream()){
+            os.write(requestBody.getBytes());
+            os.flush();
+        }
+
+        System.out.println("Response code: " + connection.getResponseCode());
+
+    }
+    private static String buildRequestBody(Map<String,String> refs) {
+        StringBuilder requestBody = new StringBuilder();
+        //i will want hust unic sha1 from refs.
+        Set<String> setUniqueSHA1 = new HashSet<>(refs.values());
+
+        for(String sha1 : setUniqueSHA1){
+            requestBody.append("0032want ").append(sha1).append("\n");
+        }
+        requestBody.append("0000");
+
+        return requestBody.toString();
+    }
+    //GitRefsDirectory
+    private static Map<String,String> handleRefDirectory(String gitURL)throws Exception{
         String refsContent = GetRefsDirectory(gitURL);
         //debug
-        System.out.println(refsContent);
+        //System.out.println(refsContent);
 
         // Parse the refsContent to find the SHA-1 hash of the master branch
         Map<String,String> refs = parseMasterBranch(refsContent);
         //debug
-        for(Map.Entry<String,String> entry : refs.entrySet()){
-            System.out.println(entry.getKey() + " : " + entry.getValue());
-        }
-
-
+        //for(Map.Entry<String,String> entry : refs.entrySet()){
+        //      System.out.println(entry.getKey() + " : " + entry.getValue());
+        //  }
+        return refs;
     }
-    //GitRefsDirectory
     private static String GetRefsDirectory(String gitURL) throws Exception{
         URL url = new URL(gitURL + "/info/refs?service=git-upload-pack");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -51,7 +98,6 @@ public class Git {
         return RefsContent.toString();
 
     }
-    //Git find sha1 from master/branch
     private static Map<String,String> parseMasterBranch(String refsContent) {
         Map<String,String> refs = new HashMap<>();
         for (int i = 0; i<refsContent.length(); i++) {
@@ -86,7 +132,6 @@ public class Git {
         return refs;
 
     }
-    //HELP methdos
     private static String takeSHA1fromRefsContent(String refsContent, int i){
         StringBuilder sha1 = new StringBuilder();
         for(int j = i - 2; j > i - 42; j--){
