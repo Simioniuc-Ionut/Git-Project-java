@@ -57,7 +57,7 @@ public class Git {
             os.flush();
         }
 
-        System.out.println("Response code: " + connection.getResponseCode());
+        System.out.println("Response code: " + connection.getResponseCode() + " " + connection.getResponseMessage());
 
     }
     private static String buildRequestBody(Map<String,String> refs) {
