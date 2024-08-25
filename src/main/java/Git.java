@@ -14,7 +14,7 @@ import java.util.zip.InflaterInputStream;
 
 public class Git {
     //Create a clone of a repository from GitHub
-    public static void cloneRepository(String gitURL) throws Exception{
+    public static void cloneRepository(String gitURL,String targetDirectory) throws Exception{
         /**
          * 1. Ref Discovery
          * - **Purpose**: The client discovers the references (branches, tags, etc.) available on the server.
@@ -31,25 +31,78 @@ public class Git {
          */
         InputStream packFile = ConstructingTheRequest(gitURL,refs);
         /**
-         * ### 3. **Read from the Packfile**
+         * ### 3.  **create the directory in the target directory**
+         */
+        initializeGitRepositoryTargeted(targetDirectory);
+        /**
+         * ### 4. **Read from the Packfile**
          * - **Purpose**: The client reads the packfile sent by the server.
          * - **Process**:
          *   - The client reads the packfile sent by the server.
          */
-        readFromPackFile(packFile);
+
+        savePackFile(packFile,targetDirectory);
+
 
     }
+    //Initialize git Repository
+    private static void initializeGitRepositoryTargeted(String targetDir){
+        File dir = new File(targetDir);
+        if (!dir.exists()) {
+            dir.mkdirs(); // Create directory if it doesn't exist
+            System.out.println("Created directory: " + dir.getAbsolutePath());
+        }else {
+            System.out.println("Directory already exists: " + dir.getAbsolutePath());
+        }
+
+       // Create the .git directory
+        File gitDir = new File(dir, ".git");
+        if (!gitDir.exists()) {
+            gitDir.mkdirs();
+            System.out.println("Created .git directory: " + gitDir.getAbsolutePath());
+        } else {
+            System.out.println(".git directory already exists: " + gitDir.getAbsolutePath());
+        }
+
+        new File(gitDir, "objects").mkdirs();
+        new File(gitDir, "refs").mkdirs();
+        new File(gitDir,"objects/pack").mkdirs();
+        System.out.println("Created necessary subdirectories under .git");
+
+        File head = new File(gitDir, "HEAD");
+
+        try {
+            head.createNewFile();
+            Files.write(head.toPath(), "ref: refs/heads/master\n".getBytes());
+            System.out.println("Created HEAD file with reference: refs/heads/master");
+        } catch (IOException e) {
+            throw new RuntimeException("Error initializing git repository", e);
+        }
+    }
     //Reading the Pack File
-    private static void readFromPackFile(InputStream packFile) throws Exception {
+    private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
+        File packFileDir = new File(targetDir, ".git/objects/pack");
+        if (!packFileDir.exists()) {
+            packFileDir.mkdirs(); // Ensure the directory exists
+            System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
+        } else {
+            System.out.println("Pack directory already exists: " + packFileDir.getAbsolutePath());
+        }
+
+        File packFileOutput = new File(packFileDir, "packfile.pack");
         // Read the packfile from the server
-        try (BufferedInputStream bis = new BufferedInputStream(packFile)){
+        try (BufferedInputStream bis = new BufferedInputStream(packFile);
+             FileOutputStream fos = new FileOutputStream(packFileOutput)) {
+
+            System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
             byte[] buffer = new byte[1024];
             int bytesRead;
-            while ((bytesRead = bis.read(buffer, 0, 1024)) != -1) {
-                // Process the data read from the packfile
-                System.out.write(buffer, 0, bytesRead);
-
+            while ((bytesRead = bis.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
             }
+            System.out.println("Pack file saved successfully.");
+        }catch (IOException e) {
+            throw new RuntimeException("Error saving pack file", e);
         }
     }
     //Constructing the Request
@@ -63,27 +116,25 @@ public class Git {
         //generally if i clone,i want all objects , bcs i dont have any object at the moment
         String requestBody = buildRequestBody(refs);
         //debug
-        System.out.println(requestBody);
+        System.out.println("Request Body:\n" + requestBody);
+        
         // Write the request body to the server
         try (OutputStream os = connection.getOutputStream()){
             os.write(requestBody.getBytes());
             os.flush();
         }
 
+        int responseCode = connection.getResponseCode();
         //debug
-        System.out.println("Response code: " + connection.getResponseCode() + " " + connection.getResponseMessage());
-        // Print error stream if available
-        if (connection.getErrorStream() != null) {
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-            String line;
-            while ((line = errorReader.readLine()) != null) {
-                System.out.println(line);
-            }
-            errorReader.close();
+        System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
+
+
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            System.out.println("Successfully received pack file.");
+            return connection.getInputStream();
+        } else {
+            throw new RuntimeException("Failed to get pack file: HTTP code " + responseCode);
         }
-        //debug
-        //System.out.println(response.toString());
-        return connection.getInputStream();
     }
     private static String buildRequestBody(Map<String,String> refs) {
         StringBuilder requestBody = new StringBuilder();

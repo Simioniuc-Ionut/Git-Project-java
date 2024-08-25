@@ -110,12 +110,12 @@ public class Main {
   }
 
   private static void handleCloneCommand(String[] args) {
-    if (args.length < 2) {
+    if (args.length < 3) {
       System.out.println("Usage: clone <repository-url>");
       return;
     }
       try {
-          Git.cloneRepository(args[1]);
+          Git.cloneRepository(args[1],args[2]);
       } catch (Exception e) {
           System.out.println("Error cloning repository: " + e.getMessage());
       }
