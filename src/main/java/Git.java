@@ -29,23 +29,17 @@ public class Git {
          * - **Process**:
          *     - The client sends a POST request to the server with the list of wanted objects.
          */
-        ConstructingTheRequest(refs);
+        ConstructingTheRequest(gitURL,refs);
 
 
     }
     //Constructing the Request
-    private static void ConstructingTheRequest(Map<String,String> refs) throws Exception {
-        String gitUrl = "https://github.com/user/repo.git";
-        URL url = new URL(gitUrl + "/git-upload-pack");
+    private static void ConstructingTheRequest(String gitURL,Map<String,String> refs) throws Exception {
+        URL url = new URL(gitURL + "/git-upload-pacK");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Type", "application/x-git-upload-pack-request");
-
-        // Add Authorization header if required for private repositories
-        String personalAccessToken = "your_personal_access_token"; // Replace with your token
-        connection.setRequestProperty("Authorization", "token " + personalAccessToken);
-
 
         //generally if i clone,i want all objects , bcs i dont have any object at the moment
         String requestBody = buildRequestBody(refs);
@@ -79,10 +73,9 @@ public class Git {
             requestBody.append("0032want ").append(sha1).append("\n");
         }
         requestBody.append("0000");
-        System.out.println(requestBody.length());
-        String length = Integer.toHexString(requestBody.length());
-        packet.append(length).append("\n").append(requestBody);
-        return packet.toString();
+        //String length = Integer.toHexString(requestBody.length());
+       // packet.append(length).append("\n").append(requestBody);
+        return requestBody.toString();
     }
     //GitRefsDirectory
     private static Map<String,String> handleRefDirectory(String gitURL)throws Exception{
