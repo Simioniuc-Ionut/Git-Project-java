@@ -56,13 +56,13 @@ public class Git {
         Map<String,String> refs = new HashMap<>();
         for (int i = 0; i<refsContent.length(); i++) {
             //HEAD
-            if(refsContent.charAt(i) == 'H' && refsContent.charAt(i+1) == 'E' && refsContent.charAt(i+2) == 'A' && refsContent.charAt(i+3) == 'D'){
+            if(refsContent.charAt(i) == 'H' && refsContent.charAt(i+1) == 'E' && refsContent.charAt(i+2) == 'A' && refsContent.charAt(i+3) == 'D' && refsContent.charAt(i+4) != ':'){
                 String HEADSHA1 = takeSHA1fromRefsContent(refsContent, i);
                 //the HEAD commit sha1 ,40bytes
                 refs.put("HEAD", HEADSHA1);
             }
             //refs
-            if(refsContent.charAt(i) == 'r' && refsContent.charAt(i+1) == 'e' && refsContent.charAt(i+2) == 'f' && refsContent.charAt(i+3) == 's'){//take the master branch
+            if(refsContent.charAt(i) == 'r' && refsContent.charAt(i+1) == 'e' && refsContent.charAt(i+2) == 'f' && refsContent.charAt(i+3) == 's' && refsContent.charAt(i-1) != ':'){//take the master branch
                //heads
                 if(refsContent.charAt(i+5) == 'h' && refsContent.charAt(i+6) == 'e' && refsContent.charAt(i+7) == 'a' && refsContent.charAt(i+8) == 'd' && refsContent.charAt(i+9) == 's'){
                    //master or another branch
@@ -97,7 +97,7 @@ public class Git {
     private static String takeNameFromRefs(String refsContent, int i) {
         StringBuilder name = new StringBuilder();
         for (int j = i + 11; j < refsContent.length(); j++) {
-            if (refsContent.charAt(j) == ' ') {
+            if (refsContent.charAt(j) == ' ' || ( refsContent.charAt(j) == '0' && refsContent.charAt(j + 1) == '0' && refsContent.charAt(j + 2) == '0' && refsContent.charAt(j + 3) == '0')) {
                 break;
             }
             name.append(refsContent.charAt(j));
