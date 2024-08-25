@@ -62,6 +62,18 @@ public class Git {
             }
             errorReader.close();
         }
+
+        // Read the response from the server
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        //debug
+        System.out.println(response.toString());
     }
     private static String buildRequestBody(Map<String,String> refs) {
         StringBuilder requestBody = new StringBuilder();
