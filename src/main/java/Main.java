@@ -26,6 +26,7 @@ public class Main {
         case "ls-tree" -> handleLsTreeCommand(args);
         case "write-tree" -> handleWriteTreeCommand();
         case "commit-tree" -> handleCommitTreeCommand(args);
+        case "clone" -> handleCloneCommand(args);
         default -> System.out.println("Unknown command: " + command);
       }
     } catch (Exception e) {
@@ -108,7 +109,17 @@ public class Main {
     Git.createCommit(args);
   }
 
-
+  private static void handleCloneCommand(String[] args) {
+    if (args.length < 2) {
+      System.out.println("Usage: clone <repository-url>");
+      return;
+    }
+      try {
+          Git.cloneRepository(args[1]);
+      } catch (Exception e) {
+          System.out.println("Error cloning repository: " + e.getMessage());
+      }
+  }
 
 
 }

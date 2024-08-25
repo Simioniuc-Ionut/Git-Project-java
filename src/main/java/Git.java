@@ -1,4 +1,6 @@
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -11,8 +13,37 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 
 public class Git {
-    //Crate a new commit-tree object
+    //Create a clone of a repository from GitHub
+    public static void cloneRepository(String gitURL) throws Exception{
+        /**
+         * - **Purpose**: The client discovers the references (branches, tags, etc.) available on the server.
+         * - **Process**:
+         *     - The client sends an HTTP GET request to the server to obtain a list of available refs.
+         */
+        String RefsContent = GetRefsDirectory(gitURL);
+        //debug
+        System.out.println(RefsContent);
 
+    }
+    //GitRefsDirectory
+    private static String GetRefsDirectory(String gitURL) throws Exception{
+        URL url = new URL(gitURL + "/info/refs?service=git-upload-pack");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        // Read the response from the server
+        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        String inputLine;
+        StringBuilder RefsContent = new StringBuilder();
+        while ((inputLine = in.readLine()) != null) {
+            RefsContent.append(inputLine);
+        }
+        in.close();
+
+        return RefsContent.toString();
+
+    }
+    //Crate a new commit-tree object
     public static void createCommit(String[] args){
         /**
          * tree <sha1-of-tree>
@@ -57,7 +88,6 @@ public class Git {
             // Convert commit content to byte array
             byte[] contentBytes = commitContent.toString().getBytes(StandardCharsets.UTF_8);
             int contentLength = contentBytes.length;
-
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -222,7 +252,6 @@ public class Git {
         }
         return false;
     }
-
 
     // Gets the object path for the SHA-1 hash
     private static String getObjectPathForHash(byte[] sha1Hash) throws IOException {
