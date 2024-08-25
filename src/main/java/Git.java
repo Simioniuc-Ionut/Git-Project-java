@@ -29,12 +29,31 @@ public class Git {
          * - **Process**:
          *     - The client sends a POST request to the server with the list of wanted objects.
          */
-        ConstructingTheRequest(gitURL,refs);
-
+        InputStream packFile = ConstructingTheRequest(gitURL,refs);
+        /**
+         * ### 3. **Read from the Packfile**
+         * - **Purpose**: The client reads the packfile sent by the server.
+         * - **Process**:
+         *   - The client reads the packfile sent by the server.
+         */
+        readFromPackFile(packFile);
 
     }
+    //Reading the Pack File
+    private static void readFromPackFile(InputStream packFile) throws Exception {
+        // Read the packfile from the server
+        try (BufferedInputStream bis = new BufferedInputStream(packFile)){
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = bis.read(buffer, 0, 1024)) != -1) {
+                // Process the data read from the packfile
+                System.out.write(buffer, 0, bytesRead);
+
+            }
+        }
+    }
     //Constructing the Request
-    private static void ConstructingTheRequest(String gitURL,Map<String,String> refs) throws Exception {
+    private static InputStream ConstructingTheRequest(String gitURL,Map<String,String> refs) throws Exception {
         URL url = new URL(gitURL + "/git-upload-pack");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
@@ -62,18 +81,9 @@ public class Git {
             }
             errorReader.close();
         }
-
-        // Read the response from the server
-        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
         //debug
-        System.out.println(response.toString());
+        //System.out.println(response.toString());
+        return connection.getInputStream();
     }
     private static String buildRequestBody(Map<String,String> refs) {
         StringBuilder requestBody = new StringBuilder();
