@@ -42,6 +42,11 @@ public class Git {
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Type", "application/x-git-upload-pack-request");
 
+        // Add Authorization header if required
+        String personalAccessToken = "your_personal_access_token"; // Replace with your token
+        connection.setRequestProperty("Authorization", "token " + personalAccessToken);
+
+
         //generally if i clone,i want all objects , bcs i dont have any object at the moment
         String requestBody = buildRequestBody(refs);
         //debug
@@ -66,7 +71,7 @@ public class Git {
         }
         requestBody.append("0000");
         String length = Integer.toHexString(requestBody.length());
-        packet.append(length).append("\0").append(requestBody);
+        packet.append(length).append("\n").append(requestBody);
         return packet.toString();
     }
     //GitRefsDirectory
