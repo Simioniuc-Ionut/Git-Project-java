@@ -30,6 +30,8 @@ public class Git {
         for(Map.Entry<String,String> entry : refs.entrySet()){
             System.out.println(entry.getKey() + " : " + entry.getValue());
         }
+
+
     }
     //GitRefsDirectory
     private static String GetRefsDirectory(String gitURL) throws Exception{
@@ -80,10 +82,9 @@ public class Git {
             }
             //the HEAD commit sha1 is the same with the master branch sha1
 
-            return  refs;
-
         }
-        throw new IllegalArgumentException("Master branch not found in refs");
+        return refs;
+
     }
     //HELP methdos
     private static String takeSHA1fromRefsContent(String refsContent, int i){
