@@ -52,59 +52,32 @@ public class Git {
 
     }
     //Git find sha1 from master/branch
-    private static Map<String,String> parseMasterBranch(String refsContent) {
-        Map<String,String> refs = new HashMap<>();
-        for (int i = 0; i<refsContent.length(); i++) {
-            //HEAD
-            if(refsContent.charAt(i) == 'H' && refsContent.charAt(i+1) == 'E' && refsContent.charAt(i+2) == 'A' && refsContent.charAt(i+3) == 'D'){
-                String HEADSHA1 = takeSHA1fromRefsContent(refsContent, i);
-                //the HEAD commit sha1 ,40bytes
+    private static Map<String, String> parseMasterBranch(String refsContent) {
+        Map<String, String> refs = new HashMap<>();
+        String[] lines = refsContent.split("\n");
+
+        for (String line : lines) {
+            if (line.startsWith("HEAD")) {
+                String HEADSHA1 = extractSHA1(line);
                 refs.put("HEAD", HEADSHA1);
+            } else if (line.startsWith("refs/heads/") || line.startsWith("refs/tags/")) {
+                String branchOrTag = line.substring(0, line.indexOf(' '));
+                String sha1 = extractSHA1(line);
+                refs.put(branchOrTag, sha1);
             }
-            //refs
-            if(refsContent.charAt(i) == 'r' && refsContent.charAt(i+1) == 'e' && refsContent.charAt(i+2) == 'f' && refsContent.charAt(i+3) == 's'){//take the master branch
-               //heads
-                if(refsContent.charAt(i+5) == 'h' && refsContent.charAt(i+6) == 'e' && refsContent.charAt(i+7) == 'a' && refsContent.charAt(i+8) == 'd' && refsContent.charAt(i+9) == 's'){
-                   //master or another branch
-                    //finish read the name from refs/heads/__name__ and take the sha1
-                    String branchSHA1 = takeSHA1fromRefsContent(refsContent, i);
-                    String nameBranch = takeNameFromRefs(refsContent, i);
-                    refs.put("refs/heads/"+ nameBranch, branchSHA1);  //take the name of the branch ,and branch SHA1
-                }
-               //tags
-                if(refsContent.charAt(i+5) == 't' && refsContent.charAt(i+6) == 'a' && refsContent.charAt(i+7) == 'g' && refsContent.charAt(i+8) == 's'){
-                    //finish read the name from refs/tags/__name__ and take the sha1
-                    String tagSHA1 = takeSHA1fromRefsContent(refsContent, i);
-                    String nameTag = takeNameFromRefs(refsContent, i-1); //bcs refs/heads have 11 and refs/tags have 10
-                    refs.put("refs/tags/"+ nameTag, tagSHA1);  //take the name of the tag ,and tag SHA1
-                }
-                //another folders...
-            }
-            //the HEAD commit sha1 is the same with the master branch sha1
-
         }
+
         return refs;
-
     }
-    //HELP methdos
-    private static String takeSHA1fromRefsContent(String refsContent, int i){
-        StringBuilder sha1 = new StringBuilder();
-        for(int j = i - 2; j > i - 42; j--){
-            sha1.append(refsContent.charAt(j));
+    //HELP methods
+    //Extract sha1 from line
+    private static String extractSHA1(String line) {
+        int spaceIndex = line.indexOf(' ');
+        if (spaceIndex > 0) {
+            return line.substring(0, spaceIndex);
         }
-        return sha1.reverse().toString();
+        return "";
     }
-    private static String takeNameFromRefs(String refsContent, int i) {
-        StringBuilder name = new StringBuilder();
-        for (int j = i + 11; j < refsContent.length(); j++) {
-            if (refsContent.charAt(j) == ' ') {
-                break;
-            }
-            name.append(refsContent.charAt(j));
-        }
-        return name.toString();
-    }
-
     //Crate a new commit-tree object
     public static void createCommit(String[] args){
         /**
