@@ -138,12 +138,15 @@ public class Git {
 
         int responseCode = connection.getResponseCode();
         //debug
-        System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage() + " content: " +  connection.getInputStream().toString());
+        System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
 
 
         if (responseCode == HttpURLConnection.HTTP_OK) {
             System.out.println("Successfully received pack file.");
+
             try (InputStream packFile = connection.getInputStream()) {
+                // Afișează răspunsul serverului pentru debug
+                printServerResponse(packFile);
                 // Verifică dacă fluxul este gol
                 if (packFile.available() == 0) {
                     throw new RuntimeException("Received an empty pack file stream.");
@@ -178,6 +181,14 @@ public class Git {
             throw new RuntimeException("Failed to get pack file: HTTP code " + responseCode);
         }
     }
+    private static void printServerResponse(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            System.out.println(line);
+        }
+    }
+
     private static byte[] buildRequestBody(Map<String,String> refs) {
         Set<String> setUniqueSHA1 = new HashSet<>(refs.values());
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
