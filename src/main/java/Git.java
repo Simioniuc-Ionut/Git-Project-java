@@ -185,7 +185,7 @@ public class Git {
                 //printServerResponse(packFile);
                 // Căutăm secvența "PACK" în fluxul binar
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                byte[] tempBuffer = new byte[7615];
+                byte[] tempBuffer = new byte[20000];
                 int bytesRead;
                 boolean foundPack = false;
                 int packOffset = -1;
