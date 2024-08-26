@@ -23,49 +23,35 @@ public class Git {
          */
         Map<String,String> refs = handleRefDirectory(gitURL);
         /**
-         * ### 2. **Constructing the Request**
+         * ### 2.  **create the directory in the target directory**
+         */
+        initializeGitRepositoryTargeted(targetDirectory);
+        /**
+         * ### 3. **Constructing the Request and save the packfile**
          *
          * - **Purpose**: The client specifies the objects it needs (`want`) and the objects it already has (`have`).
          * - **Process**:
          *     - The client sends a POST request to the server with the list of wanted objects.
          */
-        InputStream packFile = ConstructingTheRequest(gitURL,refs);
-        /**
-         * ### 3.  **create the directory in the target directory**
-         */
-        initializeGitRepositoryTargeted(targetDirectory);
+         ConstructingTheRequestAndSave(gitURL,refs,targetDirectory);
         /**
          * ### 4. **Read from the Packfile**
          * - **Purpose**: The client reads the packfile sent by the server.
          * - **Process**:
          *   - The client reads the packfile sent by the server.
          */
-        //save the pack file
-        savePackFile(packFile,targetDirectory);
-        // unpack packfile .git/objects/pack/packfile.pack
-        //unpackPackFile(targetDirectory);
 
     }
-    //Unpack the Pack File
-    private static void unpackPackFile(String targetDir) throws Exception {
-        File packFile = new File(targetDir + "/.git/objects/pack/packfile.pack");
-        // Read the packfile from the server
-        try (FileInputStream fis = new FileInputStream(packFile);
-             BufferedInputStream bis = new BufferedInputStream(fis)) {
-
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-
-            // Read and print the decompressed bytes
-            while ((bytesRead = bis.read(buffer)) != -1) {
-                for (int i = 0; i < bytesRead; i++) {
-                    System.out.printf("%02x ", buffer[i]);
-                }
-                System.out.println();
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Error reading and decompressing pack file", e);
+    //Verify the pack file
+    private static boolean isPackFile(InputStream packFile) throws Exception {
+        packFile.mark(4); // Mark the stream so we can reset it after checking
+        byte[] header = new byte[4];
+        if (packFile.read(header) != 4) {
+            return false;
         }
+        String headerStr = new String(header, StandardCharsets.US_ASCII);
+        packFile.reset(); // Reset the stream to the beginning
+        return "PACK".equals(headerStr);
     }
     //Initialize git Repository
     private static void initializeGitRepositoryTargeted(String targetDir){
@@ -132,11 +118,12 @@ public class Git {
             }
             System.out.println("Pack file saved successfully.");
         }catch (IOException e) {
+            e.printStackTrace();
             throw new RuntimeException("Error saving pack file", e);
         }
     }
     //Constructing the Request
-    private static InputStream ConstructingTheRequest(String gitURL,Map<String,String> refs) throws Exception {
+    private static void ConstructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
         URL url = new URL(gitURL + "/git-upload-pack");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
@@ -161,8 +148,23 @@ public class Git {
 
         if (responseCode == HttpURLConnection.HTTP_OK) {
             System.out.println("Successfully received pack file.");
-            return connection.getInputStream();
-        } else {
+            try (InputStream packFile = connection.getInputStream()) {
+                // Verificăm dacă fișierul primit este un `packfile` valid
+                if (isPackFile(packFile)) {
+                    // Salvăm `packfile`-ul primit
+                    savePackFile(packFile, targetDir);
+                } else {
+                    throw new RuntimeException("The pack file received is not valid");
+                }
+            }
+        }else{
+            // Gestionăm cazurile de eroare
+            try (InputStream errorStream = connection.getErrorStream()) {
+                if (errorStream != null) {
+                    String errorMessage = new String(errorStream.readAllBytes(), StandardCharsets.UTF_8);
+                    System.out.println("Error response from server: " + errorMessage);
+                }
+            }
             throw new RuntimeException("Failed to get pack file: HTTP code " + responseCode);
         }
     }
