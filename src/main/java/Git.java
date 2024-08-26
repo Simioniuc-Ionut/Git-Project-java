@@ -138,7 +138,7 @@ public class Git {
 
         int responseCode = connection.getResponseCode();
         //debug
-        System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
+        System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage() + " content: " +  connection.getInputStream().toString());
 
 
         if (responseCode == HttpURLConnection.HTTP_OK) {
