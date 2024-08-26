@@ -85,68 +85,41 @@ public class Git {
         }
     }
     //Reading the Pack File
-    private static void savePackFile(InputStream packFile, String targetDir) throws Exception {
+    private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
         File packFileDir = new File(targetDir, ".git/objects/pack");
         if (!packFileDir.exists()) {
-            if (packFileDir.mkdirs()) {
-                System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
-            } else {
-                throw new IOException("Failed to create directory: " + packFileDir.getAbsolutePath());
-            }
+            packFileDir.mkdirs(); // Ensure the directory exists
+            System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
         } else {
             System.out.println("Pack directory already exists: " + packFileDir.getAbsolutePath());
         }
 
         File packFileOutput = new File(packFileDir, "packfile.pack");
+        // Read the packfile from the server
         try (BufferedInputStream bis = new BufferedInputStream(packFile);
              FileOutputStream fos = new FileOutputStream(packFileOutput)) {
 
             System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
 
-            byte[] buffer = new byte[8192]; // Mărime buffer mai mare pentru date mari
+            byte[] buffer = new byte[8192]; // Buffer mai mare pentru eficiență
             int bytesRead;
-            while ((bytesRead = bis.read(buffer)) != -1) {
+            while((bytesRead = bis.read(buffer)) != -1){
                 fos.write(buffer, 0, bytesRead);
-
-                // Debugging
-                System.out.println("Bytes read: " + bytesRead);
-                System.out.print("Buffer data: ");
-                for (int i = 0; i < bytesRead; i++) {
+                // Afișează datele în format hexazecimal pentru debug
+                for(int i = 0; i < bytesRead; i++){
                     System.out.printf("%02x ", buffer[i]);
-                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți
+                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți pentru lizibilitate
                         System.out.println();
                     }
                 }
-                System.out.println();
             }
-
             System.out.println("Pack file saved successfully.");
-        } catch (IOException e) {
+        }catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error saving pack file", e);
         }
     }
-//    private static void savePackFile(InputStream packFileStream, String targetDir) throws IOException {
-//        // Asigură-te că directorul țintă există
-//        File dir = new File(targetDir);
-//        if (!dir.exists()) {
-//            if (!dir.mkdirs()) {
-//                throw new IOException("Failed to create directory: " + targetDir);
-//            }
-//        }
-//
-//        // Crează un fișier pentru pachetul Git
-//        File packFile = new File(dir, "packfile.pack"); // sau alt nume relevant
-//        try (FileOutputStream fos = new FileOutputStream(packFile)) {
-//            byte[] buffer = new byte[8192];
-//            int bytesRead;
-//            while ((bytesRead = packFileStream.read(buffer)) != -1) {
-//                fos.write(buffer, 0, bytesRead);
-//            }
-//        }
-//
-//        System.out.println("Pack file saved to: " + packFile.getAbsolutePath());
-//    }
+
     //Constructing the Request
     private static void ConstructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
         URL url = new URL(gitURL + "/git-upload-pack");
@@ -287,7 +260,7 @@ public class Git {
     private static Map<String,String> handleRefDirectory(String gitURL)throws Exception{
         String refsContent = GetRefsDirectory(gitURL);
         //debug
-        //System.out.println(refsContent);
+        System.out.println(refsContent);
 
         // Parse the refsContent to find the SHA-1 hash of the master branch
         Map<String,String> refs = parseMasterBranch(refsContent);
