@@ -251,15 +251,15 @@ public class Git {
 
            //i will want hust unic sha1 from refs.
             for (String sha1 : setUniqueSHA1) {
-                requestBodyInBytes.write("0053want ".getBytes());
-                requestBodyInBytes.write(hexStringToByteArray(sha1));
-                requestBodyInBytes.write("multi_ack side-band-64k ofs-delta\n".getBytes());
+                requestBodyInBytes.write("0053want ".getBytes(StandardCharsets.UTF_8));
+                requestBodyInBytes.write(sha1.getBytes(StandardCharsets.UTF_8));
+                requestBodyInBytes.write("multi_ack side-band-64k ofs-delta\n".getBytes(StandardCharsets.UTF_8));
                 //debug
                 //System.out.println("0032want " + sha1);
             }
             //requestBody.append("0000");
-            requestBodyInBytes.write("0000".getBytes());
-            requestBodyInBytes.write("0009done\n".getBytes());
+            requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
             //debug
             //System.out.println("0000");
 
