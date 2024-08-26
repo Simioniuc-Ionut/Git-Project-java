@@ -201,10 +201,10 @@ public class Git {
         StringBuilder prefixLengthInHex = new StringBuilder();
         StringBuilder prefixContnet = new StringBuilder();
         prefixContnet.append("want ").append(refs.get("HEAD")).append(" multi_ack_detailed side-band-64k thin-pack ofs-delta\n");
-        prefixLengthInHex.append(Integer.toHexString(prefixContnet.length() + 4));
-        requestBodyInBytes.write(prefixLengthInHex.toString().getBytes());
-        requestBodyInBytes.write(prefixContnet.toString().getBytes());
-        System.out.println(prefixLengthInHex.toString());
+//        prefixLengthInHex.append(Integer.toHexString(prefixContnet.length() + 4));
+//        requestBodyInBytes.write(prefixLengthInHex.toString().getBytes());
+//        requestBodyInBytes.write(prefixContnet.toString().getBytes());
+        System.out.print(prefixLengthInHex.toString());
         System.out.println(prefixContnet.toString());
             for (String sha1 : setUniqueSHA1) {
                 requestBodyInBytes.write("0032want ".getBytes());
