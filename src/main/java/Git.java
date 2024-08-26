@@ -193,10 +193,14 @@ public class Git {
                 requestBodyInBytes.write(sha1.getBytes());
                 requestBodyInBytes.write('\n');
                 //requestBody.append("0032want ").append(sha1).append("\n");
+                //debug
+                System.out.println("0032want " + sha1);
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes());
 
+            //debug
+            System.out.println("0000");
             //String length = Integer.toHexString(requestBody.length());
             // packet.append(length).append("\n").append(requestBody);
         }catch (IOException e){
