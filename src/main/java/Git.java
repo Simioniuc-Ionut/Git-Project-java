@@ -185,12 +185,13 @@ public class Git {
                 //printServerResponse(packFile);
                 // Căutăm secvența "PACK" în fluxul binar
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                byte[] tempBuffer = new byte[8192*2];
+                byte[] tempBuffer = new byte[7615];
                 int bytesRead;
                 boolean foundPack = false;
                 int packOffset = -1;
 
                 while ((bytesRead = packFile.read(tempBuffer)) != -1) {
+                    System.out.println("Bytes read: " + bytesRead);
                     for (int i = 0; i < bytesRead; i++) {
                         if (!foundPack) {
                             buffer.write(tempBuffer[i]);
