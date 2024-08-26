@@ -148,7 +148,7 @@ public class Git {
 
             try (InputStream packFile = connection.getInputStream()) {
                 //debug
-                //printServerResponse(packFile);
+                printServerResponse(packFile);
 
                 // Afișează bytes-ii primiți pentru debugging
                 byte[] firstBytes = new byte[8]; // citim primii 8 bytes pentru a verifica dacă există conținut
