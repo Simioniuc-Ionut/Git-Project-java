@@ -203,7 +203,6 @@ public class Git {
         prefixContnet.append("want ").append(refs.get("HEAD")).append(" multi_ack_detailed side-band-64k thin-pack ofs-delta\n");
         prefixLengthInHex.append(Integer.toHexString(prefixContnet.length() + 4));
         requestBodyInBytes.write(prefixLengthInHex.toString().getBytes());
-        requestBodyInBytes.write('\n');
         requestBodyInBytes.write(prefixContnet.toString().getBytes());
         System.out.println(prefixLengthInHex.toString());
         System.out.println(prefixContnet.toString());
