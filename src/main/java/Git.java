@@ -149,6 +149,21 @@ public class Git {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             System.out.println("Successfully received pack file.");
             try (InputStream packFile = connection.getInputStream()) {
+                // Verifică dacă fluxul este gol
+                if (packFile.available() == 0) {
+                    throw new RuntimeException("Received an empty pack file stream.");
+                }
+
+                // Afișează bytes-ii primiți pentru debugging
+                byte[] firstBytes = new byte[8]; // citim primii 8 bytes pentru a verifica dacă există conținut
+                int bytesRead = packFile.read(firstBytes);
+                System.out.print("First bytes received: ");
+                for (int i = 0; i < bytesRead; i++) {
+                    System.out.printf("%02x ", firstBytes[i]);
+                }
+                System.out.println();
+
+                
                 // Verificăm dacă fișierul primit este un `packfile` valid
                 if (isPackFile(packFile)) {
                     // Salvăm `packfile`-ul primit
