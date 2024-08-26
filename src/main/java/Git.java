@@ -46,6 +46,8 @@ public class Git {
     private static boolean isPackFile(byte[] firstBytes) {
         // Verifică dacă primii bytes conțin semnătura 'PACK'
         String packSignature = new String(firstBytes, 0, Math.min(firstBytes.length, 4), StandardCharsets.US_ASCII);
+        //debug
+        System.out.println("Pack Signature: " + packSignature);
         return "PACK".equals(packSignature);
     }
     //Initialize git Repository
