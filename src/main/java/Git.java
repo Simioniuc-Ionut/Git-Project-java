@@ -145,8 +145,8 @@ public class Git {
             System.out.println("Successfully received pack file.");
 
             try (InputStream packFile = connection.getInputStream()) {
-                // Afișează răspunsul serverului pentru debug
-                printServerResponse(packFile);
+                //debug
+                //printServerResponse(packFile);
                 // Verifică dacă fluxul este gol
                 if (packFile.available() == 0) {
                     throw new RuntimeException("Received an empty pack file stream.");
@@ -192,35 +192,21 @@ public class Git {
     private static byte[] buildRequestBody(Map<String,String> refs) {
         Set<String> setUniqueSHA1 = new HashSet<>(refs.values());
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
-
         try {
-            //StringBuilder requestBody = new StringBuilder();
-            //StringBuilder packet = new StringBuilder();
-
-            //i will want hust unic sha1 from refs.
-        StringBuilder prefixLengthInHex = new StringBuilder();
-        StringBuilder prefixContnet = new StringBuilder();
-        prefixContnet.append("want ").append(refs.get("HEAD")).append(" multi_ack_detailed side-band-64k thin-pack ofs-delta\n");
-//        prefixLengthInHex.append(Integer.toHexString(prefixContnet.length() + 4));
-//        requestBodyInBytes.write(prefixLengthInHex.toString().getBytes());
-//        requestBodyInBytes.write(prefixContnet.toString().getBytes());
-        System.out.print(prefixLengthInHex.toString());
-        System.out.println(prefixContnet.toString());
+           //i will want hust unic sha1 from refs.
             for (String sha1 : setUniqueSHA1) {
                 requestBodyInBytes.write("0032want ".getBytes());
                 requestBodyInBytes.write(sha1.getBytes());
                 requestBodyInBytes.write('\n');
-                //requestBody.append("0032want ").append(sha1).append("\n");
                 //debug
-                System.out.println("0032want " + sha1);
+                //System.out.println("0032want " + sha1);
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes());
             requestBodyInBytes.write("0009done\n".getBytes());
             //debug
-            System.out.println("0000");
-            //String length = Integer.toHexString(requestBody.length());
-            // packet.append(length).append("\n").append(requestBody);
+            //System.out.println("0000");
+
         }catch (IOException e){
             throw new RuntimeException("Error building request body", e);
         }
