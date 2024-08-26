@@ -210,7 +210,7 @@ public class Git {
 //                requestBodyInBytes.write(sha1.getBytes());
 //                requestBodyInBytes.write('\n');
                 //debug
-                //System.out.println("0032want " + sha1);
+                System.out.println(lengthBody + " " + body);
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes());
