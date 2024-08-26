@@ -125,6 +125,7 @@ public class Git {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
+        connection.setDoInput(true);
         connection.setRequestProperty("Content-Type", "application/x-git-upload-pack-request");
 
         //generally if i clone,i want all objects , bcs i dont have any object at the moment
