@@ -87,7 +87,7 @@ public class Git {
     //Reading the Pack File
     private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
         //debug
-        printServerResponse(packFile);
+        //printServerResponse(packFile);
         File packFileDir = new File(targetDir, ".git/objects/pack");
         if (!packFileDir.exists()) {
             packFileDir.mkdirs(); // Ensure the directory exists
@@ -122,6 +122,27 @@ public class Git {
             e.printStackTrace();
             throw new RuntimeException("Error saving pack file", e);
         }
+        debugFileContent( packFileOutput);
+    }
+    private static void debugFileContent(File packFile) throws IOException {
+        System.out.println("Reading pack file: " + packFile.getAbsolutePath());
+    try (InputStream fis = new FileInputStream(packFile)) {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                for (int i = 0; i < bytesRead; i++) {
+                    System.out.printf("%02x ", buffer[i]);
+                    if ((i + 1) % 16 == 0) {
+                        System.out.println();
+                    }
+                }
+                System.out.println();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     }
 
     //Constructing the Request
@@ -220,7 +241,7 @@ public class Git {
 //                    throw new RuntimeException("No 'PACK' signature found in the pack file stream.");
 //                }
                 savePackFile(packFile, targetDir);
-            }             
+            }
         }else{
             // Gestionăm cazurile de eroare
             try (InputStream errorStream = connection.getErrorStream()) {
