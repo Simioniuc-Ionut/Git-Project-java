@@ -197,12 +197,8 @@ public class Git {
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
         try {
            //i will want hust unic sha1 from refs.
-            for (String sha1 : setUniqueSHA1) {
-                requestBodyInBytes.write("want ".getBytes());
-                requestBodyInBytes.write(sha1.getBytes());
-                requestBodyInBytes.write('\n');
-                //debug
-                //System.out.println("0032want " + sha1);
+            for (String sha1 : refs.values()) {
+                requestBodyInBytes.write(String.format("%04xwant %s\n", sha1.length() + 5, sha1).getBytes());
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes());
