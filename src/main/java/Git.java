@@ -85,38 +85,48 @@ public class Git {
         }
     }
     //Reading the Pack File
-    private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
+    private static void savePackFile(InputStream packFile, String targetDir) throws IOException {
         File packFileDir = new File(targetDir, ".git/objects/pack");
+        File packFileOutput = new File(packFileDir, "packfile.pack");
+
         if (!packFileDir.exists()) {
-            packFileDir.mkdirs(); // Ensure the directory exists
-            System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
-        } else {
-            System.out.println("Pack directory already exists: " + packFileDir.getAbsolutePath());
+            packFileDir.mkdirs(); // Creează directorul dacă nu există
         }
 
-        File packFileOutput = new File(packFileDir, "packfile.pack");
-        // Read the packfile from the server
         try (BufferedInputStream bis = new BufferedInputStream(packFile);
              FileOutputStream fos = new FileOutputStream(packFileOutput)) {
 
-            System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
-
-            byte[] buffer = new byte[8192]; // Buffer mai mare pentru eficiență
+            byte[] buffer = new byte[8192]; // Buffer mai mare pentru a gestiona datele
+            boolean foundPackHeader = false;
             int bytesRead;
-            while((bytesRead = bis.read(buffer)) != -1){
-                fos.write(buffer, 0, bytesRead);
-                // Afișează datele în format hexazecimal pentru debug
-                for(int i = 0; i < bytesRead; i++){
-                    System.out.printf("%02x ", buffer[i]);
-                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți pentru lizibilitate
-                        System.out.println();
+
+            while ((bytesRead = bis.read(buffer)) != -1) {
+                int offset = 0;
+
+                // Dacă nu am găsit încă header-ul PACK
+                if (!foundPackHeader) {
+                    while (offset < bytesRead - 4) {
+                        if (buffer[offset] == 'P' && buffer[offset + 1] == 'A' && buffer[offset + 2] == 'C' && buffer[offset + 3] == 'K') {
+                            foundPackHeader = true;
+                            // Scrie datele de la începutul header-ului PACK
+                            fos.write(buffer, offset, bytesRead - offset);
+                            break;
+                        }
+                        offset++;
                     }
+
+                    if (foundPackHeader) {
+                        // Scrie restul bufferului după găsirea header-ului
+                        while ((bytesRead = bis.read(buffer)) != -1) {
+                            fos.write(buffer, 0, bytesRead);
+                        }
+                    }
+                } else {
+                    // Scrie datele deja găsite după header
+                    fos.write(buffer, 0, bytesRead);
                 }
             }
-            System.out.println("Pack file saved successfully.");
-        }catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error saving pack file", e);
+            System.out.println("Pack file saved successfully to: " + packFileOutput.getAbsolutePath());
         }
     }
 
@@ -178,7 +188,7 @@ public class Git {
 
             try (InputStream packFile = connection.getInputStream()) {
                 //debug
-                printServerResponse(packFile);
+                //printServerResponse(packFile);
                 // Căutăm secvența "PACK" în fluxul binar
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 byte[] tempBuffer = new byte[8192];
