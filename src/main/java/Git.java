@@ -113,20 +113,22 @@ public class Git {
 
         File packFileOutput = new File(packFileDir, "packfile.pack");
         // Read the packfile from the server
-        try (InflaterInputStream iis = new InflaterInputStream(packFile);
+        try (BufferedInputStream bis = new BufferedInputStream(packFile);
              FileOutputStream fos = new FileOutputStream(packFileOutput)) {
 
             System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
 
-
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[4096]; // Buffer mai mare pentru eficiență
             int bytesRead;
-            while((bytesRead = iis.read(buffer))!= - 1){
-                fos.write(buffer,0,bytesRead);
-                for(int i=0; i<bytesRead; i++){
-                    System.out.printf("%02x ",buffer[i]);
+            while((bytesRead = bis.read(buffer)) != -1){
+                fos.write(buffer, 0, bytesRead);
+                // Afișează datele în format hexazecimal pentru debug
+                for(int i = 0; i < bytesRead; i++){
+                    System.out.printf("%02x ", buffer[i]);
+                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți pentru lizibilitate
+                        System.out.println();
+                    }
                 }
-                fos.write("\0".getBytes(StandardCharsets.ISO_8859_1),0,1);
             }
             System.out.println("Pack file saved successfully.");
         }catch (IOException e) {
