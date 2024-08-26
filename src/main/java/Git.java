@@ -86,6 +86,8 @@ public class Git {
     }
     //Reading the Pack File
     private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
+        //debug
+        printServerResponse(packFile);
         File packFileDir = new File(targetDir, ".git/objects/pack");
         if (!packFileDir.exists()) {
             packFileDir.mkdirs(); // Ensure the directory exists
@@ -178,7 +180,7 @@ public class Git {
 
             try (InputStream packFile = connection.getInputStream()) {
                 //debug
-                printServerResponse(packFile);
+                //printServerResponse(packFile);
                 // Căutăm secvența "PACK" în fluxul binar
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 byte[] tempBuffer = new byte[8192];
@@ -233,17 +235,6 @@ public class Git {
             System.out.println(line);
         }
     }
-
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
-        }
-        return data;
-    }
-
     private static byte[] buildRequestBody(Map<String,String> refs) {
         Set<String> setUniqueSHA1 = new HashSet<>(refs.values());
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
