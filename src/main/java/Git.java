@@ -128,7 +128,7 @@ public class Git {
         //generally if i clone,i want all objects , bcs i dont have any object at the moment
         byte[] requestBody = buildRequestBody(refs);
         //debug
-        System.out.println("Request Body:\n" + requestBody.toString());
+        //System.out.println("Request Body:\n" + requestBody.toString());
 
         // Write the request body to the server
         try (OutputStream os = connection.getOutputStream()){
@@ -147,14 +147,15 @@ public class Git {
             try (InputStream packFile = connection.getInputStream()) {
                 //debug
                 //printServerResponse(packFile);
-                // Verifică dacă fluxul este gol
-                if (packFile.available() == 0) {
-                    throw new RuntimeException("Received an empty pack file stream.");
-                }
 
                 // Afișează bytes-ii primiți pentru debugging
                 byte[] firstBytes = new byte[8]; // citim primii 8 bytes pentru a verifica dacă există conținut
                 int bytesRead = packFile.read(firstBytes);
+                // Verifică dacă fluxul este gol
+                if (bytesRead == 0 || bytesRead == -1) {
+                    throw new RuntimeException("Received an empty pack file stream.");
+                }
+
                 System.out.print("First bytes received: ");
                 for (int i = 0; i < bytesRead; i++) {
                     System.out.printf("%02x ", firstBytes[i]);
