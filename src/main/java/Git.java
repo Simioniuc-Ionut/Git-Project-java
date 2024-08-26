@@ -85,36 +85,43 @@ public class Git {
         }
     }
     //Reading the Pack File
-    private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
+    private static void savePackFile(InputStream packFile, String targetDir) throws Exception {
         File packFileDir = new File(targetDir, ".git/objects/pack");
         if (!packFileDir.exists()) {
-            packFileDir.mkdirs(); // Ensure the directory exists
-            System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
+            if (packFileDir.mkdirs()) {
+                System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
+            } else {
+                throw new IOException("Failed to create directory: " + packFileDir.getAbsolutePath());
+            }
         } else {
             System.out.println("Pack directory already exists: " + packFileDir.getAbsolutePath());
         }
 
         File packFileOutput = new File(packFileDir, "packfile.pack");
-        // Read the packfile from the server
         try (BufferedInputStream bis = new BufferedInputStream(packFile);
              FileOutputStream fos = new FileOutputStream(packFileOutput)) {
 
             System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
 
-            byte[] buffer = new byte[4096]; // Buffer mai mare pentru eficiență
+            byte[] buffer = new byte[8192]; // Mărime buffer mai mare pentru date mari
             int bytesRead;
-            while((bytesRead = bis.read(buffer)) != -1){
+            while ((bytesRead = bis.read(buffer)) != -1) {
                 fos.write(buffer, 0, bytesRead);
-                // Afișează datele în format hexazecimal pentru debug
-                for(int i = 0; i < bytesRead; i++){
+
+                // Debugging
+                System.out.println("Bytes read: " + bytesRead);
+                System.out.print("Buffer data: ");
+                for (int i = 0; i < bytesRead; i++) {
                     System.out.printf("%02x ", buffer[i]);
-                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți pentru lizibilitate
+                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți
                         System.out.println();
                     }
                 }
+                System.out.println();
             }
+
             System.out.println("Pack file saved successfully.");
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error saving pack file", e);
         }
