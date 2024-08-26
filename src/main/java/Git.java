@@ -43,15 +43,10 @@ public class Git {
 
     }
     //Verify the pack file
-    private static boolean isPackFile(InputStream packFile) throws Exception {
-        packFile.mark(4); // Mark the stream so we can reset it after checking
-        byte[] header = new byte[4];
-        if (packFile.read(header) != 4) {
-            return false;
-        }
-        String headerStr = new String(header, StandardCharsets.US_ASCII);
-        packFile.reset(); // Reset the stream to the beginning
-        return "PACK".equals(headerStr);
+    private static boolean isPackFile(byte[] firstBytes) {
+        // Verifică dacă primii bytes conțin semnătura 'PACK'
+        String packSignature = new String(firstBytes, 0, Math.min(firstBytes.length, 4), StandardCharsets.US_ASCII);
+        return "PACK".equals(packSignature);
     }
     //Initialize git Repository
     private static void initializeGitRepositoryTargeted(String targetDir){
@@ -163,9 +158,9 @@ public class Git {
                 }
                 System.out.println();
 
-                
+
                 // Verificăm dacă fișierul primit este un `packfile` valid
-                if (isPackFile(packFile)) {
+                if (isPackFile(firstBytes)) {
                     // Salvăm `packfile`-ul primit
                     savePackFile(packFile, targetDir);
                 } else {
@@ -185,9 +180,9 @@ public class Git {
     }
     private static String buildRequestBody(Map<String,String> refs) {
         StringBuilder requestBody = new StringBuilder();
-        StringBuilder packet = new StringBuilder();
+
         //i will want hust unic sha1 from refs.
-        Set<String> setUniqueSHA1 = new HashSet<>(refs.values());
+        List<String> setUniqueSHA1 = new ArrayList<>(refs.values());
 
         for(String sha1 : setUniqueSHA1){
             requestBody.append("0032want ").append(sha1).append("\n");
