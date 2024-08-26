@@ -33,7 +33,7 @@ public class Git {
          * - **Process**:
          *     - The client sends a POST request to the server with the list of wanted objects.
          */
-         ConstructingTheRequestAndSave(gitURL,refs,targetDirectory);
+         constructingTheRequestAndSave(gitURL,refs,targetDirectory);
         /**
          * ### 4. **Read from the Packfile**
          * - **Purpose**: The client reads the packfile sent by the server.
@@ -105,7 +105,9 @@ public class Git {
 
             byte[] buffer = new byte[8192]; // Buffer mai mare pentru eficiență
             int bytesRead;
+            int totalBytesRead = 0;
             while((bytesRead = bis.read(buffer)) != -1){
+                totalBytesRead += bytesRead;
                 fos.write(buffer, 0, bytesRead);
                 // Afișează datele în format hexazecimal pentru debug
                 for(int i = 0; i < bytesRead; i++){
@@ -115,7 +117,7 @@ public class Git {
                     }
                 }
             }
-            System.out.println("Pack file saved successfully.");
+            System.out.println("Pack file saved successfully." + totalBytesRead);
         }catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error saving pack file", e);
@@ -123,7 +125,7 @@ public class Git {
     }
 
     //Constructing the Request
-    private static void ConstructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
+    private static void constructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
         URL url = new URL(gitURL + "/git-upload-pack");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
