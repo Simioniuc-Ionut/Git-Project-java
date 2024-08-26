@@ -143,7 +143,7 @@ public class Git {
             e.printStackTrace();
         }
     }
-    }
+    
 
     //Constructing the Request
     private static void constructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
