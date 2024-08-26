@@ -177,6 +177,8 @@ public class Git {
              */
 
             try (InputStream packFile = connection.getInputStream()) {
+                //debug
+                printServerResponse(packFile);
                 // Căutăm secvența "PACK" în fluxul binar
                 ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                 byte[] tempBuffer = new byte[8192];
