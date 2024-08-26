@@ -43,7 +43,7 @@ public class Git {
         //save the pack file
         savePackFile(packFile,targetDirectory);
         // unpack packfile .git/objects/pack/packfile.pack
-        unpackPackFile(targetDirectory);
+        //unpackPackFile(targetDirectory);
 
     }
     //Unpack the Pack File
@@ -114,14 +114,19 @@ public class Git {
 
         File packFileOutput = new File(packFileDir, "packfile.pack");
         // Read the packfile from the server
-        try (BufferedInputStream bis = new BufferedInputStream(packFile);
+        try (InflaterInputStream iis = new InflaterInputStream(packFile);
              FileOutputStream fos = new FileOutputStream(packFileOutput)) {
+
+            BufferedReader bis = new BufferedReader(new InputStreamReader(iis));
 
             System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
             byte[] buffer = new byte[1024];
             int bytesRead;
-            while ((bytesRead = bis.read(buffer)) != -1) {
+            while ((bytesRead = bis.read()) != -1) {
                 fos.write(buffer, 0, bytesRead);
+                for(int i=0 ; i<bytesRead; i++){
+                    System.out.printf("%02x ",buffer[i]);
+                }
             }
             System.out.println("Pack file saved successfully.");
         }catch (IOException e) {
