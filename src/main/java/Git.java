@@ -85,39 +85,60 @@ public class Git {
         }
     }
     //Reading the Pack File
-    private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
-        File packFileDir = new File(targetDir, ".git/objects/pack");
-        if (!packFileDir.exists()) {
-            packFileDir.mkdirs(); // Ensure the directory exists
-            System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
-        } else {
-            System.out.println("Pack directory already exists: " + packFileDir.getAbsolutePath());
-        }
-
-        File packFileOutput = new File(packFileDir, "packfile.pack");
-        // Read the packfile from the server
-        try (BufferedInputStream bis = new BufferedInputStream(packFile);
-             FileOutputStream fos = new FileOutputStream(packFileOutput)) {
-
-            System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
-
-            byte[] buffer = new byte[4096]; // Buffer mai mare pentru eficiență
-            int bytesRead;
-            while((bytesRead = bis.read(buffer)) != -1){
-                fos.write(buffer, 0, bytesRead);
-                // Afișează datele în format hexazecimal pentru debug
-                for(int i = 0; i < bytesRead; i++){
-                    System.out.printf("%02x ", buffer[i]);
-                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți pentru lizibilitate
-                        System.out.println();
-                    }
-                }
+//    private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
+//        File packFileDir = new File(targetDir, ".git/objects/pack");
+//        if (!packFileDir.exists()) {
+//            packFileDir.mkdirs(); // Ensure the directory exists
+//            System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
+//        } else {
+//            System.out.println("Pack directory already exists: " + packFileDir.getAbsolutePath());
+//        }
+//
+//        File packFileOutput = new File(packFileDir, "packfile.pack");
+//        // Read the packfile from the server
+//        try (BufferedInputStream bis = new BufferedInputStream(packFile);
+//             FileOutputStream fos = new FileOutputStream(packFileOutput)) {
+//
+//            System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
+//
+//            byte[] buffer = new byte[4096]; // Buffer mai mare pentru eficiență
+//            int bytesRead;
+//            while((bytesRead = bis.read(buffer)) != -1){
+//                fos.write(buffer, 0, bytesRead);
+//                // Afișează datele în format hexazecimal pentru debug
+//                for(int i = 0; i < bytesRead; i++){
+//                    System.out.printf("%02x ", buffer[i]);
+//                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți pentru lizibilitate
+//                        System.out.println();
+//                    }
+//                }
+//            }
+//            System.out.println("Pack file saved successfully.");
+//        }catch (IOException e) {
+//            e.printStackTrace();
+//            throw new RuntimeException("Error saving pack file", e);
+//        }
+//    }
+    private static void savePackFile(InputStream packFileStream, String targetDir) throws IOException {
+        // Asigură-te că directorul țintă există
+        File dir = new File(targetDir);
+        if (!dir.exists()) {
+            if (!dir.mkdirs()) {
+                throw new IOException("Failed to create directory: " + targetDir);
             }
-            System.out.println("Pack file saved successfully.");
-        }catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error saving pack file", e);
         }
+
+        // Crează un fișier pentru pachetul Git
+        File packFile = new File(dir, "packfile.pack"); // sau alt nume relevant
+        try (FileOutputStream fos = new FileOutputStream(packFile)) {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = packFileStream.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+        }
+
+        System.out.println("Pack file saved to: " + packFile.getAbsolutePath());
     }
     //Constructing the Request
     private static void ConstructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
@@ -146,31 +167,70 @@ public class Git {
         if (responseCode == HttpURLConnection.HTTP_OK) {
             System.out.println("Successfully received pack file.");
 
-            try (InputStream packFile = connection.getInputStream()) {
-                //debug
+            /*try (InputStream packFile = connection.getInputStream()) {
+                debug
                 printServerResponse(packFile);
 
-                // Afișează bytes-ii primiți pentru debugging
+                 Afișează bytes-ii primiți pentru debugging
                 byte[] firstBytes = new byte[8]; // citim primii 8 bytes pentru a verifica dacă există conținut
                 int bytesRead = packFile.read(firstBytes);
-                // Verifică dacă fluxul este gol
+                 Verifică dacă fluxul este gol
                 if (bytesRead == 0 || bytesRead == -1) {
                     throw new RuntimeException("Received an empty pack file stream.");
                 }
-
                 System.out.print("First bytes received: ");
                 for (int i = 0; i < bytesRead; i++) {
                     System.out.printf("%02x ", firstBytes[i]);
                 }
                 System.out.println();
 
-
-                // Verificăm dacă fișierul primit este un `packfile` valid
+                }
+                acum ar trebui sa am ramas pe InputStream toate datele incepand cu linia : 2004PACK▒▒��J�A�$h1Yf���RH\�4�Nd^��9�c���S��r"�
+                 Verificăm dacă fișierul primit este un `packfile` valid
                 if (isPackFile(firstBytes)) {
-                    // Salvăm `packfile`-ul primit
+                     Salvăm `packfile`-ul primit
                     savePackFile(packFile, targetDir);
                 } else {
                     throw new RuntimeException("The pack file received is not valid");
+                }
+            }
+             */
+
+            try (InputStream packFile = connection.getInputStream()) {
+                // Căutăm secvența "PACK" în fluxul binar
+                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                byte[] tempBuffer = new byte[8192];
+                int bytesRead;
+                boolean foundPack = false;
+                int packOffset = -1;
+
+                while ((bytesRead = packFile.read(tempBuffer)) != -1) {
+                    for (int i = 0; i < bytesRead; i++) {
+                        if (!foundPack) {
+                            buffer.write(tempBuffer[i]);
+                            if (buffer.size() >= 4 && new String(buffer.toByteArray(), buffer.size() - 4, 4).equals("PACK")) {
+                                foundPack = true;
+                                packOffset = buffer.size() - 4;
+                                break;
+                            }
+                        } else {
+                            // După ce am găsit "PACK", scriem restul fluxului în fișier
+                            ByteArrayInputStream remainingStream = new ByteArrayInputStream(buffer.toByteArray());
+                            savePackFile(remainingStream, targetDir);
+                            return;
+                        }
+                    }
+
+                    if (foundPack) {
+                        // Repliați buffer-ul înapoi la începutul secvenței "PACK"
+                        buffer.reset();
+                        buffer.write(tempBuffer, packOffset, bytesRead - packOffset);
+                        break;
+                    }
+                }
+
+                if (!foundPack) {
+                    throw new RuntimeException("No 'PACK' signature found in the pack file stream.");
                 }
             }
         }else{
