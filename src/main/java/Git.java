@@ -198,7 +198,15 @@ public class Git {
             //StringBuilder packet = new StringBuilder();
 
             //i will want hust unic sha1 from refs.
-
+        StringBuilder prefixLengthInHex = new StringBuilder();
+        StringBuilder prefixContnet = new StringBuilder();
+        prefixContnet.append("want ").append(refs.get("HEAD")).append(" multi_ack_detailed side-band-64k thin-pack ofs-delta\n");
+        prefixLengthInHex.append(Integer.toHexString(prefixContnet.length() + 4));
+        requestBodyInBytes.write(prefixLengthInHex.toString().getBytes());
+        requestBodyInBytes.write('\n');
+        requestBodyInBytes.write(prefixContnet.toString().getBytes());
+        System.out.println(prefixLengthInHex.toString());
+        System.out.println(prefixContnet.toString());
             for (String sha1 : setUniqueSHA1) {
                 requestBodyInBytes.write("0032want ".getBytes());
                 requestBodyInBytes.write(sha1.getBytes());
@@ -209,7 +217,7 @@ public class Git {
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes());
-
+            requestBodyInBytes.write("0009done\n".getBytes());
             //debug
             System.out.println("0000");
             //String length = Integer.toHexString(requestBody.length());
