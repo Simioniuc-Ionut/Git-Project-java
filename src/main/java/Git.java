@@ -51,8 +51,7 @@ public class Git {
         File packFile = new File(targetDir + "/.git/objects/pack/packfile.pack");
         // Read the packfile from the server
         try (FileInputStream fis = new FileInputStream(packFile);
-             InflaterInputStream iis = new InflaterInputStream(fis);
-             BufferedInputStream bis = new BufferedInputStream(iis)) {
+             BufferedInputStream bis = new BufferedInputStream(fis)) {
 
             byte[] buffer = new byte[1024];
             int bytesRead;
@@ -117,16 +116,17 @@ public class Git {
         try (InflaterInputStream iis = new InflaterInputStream(packFile);
              FileOutputStream fos = new FileOutputStream(packFileOutput)) {
 
-            BufferedReader bis = new BufferedReader(new InputStreamReader(iis));
-
             System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
+
+
             byte[] buffer = new byte[1024];
             int bytesRead;
-            while ((bytesRead = bis.read()) != -1) {
-                fos.write(buffer, 0, bytesRead);
-                for(int i=0 ; i<bytesRead; i++){
+            while((bytesRead = iis.read(buffer))!= - 1){
+                fos.write(buffer,0,bytesRead);
+                for(int i=0; i<bytesRead; i++){
                     System.out.printf("%02x ",buffer[i]);
                 }
+                fos.write("\0".getBytes(StandardCharsets.ISO_8859_1),0,1);
             }
             System.out.println("Pack file saved successfully.");
         }catch (IOException e) {
