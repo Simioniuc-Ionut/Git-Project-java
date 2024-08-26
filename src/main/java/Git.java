@@ -125,14 +125,14 @@ public class Git {
         debugFileContent( packFileOutput);
     }
     private static void debugFileContent(File packFile) throws IOException {
-        System.out.println("Reading pack file: " + packFile.getAbsolutePath());
     try (InputStream fis = new FileInputStream(packFile)) {
+        System.out.println("Reading pack file: " + packFile.getAbsolutePath());
             byte[] buffer = new byte[8192];
             int bytesRead;
 
             while ((bytesRead = fis.read(buffer)) != -1) {
                 for (int i = 0; i < bytesRead; i++) {
-                    System.out.printf("%02x ", buffer[i]);
+                    System.out.println(buffer[i]);
                     if ((i + 1) % 16 == 0) {
                         System.out.println();
                     }
@@ -143,7 +143,7 @@ public class Git {
             e.printStackTrace();
         }
     }
-    
+
 
     //Constructing the Request
     private static void constructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
