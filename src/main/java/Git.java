@@ -40,10 +40,33 @@ public class Git {
          * - **Process**:
          *   - The client reads the packfile sent by the server.
          */
-
+        //save the pack file
         savePackFile(packFile,targetDirectory);
+        // unpack packfile .git/objects/pack/packfile.pack
+        unpackPackFile(targetDirectory);
 
+    }
+    //Unpack the Pack File
+    private static void unpackPackFile(String targetDir) throws Exception {
+        File packFile = new File(targetDir + "/.git/objects/pack/packfile.pack");
+        // Read the packfile from the server
+        try (FileInputStream fis = new FileInputStream(packFile);
+             InflaterInputStream iis = new InflaterInputStream(fis);
+             BufferedInputStream bis = new BufferedInputStream(iis)) {
 
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+
+            // Read and print the decompressed bytes
+            while ((bytesRead = bis.read(buffer)) != -1) {
+                for (int i = 0; i < bytesRead; i++) {
+                    System.out.printf("%02x ", buffer[i]);
+                }
+                System.out.println();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading and decompressing pack file", e);
+        }
     }
     //Initialize git Repository
     private static void initializeGitRepositoryTargeted(String targetDir){
@@ -117,7 +140,7 @@ public class Git {
         String requestBody = buildRequestBody(refs);
         //debug
         System.out.println("Request Body:\n" + requestBody);
-        
+
         // Write the request body to the server
         try (OutputStream os = connection.getOutputStream()){
             os.write(requestBody.getBytes());
