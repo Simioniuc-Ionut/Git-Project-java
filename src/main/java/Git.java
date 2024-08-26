@@ -126,13 +126,13 @@ public class Git {
         connection.setRequestProperty("Content-Type", "application/x-git-upload-pack-request");
 
         //generally if i clone,i want all objects , bcs i dont have any object at the moment
-        String requestBody = buildRequestBody(refs);
+        byte[] requestBody = buildRequestBody(refs);
         //debug
-        System.out.println("Request Body:\n" + requestBody);
+        System.out.println("Request Body:\n" + requestBody.toString());
 
         // Write the request body to the server
         try (OutputStream os = connection.getOutputStream()){
-            os.write(requestBody.getBytes());
+            os.write(requestBody);
             os.flush();
         }
 
@@ -178,19 +178,31 @@ public class Git {
             throw new RuntimeException("Failed to get pack file: HTTP code " + responseCode);
         }
     }
-    private static String buildRequestBody(Map<String,String> refs) {
-        StringBuilder requestBody = new StringBuilder();
+    private static byte[] buildRequestBody(Map<String,String> refs) {
+        Set<String> setUniqueSHA1 = new HashSet<>(refs.values());
+        ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
 
-        //i will want hust unic sha1 from refs.
-        List<String> setUniqueSHA1 = new ArrayList<>(refs.values());
+        try {
+            //StringBuilder requestBody = new StringBuilder();
+            //StringBuilder packet = new StringBuilder();
 
-        for(String sha1 : setUniqueSHA1){
-            requestBody.append("0032want ").append(sha1).append("\n");
+            //i will want hust unic sha1 from refs.
+
+            for (String sha1 : setUniqueSHA1) {
+                requestBodyInBytes.write("0032want ".getBytes());
+                requestBodyInBytes.write(sha1.getBytes());
+                requestBodyInBytes.write('\n');
+                //requestBody.append("0032want ").append(sha1).append("\n");
+            }
+            //requestBody.append("0000");
+            requestBodyInBytes.write("0000".getBytes());
+
+            //String length = Integer.toHexString(requestBody.length());
+            // packet.append(length).append("\n").append(requestBody);
+        }catch (IOException e){
+            throw new RuntimeException("Error building request body", e);
         }
-        requestBody.append("0000");
-        //String length = Integer.toHexString(requestBody.length());
-       // packet.append(length).append("\n").append(requestBody);
-        return requestBody.toString();
+        return requestBodyInBytes.toByteArray();
     }
     //GitRefsDirectory
     private static Map<String,String> handleRefDirectory(String gitURL)throws Exception{
