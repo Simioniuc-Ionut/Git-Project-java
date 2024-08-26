@@ -125,7 +125,6 @@ public class Git {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
-        connection.setDoInput(true);
         connection.setRequestProperty("Content-Type", "application/x-git-upload-pack-request");
 
         //generally if i clone,i want all objects , bcs i dont have any object at the moment
@@ -198,8 +197,12 @@ public class Git {
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
         try {
            //i will want hust unic sha1 from refs.
-            for (String sha1 : refs.values()) {
-                requestBodyInBytes.write(String.format("%04xwant %s\n", sha1.length() + 5, sha1).getBytes());
+            for (String sha1 : setUniqueSHA1) {
+                requestBodyInBytes.write("0032want ".getBytes());
+                requestBodyInBytes.write(sha1.getBytes());
+                requestBodyInBytes.write('\n');
+                //debug
+                //System.out.println("0032want " + sha1);
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes());
