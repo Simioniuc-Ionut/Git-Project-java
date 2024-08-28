@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
+import java.util.zip.InflaterOutputStream;
 
 public class Git {
     //Create a clone of a repository from GitHub
@@ -100,8 +101,12 @@ public class Git {
         File packFileOutput = new File(packFileDir, "packfile.pack");
         // Read the packfile from the server
         try (BufferedInputStream bis = new BufferedInputStream(packFile);
+             InflaterInputStream ios = new InflaterInputStream(bis); // Decomprimă datele
              FileOutputStream fos = new FileOutputStream(packFileOutput)) {
+          \
 
+
+                // Extract type, size, and content from the object data
             System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
 
             byte[] buffer = new byte[8192]; // Buffer mai mare pentru eficiență
@@ -119,6 +124,9 @@ public class Git {
                 }
             }
             System.out.println("Pack file saved successfully." + totalBytesRead);
+            byte[] data = ios.readAllBytes();
+            String objectContent = new String(data, StandardCharsets.ISO_8859_1);
+            System.out.println("Object content: " + objectContent);
         }catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error saving pack file", e);
@@ -252,9 +260,9 @@ public class Git {
 //                if (!foundPack) {
 //                    throw new RuntimeException("No 'PACK' signature found in the pack file stream.");
 //                }
-                System.out.println("Successfully received pack file2.");
-                printServerResponse(packFile);
-                //savePackFile(packFile, targetDir);
+                //System.out.println("Successfully received pack file2.");
+                //printServerResponse(packFile);
+                savePackFile(packFile, targetDir);
             }
         }else{
             // Gestionăm cazurile de eroare
