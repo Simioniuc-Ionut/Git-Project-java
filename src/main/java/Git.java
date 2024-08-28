@@ -168,6 +168,13 @@ public class Git {
         //debug
         System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
 
+        //write for done
+        ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
+        requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
+        try (OutputStream os = connection.getOutputStream()){
+            os.write(requestBodyInBytes.toByteArray());
+            os.flush();
+        }
         if (responseCode == HttpURLConnection.HTTP_OK) {
             System.out.println("Successfully received pack file.");
 
@@ -266,7 +273,7 @@ public class Git {
             requestBodyInBytes.write("0053want ".getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write(refs.get("HEAD").getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write("multi_ack side-band-64k ofs-delta\n".getBytes(StandardCharsets.UTF_8));
-            
+
            //i will want hust unic sha1 from refs.
             for (String sha1 : setUniqueSHA1) {
                 if(sha1.equals(refs.get("HEAD"))){
@@ -285,7 +292,7 @@ public class Git {
             requestBodyInBytes.write(refs.get("HEAD").getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write("\n".getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
-            requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
+            //requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
             //debug
             //System.out.println("0000");
 
