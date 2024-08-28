@@ -87,12 +87,13 @@ public class Git {
     //Reading the Pack File
     private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
         //debug
-        //printServerResponse(packFile);
+        printServerResponse(packFile);
         File packFileDir = new File(targetDir, ".git/objects/pack");
         if (!packFileDir.exists()) {
             packFileDir.mkdirs(); // Ensure the directory exists
             System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
-        } else {
+        }
+        else {
             System.out.println("Pack directory already exists: " + packFileDir.getAbsolutePath());
         }
 
@@ -132,7 +133,7 @@ public class Git {
 
             while ((bytesRead = fis.read(buffer)) != -1) {
                 for (int i = 0; i < bytesRead; i++) {
-                    System.out.println(buffer[i]);
+                    System.out.printf("%02x ", buffer[i]);
                     if ((i + 1) % 16 == 0) {
                         System.out.println();
                     }
@@ -143,7 +144,6 @@ public class Git {
             e.printStackTrace();
         }
     }
-
 
     //Constructing the Request
     private static void constructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
