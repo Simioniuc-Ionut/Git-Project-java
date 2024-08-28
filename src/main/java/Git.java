@@ -274,7 +274,7 @@ public class Git {
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
-            requestBodyInBytes.write("0004have\n".getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write("0005have\n".getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
             //debug
