@@ -104,7 +104,7 @@ public class Git {
 
             System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
 
-            byte[] buffer = new byte[16284]; // Buffer mai mare pentru eficiență
+            byte[] buffer = new byte[8192]; // Buffer mai mare pentru eficiență
             int bytesRead;
             int totalBytesRead = 0;
             while((bytesRead = bis.read(buffer)) != -1){
