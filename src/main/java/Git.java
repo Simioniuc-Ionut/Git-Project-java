@@ -263,18 +263,27 @@ public class Git {
         Set<String> setUniqueSHA1 = new HashSet<>(refs.values());
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
         try {
-
+            requestBodyInBytes.write("0053want ".getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write(refs.get("HEAD").getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write("multi_ack side-band-64k ofs-delta\n".getBytes(StandardCharsets.UTF_8));
+            
            //i will want hust unic sha1 from refs.
             for (String sha1 : setUniqueSHA1) {
-                requestBodyInBytes.write("0053want ".getBytes(StandardCharsets.UTF_8));
+                if(sha1.equals(refs.get("HEAD"))){
+                    continue;
+                }
+                requestBodyInBytes.write("0032want ".getBytes(StandardCharsets.UTF_8));
                 requestBodyInBytes.write(sha1.getBytes(StandardCharsets.UTF_8));
-                requestBodyInBytes.write("multi_ack side-band-64k ofs-delta\n".getBytes(StandardCharsets.UTF_8));
+                requestBodyInBytes.write("\n".getBytes(StandardCharsets.UTF_8));
+                //requestBodyInBytes.write("multi_ack side-band-64k ofs-delta\n".getBytes(StandardCharsets.UTF_8));
                 //debug
-                //System.out.println("0032want " + sha1);
+                System.out.println("0032want " + sha1);
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
-            requestBodyInBytes.write("0005have\n".getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write("0032have ".getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write(refs.get("HEAD").getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write("\n".getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
             //debug
