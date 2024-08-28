@@ -293,10 +293,10 @@ public class Git {
             }
             //requestBody.append("0000");
             requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
-//            requestBodyInBytes.write("0032have ".getBytes(StandardCharsets.UTF_8));
-//            requestBodyInBytes.write(refs.get("HEAD").getBytes(StandardCharsets.UTF_8));
-//            requestBodyInBytes.write("\n".getBytes(StandardCharsets.UTF_8));
-//            requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write("0032have ".getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write(refs.get("HEAD").getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write("\n".getBytes(StandardCharsets.UTF_8));
+            requestBodyInBytes.write("0000".getBytes(StandardCharsets.UTF_8));
             requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
             //debug
             //System.out.println("0000");
