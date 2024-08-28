@@ -103,8 +103,6 @@ public class Git {
         try (BufferedInputStream bis = new BufferedInputStream(packFile);
              InflaterInputStream ios = new InflaterInputStream(bis); // Decomprimă datele
              FileOutputStream fos = new FileOutputStream(packFileOutput)) {
-          \
-
 
                 // Extract type, size, and content from the object data
             System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
