@@ -172,11 +172,11 @@ public class Git {
         System.out.println("Successfully received pack file1.");
         printServerResponse(packFile1);
         //write for done
-        //ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
-        //requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
+        ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
+        requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
 
-            //os.write(requestBodyInBytes.toByteArray());
-         //   os.flush();
+            os.write(requestBodyInBytes.toByteArray());
+            os.flush();
         }catch (IOException e){
             System.out.println("Error writing done");
             throw new RuntimeException("Error writing done", e);
