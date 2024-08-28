@@ -167,9 +167,9 @@ public class Git {
         int responseCode = connection.getResponseCode();
         //debug
         System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
-        InputStream packFile = connection.getInputStream();
+        InputStream packFile1 = connection.getInputStream();
         //debug
-        System.out.println("Successfully received pack file." + packFile);
+        System.out.println("Successfully received pack file." + packFile1);
         //write for done
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
         requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
