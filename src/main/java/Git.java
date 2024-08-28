@@ -180,7 +180,7 @@ public class Git {
         }
 
         if (responseCode == HttpURLConnection.HTTP_OK) {
-            System.out.println("Successfully received pack file.");
+
 
             /*try (InputStream packFile = connection.getInputStream()) {
                 debug
@@ -250,6 +250,7 @@ public class Git {
 //                if (!foundPack) {
 //                    throw new RuntimeException("No 'PACK' signature found in the pack file stream.");
 //                }
+                System.out.println("Successfully received pack file.");
                 printServerResponse(packFile);
                 //savePackFile(packFile, targetDir);
             }
