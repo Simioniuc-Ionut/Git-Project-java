@@ -284,9 +284,6 @@ public class Git {
 
            //i will want hust unic sha1 from refs.
             for (String sha1 : setUniqueSHA1) {
-                if(sha1.equals(refs.get("HEAD"))){
-                    continue;
-                }
                 requestBodyInBytes.write("0032want ".getBytes(StandardCharsets.UTF_8));
                 requestBodyInBytes.write(sha1.getBytes(StandardCharsets.UTF_8));
                 requestBodyInBytes.write("\n".getBytes(StandardCharsets.UTF_8));
