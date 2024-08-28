@@ -250,7 +250,9 @@ public class Git {
 //                if (!foundPack) {
 //                    throw new RuntimeException("No 'PACK' signature found in the pack file stream.");
 //                }
-                savePackFile(packFile, targetDir);
+                System.out.println("Successfully received pack file.");
+                printServerResponse(packFile1);
+                //savePackFile(packFile, targetDir);
             }
         }else{
             // Gestionăm cazurile de eroare
