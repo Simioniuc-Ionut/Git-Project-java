@@ -157,14 +157,14 @@ public class Git {
         byte[] requestBody = buildRequestBody(refs);
         //debug
         //System.out.println("Request Body:\n" + requestBody.toString());
-
+        int responseCode;
         // Write the request body to the server
         try (OutputStream os = connection.getOutputStream()){
             os.write(requestBody);
             os.flush();
-        }
 
-        int responseCode = connection.getResponseCode();
+
+         responseCode = connection.getResponseCode();
         //debug
         System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
         InputStream packFile1 = connection.getInputStream();
@@ -174,7 +174,7 @@ public class Git {
         //write for done
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
         requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
-        try (OutputStream os = connection.getOutputStream()){
+
             os.write(requestBodyInBytes.toByteArray());
             os.flush();
         }catch (IOException e){
@@ -183,7 +183,6 @@ public class Git {
         }
 
         if (responseCode == HttpURLConnection.HTTP_OK) {
-
 
             /*try (InputStream packFile = connection.getInputStream()) {
                 debug
