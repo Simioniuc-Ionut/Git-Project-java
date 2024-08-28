@@ -167,7 +167,9 @@ public class Git {
         int responseCode = connection.getResponseCode();
         //debug
         System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
-
+        InputStream packFile = connection.getInputStream();
+        //debug
+        System.out.println("Successfully received pack file." + packFile);
         //write for done
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
         requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
@@ -175,6 +177,7 @@ public class Git {
             os.write(requestBodyInBytes.toByteArray());
             os.flush();
         }
+
         if (responseCode == HttpURLConnection.HTTP_OK) {
             System.out.println("Successfully received pack file.");
 
