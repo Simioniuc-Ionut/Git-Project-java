@@ -169,7 +169,7 @@ public class Git {
         System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
         InputStream packFile1 = connection.getInputStream();
         //debug
-        System.out.println("Successfully received pack file.");
+        System.out.println("Successfully received pack file1.");
         printServerResponse(packFile1);
         //write for done
         ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
@@ -252,7 +252,7 @@ public class Git {
 //                if (!foundPack) {
 //                    throw new RuntimeException("No 'PACK' signature found in the pack file stream.");
 //                }
-                System.out.println("Successfully received pack file.");
+                System.out.println("Successfully received pack file2.");
                 printServerResponse(packFile);
                 //savePackFile(packFile, targetDir);
             }
