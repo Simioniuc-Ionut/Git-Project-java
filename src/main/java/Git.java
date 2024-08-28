@@ -167,16 +167,16 @@ public class Git {
          responseCode = connection.getResponseCode();
         //debug
         System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
-        InputStream packFile1 = connection.getInputStream();
+        //InputStream packFile1 = connection.getInputStream();
         //debug
-        System.out.println("Successfully received pack file1.");
-        printServerResponse(packFile1);
+        //System.out.println("Successfully received pack file1.");
+        //printServerResponse(packFile1);
         //write for done
-        ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
-        requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
-
-            os.write(requestBodyInBytes.toByteArray());
-            os.flush();
+//        ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
+//        requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
+//
+//            os.write(requestBodyInBytes.toByteArray());
+//            os.flush();
         }catch (IOException e){
             System.out.println("Error writing done");
             throw new RuntimeException("Error writing done", e);
@@ -253,8 +253,8 @@ public class Git {
 //                    throw new RuntimeException("No 'PACK' signature found in the pack file stream.");
 //                }
                 System.out.println("Successfully received pack file2.");
-                printServerResponse(packFile);
-                //savePackFile(packFile, targetDir);
+                //printServerResponse(packFile);
+                savePackFile(packFile, targetDir);
             }
         }else{
             // Gestionăm cazurile de eroare
