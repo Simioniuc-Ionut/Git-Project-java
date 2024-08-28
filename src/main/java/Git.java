@@ -177,6 +177,9 @@ public class Git {
         try (OutputStream os = connection.getOutputStream()){
             os.write(requestBodyInBytes.toByteArray());
             os.flush();
+        }catch (IOException e){
+            System.out.println("Error writing done");
+            throw new RuntimeException("Error writing done", e);
         }
 
         if (responseCode == HttpURLConnection.HTTP_OK) {
