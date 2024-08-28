@@ -88,7 +88,7 @@ public class Git {
     //Reading the Pack File
     private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
         //debug
-        printServerResponse(packFile);
+        //printServerResponse(packFile);
         File packFileDir = new File(targetDir, ".git/objects/pack");
         if (!packFileDir.exists()) {
             packFileDir.mkdirs(); // Ensure the directory exists
