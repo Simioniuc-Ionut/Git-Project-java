@@ -51,110 +51,6 @@ public class Git {
         System.out.println("Pack Signature: " + packSignature);
         return "PACK".equals(packSignature);
     }
-    //Initialize git Repository
-    private static void initializeGitRepositoryTargeted(String targetDir){
-        File dir = new File(targetDir);
-        if (!dir.exists()) {
-            dir.mkdirs(); // Create directory if it doesn't exist
-            System.out.println("Created directory: " + dir.getAbsolutePath());
-        }else {
-            System.out.println("Directory already exists: " + dir.getAbsolutePath());
-        }
-
-       // Create the .git directory
-        File gitDir = new File(dir, ".git");
-        if (!gitDir.exists()) {
-            gitDir.mkdirs();
-            System.out.println("Created .git directory: " + gitDir.getAbsolutePath());
-        } else {
-            System.out.println(".git directory already exists: " + gitDir.getAbsolutePath());
-        }
-
-        new File(gitDir, "objects").mkdirs();
-        new File(gitDir, "refs").mkdirs();
-        new File(gitDir,"objects/pack").mkdirs();
-        System.out.println("Created necessary subdirectories under .git");
-
-        File head = new File(gitDir, "HEAD");
-
-        try {
-            head.createNewFile();
-            Files.write(head.toPath(), "ref: refs/heads/master\n".getBytes());
-            System.out.println("Created HEAD file with reference: refs/heads/master");
-        } catch (IOException e) {
-            throw new RuntimeException("Error initializing git repository", e);
-        }
-    }
-    //Reading the Pack File
-    private static void savePackFile(InputStream packFile,String targetDir) throws Exception {
-        //debug
-        //printServerResponse(packFile);
-        File packFileDir = new File(targetDir, ".git/objects/pack");
-        if (!packFileDir.exists()) {
-            packFileDir.mkdirs(); // Ensure the directory exists
-            System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
-        }
-        else {
-            System.out.println("Pack directory already exists: " + packFileDir.getAbsolutePath());
-        }
-
-        File packFileOutput = new File(packFileDir, "packfile.pack");
-        // Read the packfile from the server
-        try (BufferedInputStream bis = new BufferedInputStream(packFile);
-             InflaterInputStream ios = new InflaterInputStream(bis); // Decomprimă datele
-             FileOutputStream fos = new FileOutputStream(packFileOutput)) {
-
-                // Extract type, size, and content from the object data
-            System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
-
-            byte[] buffer = new byte[8192]; // Buffer mai mare pentru eficiență
-            int bytesRead;
-            int totalBytesRead = 0;
-            while((bytesRead = bis.read(buffer)) != -1){
-                totalBytesRead += bytesRead;
-                fos.write(buffer, 0, bytesRead);
-                // Afișează datele în format hexazecimal pentru debug
-                for(int i = 0; i < bytesRead; i++){
-                    System.out.printf("%02x ", buffer[i]);
-
-                    if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți pentru lizibilitate
-                        System.out.println();
-                    }
-                }
-            }
-            System.out.println("Pack file saved successfully." + totalBytesRead);
-            //new
-            byte[] data = ios.readAllBytes();
-            String objectContent = new String(data, StandardCharsets.ISO_8859_1);
-            System.out.println("Object content: " + objectContent);
-            //
-
-        }catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error saving pack file", e);
-        }
-        debugFileContent( packFileOutput);
-    }
-    private static void debugFileContent(File packFile) throws IOException {
-    try (InputStream fis = new FileInputStream(packFile)) {
-        System.out.println("Reading pack file: " + packFile.getAbsolutePath());
-            byte[] buffer = new byte[8192];
-            int bytesRead;
-
-            while ((bytesRead = fis.read(buffer)) != -1) {
-                for (int i = 0; i < bytesRead; i++) {
-                    System.out.printf("%02x ", buffer[i]);
-                    if ((i + 1) % 16 == 0) {
-                        System.out.println();
-                    }
-                }
-                System.out.println();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     //Constructing the Request
     private static void constructingTheRequestAndSave(String gitURL,Map<String,String> refs,String targetDir) throws Exception {
         URL url = new URL(gitURL + "/git-upload-pack");
@@ -174,14 +70,14 @@ public class Git {
             os.flush();
 
 
-         responseCode = connection.getResponseCode();
-        //debug
-        System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
-        //InputStream packFile1 = connection.getInputStream();
-        //debug
-        //System.out.println("Successfully received pack file1.");
-       // printServerResponse(packFile1);
-        //write for done
+            responseCode = connection.getResponseCode();
+            //debug
+            System.out.println("Response Code: " + responseCode + " " + connection.getResponseMessage());
+            //InputStream packFile1 = connection.getInputStream();
+            //debug
+            //System.out.println("Successfully received pack file1.");
+            // printServerResponse(packFile1);
+            //write for done
 //        ByteArrayOutputStream requestBodyInBytes = new ByteArrayOutputStream();
 //        requestBodyInBytes.write("0009done\n".getBytes(StandardCharsets.UTF_8));
 //
@@ -277,7 +173,162 @@ public class Git {
             throw new RuntimeException("Failed to get pack file: HTTP code " + responseCode);
         }
     }
-    private static void printServerResponse(InputStream inputStream) throws IOException {
+
+    //Initialize git Repository
+    private static void initializeGitRepositoryTargeted(String targetDir){
+        File dir = new File(targetDir);
+        if (!dir.exists()) {
+            dir.mkdirs(); // Create directory if it doesn't exist
+            System.out.println("Created directory: " + dir.getAbsolutePath());
+        }else {
+            System.out.println("Directory already exists: " + dir.getAbsolutePath());
+        }
+
+       // Create the .git directory
+        File gitDir = new File(dir, ".git");
+        if (!gitDir.exists()) {
+            gitDir.mkdirs();
+            System.out.println("Created .git directory: " + gitDir.getAbsolutePath());
+        } else {
+            System.out.println(".git directory already exists: " + gitDir.getAbsolutePath());
+        }
+
+        new File(gitDir, "objects").mkdirs();
+        new File(gitDir, "refs").mkdirs();
+        new File(gitDir,"objects/pack").mkdirs();
+        System.out.println("Created necessary subdirectories under .git");
+
+        File head = new File(gitDir, "HEAD");
+
+        try {
+            head.createNewFile();
+            Files.write(head.toPath(), "ref: refs/heads/master\n".getBytes());
+            System.out.println("Created HEAD file with reference: refs/heads/master");
+        } catch (IOException e) {
+            throw new RuntimeException("Error initializing git repository", e);
+        }
+    }
+    //Reading the Pack File
+    private static void savePackFile(InputStream packFile, String targetDir) throws Exception {
+        File packFileDir = new File(targetDir, ".git/objects/pack");
+        if (!packFileDir.exists()) {
+            packFileDir.mkdirs(); // Ensure the directory exists
+            System.out.println("Created pack directory: " + packFileDir.getAbsolutePath());
+        }
+
+        File packFileOutput = new File(packFileDir, "packfile.pack");
+
+        // Read the packfile from the server
+        try (BufferedInputStream bis = new BufferedInputStream(packFile);
+             FileOutputStream fos = new FileOutputStream(packFileOutput)) {
+
+            System.out.println("Saving pack file to: " + packFileOutput.getAbsolutePath());
+
+            // Step 1: Read and validate the pack header
+            byte[] header = new byte[12];
+            bis.read(header, 0, 12);
+
+            String signature = new String(header, 0, 4, StandardCharsets.US_ASCII);
+            if (!"PACK".equals(signature)) {
+                throw new RuntimeException("Invalid pack file signature");
+            }
+
+            int version = ((header[4] & 0xFF) << 24) | ((header[5] & 0xFF) << 16) |
+                    ((header[6] & 0xFF) << 8) | (header[7] & 0xFF);
+
+            int objectCount = ((header[8] & 0xFF) << 24) | ((header[9] & 0xFF) << 16) |
+                    ((header[10] & 0xFF) << 8) | (header[11] & 0xFF);
+
+            System.out.println("Pack version: " + version);
+            System.out.println("Number of objects: " + objectCount);
+
+            // Write the header to the output file
+            fos.write(header);
+
+            // Step 2: Read the objects
+            for (int i = 0; i < objectCount; i++) {
+                readAndProcessObject(bis, fos);
+            }
+
+            System.out.println("Pack file saved successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error saving pack file", e);
+        }
+
+        debugFileContent(packFileOutput);
+    }
+
+    private static void readAndProcessObject(BufferedInputStream bis, FileOutputStream fos) throws IOException {
+        // Read the first byte which contains the object type and size (partially encoded)
+        int firstByte = bis.read();
+        int type = (firstByte >> 4) & 0x07;
+        int size = firstByte & 0x0F;
+
+        int shift = 4;
+        while ((firstByte & 0x80) != 0) {
+            firstByte = bis.read();
+            size |= (firstByte & 0x7F) << shift;
+            shift += 7;
+        }
+
+        // Depending on the type, read and process the object
+        switch (type) {
+            case 1: // commit
+            case 2: // tree
+            case 3: // blob
+            case 4: // tag
+                // Standard object: decompress and write
+                decompressAndWriteObject(bis, fos, size);
+                break;
+            case 6: // ofs-delta
+            case 7: // ref-delta
+                // Handle delta objects here
+                handleDeltaObject(bis, fos, type);
+                break;
+            default:
+                throw new IOException("Unknown object type: " + type);
+        }
+    }
+
+    private static void decompressAndWriteObject(BufferedInputStream bis, FileOutputStream fos, int size) throws IOException {
+        InflaterInputStream inflaterInputStream = new InflaterInputStream(bis);
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+
+        while ((bytesRead = inflaterInputStream.read(buffer)) != -1) {
+            fos.write(buffer, 0, bytesRead);
+        }
+        inflaterInputStream.close();
+    }
+
+    private static void handleDeltaObject(BufferedInputStream bis, FileOutputStream fos, int type) throws IOException {
+        // Handle the reading and processing of delta objects (ofs-delta or ref-delta)
+        // This will involve additional logic to apply the delta to the base object
+        System.out.println("Delta object detected, type: " + type);
+        // Implement delta object processing here
+    }
+    private static void debugFileContent(File packFile) throws IOException {
+    try (InputStream fis = new FileInputStream(packFile)) {
+        System.out.println("Reading pack file: " + packFile.getAbsolutePath());
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+
+            while ((bytesRead = fis.read(buffer)) != -1) {
+                for (int i = 0; i < bytesRead; i++) {
+                    System.out.printf("%02x ", buffer[i]);
+                    if ((i + 1) % 16 == 0) {
+                        System.out.println();
+                    }
+                }
+                System.out.println();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+ private static void printServerResponse(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         while ((line = reader.readLine()) != null) {
