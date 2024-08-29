@@ -115,16 +115,20 @@ public class Git {
                 fos.write(buffer, 0, bytesRead);
                 // Afișează datele în format hexazecimal pentru debug
                 for(int i = 0; i < bytesRead; i++){
-                    //System.out.printf("%02x ", buffer[i]);
+                    System.out.printf("%02x ", buffer[i]);
+
                     if ((i + 1) % 16 == 0) { // Linie nouă după 16 octeți pentru lizibilitate
                         System.out.println();
                     }
                 }
             }
             System.out.println("Pack file saved successfully." + totalBytesRead);
+            //new
             byte[] data = ios.readAllBytes();
             String objectContent = new String(data, StandardCharsets.ISO_8859_1);
             System.out.println("Object content: " + objectContent);
+            //
+
         }catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error saving pack file", e);
