@@ -121,46 +121,8 @@ public class Git {
 
             try (InputStream packFile = connection.getInputStream()) {
                 //debug
-                //printServerResponse(packFile);
-                // Căutăm secvența "PACK" în fluxul binar
-//                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//                byte[] tempBuffer = new byte[8192];
-//                int bytesRead;
-//                boolean foundPack = false;
-//                int packOffset = -1;
-//
-//                while ((bytesRead = packFile.read(tempBuffer)) != -1) {
-//                    System.out.println("Bytes read: " + bytesRead);
-//                    for (int i = 0; i < bytesRead; i++) {
-//                        if (!foundPack) {
-//                            buffer.write(tempBuffer[i]);
-//                            if (buffer.size() >= 4 && new String(buffer.toByteArray(), buffer.size() - 4, 4).equals("PACK")) {
-//                                foundPack = true;
-//                                packOffset = buffer.size() - 4;
-//                                break;
-//                            }
-//                        } else {
-//                            // După ce am găsit "PACK", scriem restul fluxului în fișier
-//                            ByteArrayInputStream remainingStream = new ByteArrayInputStream(buffer.toByteArray());
-//                            savePackFile(remainingStream, targetDir);
-//                            return;
-//                        }
-//                    }
-//
-//                    if (foundPack) {
-//                        // Repliați buffer-ul înapoi la începutul secvenței "PACK"
-//                        buffer.reset();
-//                        buffer.write(tempBuffer, packOffset, bytesRead - packOffset);
-//                        break;
-//                    }
-//                }
-//
-//                if (!foundPack) {
-//                    throw new RuntimeException("No 'PACK' signature found in the pack file stream.");
-//                }
-                //System.out.println("Successfully received pack file2.");
-                //printServerResponse(packFile);
-                savePackFile(packFile, targetDir);
+                printServerResponse(packFile);
+                //savePackFile(packFile, targetDir);
             }
         }else{
             // Gestionăm cazurile de eroare
