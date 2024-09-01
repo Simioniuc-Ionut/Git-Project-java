@@ -11,12 +11,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 
 @RequiredArgsConstructor
 public class GitClient {
     public static final int HASH_BYTES_LENGTH = 20;
     public static final int HASH_STRING_LENGTH = 40;
+    public static final HexFormat HEX = HexFormat.of();
     public static final MediaType X_GIT_UPLOAD_PACK_REQUEST =
             MediaType.parse("application/x-git-upload-pack-request");
 

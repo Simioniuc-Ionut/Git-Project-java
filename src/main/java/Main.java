@@ -122,7 +122,8 @@ public class Main {
       }
   }
   public static void cloneRepository(String uri, String path) throws IOException, NoSuchAlgorithmException, DataFormatException {
-    Git.cloneRepository(URI.create(uri), Paths.get(path));
+    //Git.cloneRepository(URI.create(uri), Paths.get(path));
+    Git.clone(URI.create(uri), Paths.get(path));
   }
 
 }
