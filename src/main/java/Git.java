@@ -1,32 +1,43 @@
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
-import java.nio.charset.MalformedInputException;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Collator;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.zip.DataFormatException;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
-import java.util.zip.InflaterOutputStream;
 
+import protocol.GitClient;
 public class Git {
+
     //Create a clone of a repository from GitHub
-    public static void cloneRepository(String gitURL,String targetDirectory) throws Exception{
+    public static void cloneRepository(URI uri, Path path) throws IOException, NoSuchAlgorithmException, DataFormatException {
         /**
          * 1. Ref Discovery
          * - **Purpose**: The client discovers the references (branches, tags, etc.) available on the server.
          * - **Process**:
          *     - The client sends an HTTP GET request to the server to obtain a list of available refs.
          */
-        Map<String,String> refs = handleRefDirectory(gitURL);
+        //Map<String,String> refs = handleRefDirectory(gitURL);
+        final var client = new GitClient(uri);
+        final var head = client.fetchReferences().getFirst();
+        final var pack = client.getPack(head);
+        //debug
+        System.out.println("Successfully received pack file." + head + " " + pack);
+
+        //final var packParser = new PackParser(ByteBuffer.wrap(pack));
         /**
          * ### 2.  **create the directory in the target directory**
          */
-        initializeGitRepositoryTargeted(targetDirectory);
+        //initializeGitRepositoryTargeted(targetDirectory);
         /**
          * ### 3. **Constructing the Request and save the packfile**
          *
@@ -34,7 +45,7 @@ public class Git {
          * - **Process**:
          *     - The client sends a POST request to the server with the list of wanted objects.
          */
-         constructingTheRequestAndSave(gitURL,refs,targetDirectory);
+         //constructingTheRequestAndSave(gitURL,refs,targetDirectory);
         /**
          * ### 4. **Read from the Packfile**
          * - **Purpose**: The client reads the packfile sent by the server.

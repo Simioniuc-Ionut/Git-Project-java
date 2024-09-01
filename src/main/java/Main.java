@@ -1,5 +1,6 @@
 import javax.xml.crypto.dsig.DigestMethod;
 import java.io.*;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -115,11 +116,13 @@ public class Main {
       return;
     }
       try {
-          Git.cloneRepository(args[1],args[2]);
+          cloneRepository(args[1],args[2]);
       } catch (Exception e) {
           System.out.println("Error cloning repository: " + e.getMessage());
       }
   }
-
+  public static void cloneRepository(String uri, String path) throws IOException, NoSuchAlgorithmException, DataFormatException {
+    Git.cloneRepository(URI.create(uri), Paths.get(path));
+  }
 
 }
